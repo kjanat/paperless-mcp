@@ -3,8 +3,9 @@ import { z } from "zod";
 export function registerDocumentTools(server, api) {
   server.tool(
     "bulk_edit_documents",
+    "Perform bulk operations on multiple documents simultaneously: set correspondent/type/tags, delete, reprocess, merge, split, rotate, or manage permissions. Efficient for managing large document collections.",
     {
-      documents: z.array(z.number()),
+      documents: z.array(z.number()).describe("Array of document IDs to perform bulk operations on. Get document IDs from list_documents or search_documents first."),
       method: z.enum([
         "set_correspondent",
         "set_document_type",
@@ -19,35 +20,35 @@ export function registerDocumentTools(server, api) {
         "split",
         "rotate",
         "delete_pages",
-      ]),
-      correspondent: z.number().optional(),
-      document_type: z.number().optional(),
-      storage_path: z.number().optional(),
-      tag: z.number().optional(),
-      add_tags: z.array(z.number()).optional(),
-      remove_tags: z.array(z.number()).optional(),
+      ]).describe("The bulk operation to perform: set_correspondent (assign sender/receiver), set_document_type (categorize documents), set_storage_path (organize file location), add_tag/remove_tag/modify_tags (manage labels), delete (permanently remove), reprocess (re-run OCR/indexing), set_permissions (control access), merge (combine documents), split (separate into multiple), rotate (adjust orientation), delete_pages (remove specific pages)"),
+      correspondent: z.number().optional().describe("ID of correspondent to assign when method is 'set_correspondent'. Use list_correspondents to get valid IDs."),
+      document_type: z.number().optional().describe("ID of document type to assign when method is 'set_document_type'. Use list_document_types to get valid IDs."),
+      storage_path: z.number().optional().describe("ID of storage path to assign when method is 'set_storage_path'. Storage paths organize documents in folder hierarchies."),
+      tag: z.number().optional().describe("Single tag ID to add or remove when method is 'add_tag' or 'remove_tag'. Use list_tags to get valid IDs."),
+      add_tags: z.array(z.number()).optional().describe("Array of tag IDs to add when method is 'modify_tags'. Use list_tags to get valid IDs."),
+      remove_tags: z.array(z.number()).optional().describe("Array of tag IDs to remove when method is 'modify_tags'. Use list_tags to get valid IDs."),
       permissions: z
         .object({
-          owner: z.number().nullable().optional(),
+          owner: z.number().nullable().optional().describe("User ID to set as document owner, or null to remove ownership"),
           set_permissions: z
             .object({
               view: z.object({
-                users: z.array(z.number()),
-                groups: z.array(z.number()),
-              }),
+                users: z.array(z.number()).describe("User IDs granted view permission"),
+                groups: z.array(z.number()).describe("Group IDs granted view permission"),
+              }).describe("Users and groups who can view these documents"),
               change: z.object({
-                users: z.array(z.number()),
-                groups: z.array(z.number()),
-              }),
+                users: z.array(z.number()).describe("User IDs granted edit permission"),
+                groups: z.array(z.number()).describe("Group IDs granted edit permission"),
+              }).describe("Users and groups who can edit these documents"),
             })
-            .optional(),
-          merge: z.boolean().optional(),
+            .optional().describe("Specific permission settings for users and groups"),
+          merge: z.boolean().optional().describe("Whether to merge with existing permissions (true) or replace them (false)"),
         })
-        .optional(),
-      metadata_document_id: z.number().optional(),
-      delete_originals: z.boolean().optional(),
-      pages: z.string().optional(),
-      degrees: z.number().optional(),
+        .optional().describe("Permission settings when method is 'set_permissions'. Controls who can view and edit the documents."),
+      metadata_document_id: z.number().optional().describe("Source document ID when merging documents. The metadata from this document will be preserved."),
+      delete_originals: z.boolean().optional().describe("Whether to delete original documents after merge/split operations. Use with caution."),
+      pages: z.string().optional().describe("Page specification for delete_pages method. Format: '1,3,5-7' to delete pages 1, 3, and 5 through 7."),
+      degrees: z.number().optional().describe("Rotation angle in degrees when method is 'rotate'. Use 90, 180, or 270 for standard rotations."),
     },
     async (args, extra) => {
       if (!api) throw new Error("Please configure API connection first");
@@ -58,17 +59,18 @@ export function registerDocumentTools(server, api) {
 
   server.tool(
     "post_document",
+    "Upload a new document to Paperless-NGX with metadata. Supports PDF, images (PNG/JPG/TIFF), and text files. Automatically processes for OCR and indexing.",
     {
-      file: z.string(),
-      filename: z.string(),
-      title: z.string().optional(),
-      created: z.string().optional(),
-      correspondent: z.number().optional(),
-      document_type: z.number().optional(),
-      storage_path: z.number().optional(),
-      tags: z.array(z.number()).optional(),
-      archive_serial_number: z.string().optional(),
-      custom_fields: z.array(z.number()).optional(),
+      file: z.string().describe("Base64 encoded file content. Convert your file to base64 before uploading. Supports PDF, images (PNG, JPG, TIFF), and text files."),
+      filename: z.string().describe("Original filename with extension (e.g., 'invoice.pdf', 'receipt.png'). This helps Paperless determine file type and initial document title."),
+      title: z.string().optional().describe("Custom document title. If not provided, Paperless will extract title from filename or document content."),
+      created: z.string().optional().describe("Document creation date in ISO format (YYYY-MM-DD or YYYY-MM-DDTHH:mm:ss). If not provided, uses current date."),
+      correspondent: z.number().optional().describe("ID of the correspondent (sender/receiver) for this document. Use list_correspondents to find or create_correspondent to add new ones."),
+      document_type: z.number().optional().describe("ID of document type for categorization (e.g., Invoice, Receipt, Letter). Use list_document_types to find or create_document_type to add new ones."),
+      storage_path: z.number().optional().describe("ID of storage path to organize document location in folder hierarchy. Leave empty for default storage."),
+      tags: z.array(z.number()).optional().describe("Array of tag IDs to label this document. Use list_tags to find existing tags or create_tag to add new ones."),
+      archive_serial_number: z.string().optional().describe("Custom archive number for document organization and reference. Useful for maintaining external filing systems."),
+      custom_fields: z.array(z.number()).optional().describe("Array of custom field IDs to associate with this document. Custom fields store additional metadata."),
     },
     async (args, extra) => {
       if (!api) throw new Error("Please configure API connection first");
@@ -82,9 +84,10 @@ export function registerDocumentTools(server, api) {
 
   server.tool(
     "list_documents",
+    "Retrieve paginated list of all documents in the system with basic metadata. Use for browsing document collections or getting document IDs for other operations.",
     {
-      page: z.number().optional(),
-      page_size: z.number().optional(),
+      page: z.number().optional().describe("Page number for pagination (starts at 1). Use this to browse through large document collections."),
+      page_size: z.number().optional().describe("Number of documents per page (default 25, max 100). Larger page sizes return more documents but may be slower."),
     },
     async (args, extra) => {
       if (!api) throw new Error("Please configure API connection first");
@@ -97,8 +100,9 @@ export function registerDocumentTools(server, api) {
 
   server.tool(
     "get_document",
+    "Get complete details for a specific document including full metadata, content preview, tags, correspondent, and document type information.",
     {
-      id: z.number(),
+      id: z.number().describe("Unique document ID. Get this from list_documents or search_documents results. Returns full document metadata, content preview, and associated tags/correspondent/type."),
     },
     async (args, extra) => {
       if (!api) throw new Error("Please configure API connection first");
@@ -108,8 +112,9 @@ export function registerDocumentTools(server, api) {
 
   server.tool(
     "search_documents",
+    "Search through documents using full-text search across content, titles, tags, and metadata. Supports advanced query syntax and filtering.",
     {
-      query: z.string(),
+      query: z.string().describe("Search query to find documents. Supports full-text search through document content, titles, tags, and metadata. Use keywords, phrases in quotes, or advanced syntax like 'tag:important' or 'correspondent:john' for targeted searches."),
     },
     async (args, extra) => {
       if (!api) throw new Error("Please configure API connection first");
@@ -119,9 +124,10 @@ export function registerDocumentTools(server, api) {
 
   server.tool(
     "download_document",
+    "Download a document file as base64-encoded data. Choose between original uploaded file or processed/archived version with OCR improvements.",
     {
-      id: z.number(),
-      original: z.boolean().optional(),
+      id: z.number().describe("Document ID to download. Get this from list_documents, search_documents, or get_document results."),
+      original: z.boolean().optional().describe("Whether to download the original uploaded file (true) or the processed/archived version (false, default). Original files preserve exact formatting but may not include OCR improvements."),
     },
     async (args, extra) => {
       if (!api) throw new Error("Please configure API connection first");
