@@ -5,7 +5,7 @@ export function registerDocumentTools(server, api) {
     "bulk_edit_documents",
     "Perform bulk operations on multiple documents simultaneously: set correspondent/type/tags, delete, reprocess, merge, split, rotate, or manage permissions. Efficient for managing large document collections.",
     {
-      documents: z.array(z.number()).describe("Array of document IDs to perform bulk operations on. Get document IDs from list_documents or search_documents first."),
+      documents: z.array(z.number()).describe("Array of document IDs to perform bulk operations on. Get document IDs from search_documents first."),
       method: z.enum([
         "set_correspondent",
         "set_document_type",
@@ -82,27 +82,12 @@ export function registerDocumentTools(server, api) {
     }
   );
 
-  server.tool(
-    "list_documents",
-    "Retrieve paginated list of all documents in the system with basic metadata. Use for browsing document collections or getting document IDs for other operations.",
-    {
-      page: z.number().optional().describe("Page number for pagination (starts at 1). Use this to browse through large document collections."),
-      page_size: z.number().optional().describe("Number of documents per page (default 25, max 100). Larger page sizes return more documents but may be slower."),
-    },
-    async (args, extra) => {
-      if (!api) throw new Error("Please configure API connection first");
-      const query = new URLSearchParams();
-      if (args.page) query.set("page", args.page);
-      if (args.page_size) query.set("page_size", args.page_size);
-      return api.getDocuments(query.toString() ? `?${query.toString()}` : "");
-    }
-  );
 
   server.tool(
     "get_document",
     "Get complete details for a specific document including full metadata, content preview, tags, correspondent, and document type information.",
     {
-      id: z.number().describe("Unique document ID. Get this from list_documents or search_documents results. Returns full document metadata, content preview, and associated tags/correspondent/type."),
+      id: z.number().describe("Unique document ID. Get this from search_documents results. Returns full document metadata, content preview, and associated tags/correspondent/type."),
     },
     async (args, extra) => {
       if (!api) throw new Error("Please configure API connection first");
@@ -112,13 +97,15 @@ export function registerDocumentTools(server, api) {
 
   server.tool(
     "search_documents",
-    "Search through documents using full-text search across content, titles, tags, and metadata. Supports advanced query syntax and filtering.",
+    "Search through documents using full-text search across content, titles, tags, and metadata. Returns document metadata WITHOUT the full OCR content field to prevent token overflow. Use get_document to retrieve full details for specific documents of interest. Supports Paperless-NGX advanced query syntax.",
     {
-      query: z.string().describe("Search query to find documents. Supports full-text search through document content, titles, tags, and metadata. Use keywords, phrases in quotes, or advanced syntax like 'tag:important' or 'correspondent:john' for targeted searches."),
+      query: z.string().describe("Search query using Paperless-NGX syntax. By default, matches documents containing ALL words. Advanced syntax: Field searches: 'tag:unpaid', 'type:invoice', 'correspondent:university'. Logical operators: 'term1 AND (term2 OR term3)'. Date ranges: 'created:[2020 to 2024]', 'added:yesterday', 'modified:today'. Wildcards: 'prod*name'. Combine multiple criteria as needed. Search looks through document content, title, correspondent, type, and tags."),
+      page: z.number().optional().describe("Page number for pagination (starts at 1). Use to browse through large result sets without hitting token limits."),
+      page_size: z.number().optional().describe("Number of documents per page (default 25, max 100). Smaller page sizes help avoid token limits when many documents match."),
     },
     async (args, extra) => {
       if (!api) throw new Error("Please configure API connection first");
-      return api.searchDocuments(args.query);
+      return api.searchDocuments(args.query, args.page, args.page_size);
     }
   );
 
@@ -126,7 +113,7 @@ export function registerDocumentTools(server, api) {
     "download_document",
     "Download a document file as base64-encoded data. Choose between original uploaded file or processed/archived version with OCR improvements.",
     {
-      id: z.number().describe("Document ID to download. Get this from list_documents, search_documents, or get_document results."),
+      id: z.number().describe("Document ID to download. Get this from search_documents or get_document results."),
       original: z.boolean().optional().describe("Whether to download the original uploaded file (true) or the processed/archived version (false, default). Original files preserve exact formatting but may not include OCR improvements."),
     },
     async (args, extra) => {
