@@ -106,8 +106,27 @@ export class PaperlessAPI {
     return this.request(`/documents/${id}/`);
   }
 
-  async searchDocuments(query) {
-    return this.request(`/documents/?query=${encodeURIComponent(query)}`);
+  async searchDocuments(query, page?, pageSize?) {
+    const params = new URLSearchParams();
+    params.set("query", query);
+    if (page) params.set("page", page.toString());
+    if (pageSize) params.set("page_size", pageSize.toString());
+    
+    const response: any = await this.request(`/documents/?${params.toString()}`);
+    
+    // Filter out content field and long URLs to reduce token usage
+    if (response.results) {
+      response.results = response.results.map((doc: any) => {
+        const { content, download_url, thumbnail_url, ...rest } = doc;
+        return {
+          ...rest,
+          // Include only document ID for constructing URLs if needed
+          id: doc.id,
+        };
+      });
+    }
+    
+    return response;
   }
 
   async downloadDocument(id, asOriginal = false) {
