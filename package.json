@@ -26,7 +26,7 @@
     "skills"
   ],
   "scripts": {
-    "bd": "bun build src/index.ts --minify --outdir=dist --target=node",
+    "bd": "bun build src/index.ts --minify --outdir=dist --target=node --banner='#!/usr/bin/env node'",
     "fmt": "dprint fmt .",
     "fmt:check": "dprint check .",
     "inspect": "bunx @modelcontextprotocol/inspector bun src/index.ts",
