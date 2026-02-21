@@ -1,13 +1,30 @@
+/** Metadata for document upload via FormData. */
+export interface PostDocumentMetadata {
+	readonly title?: string;
+	readonly created?: string;
+	readonly correspondent?: number;
+	readonly document_type?: number;
+	readonly storage_path?: number;
+	readonly tags?: readonly number[];
+	readonly archive_serial_number?: string;
+	readonly custom_fields?: readonly number[];
+}
+
+/** Minimal shape of Paperless-NGX paginated search response. */
+interface SearchResponse {
+	readonly count: number;
+	readonly next: string | null;
+	readonly previous: string | null;
+	results: Record<string, unknown>[];
+}
+
 export class PaperlessAPI {
 	constructor(
 		private readonly baseUrl: string,
 		private readonly token: string,
-	) {
-		this.baseUrl = baseUrl;
-		this.token = token;
-	}
+	) {}
 
-	async request(path: string, options: RequestInit = {}) {
+	async request<T = unknown>(path: string, options: RequestInit = {}): Promise<T> {
 		const url = `${this.baseUrl}/api${path}`;
 		const headers = {
 			Authorization: `Token ${this.token}`,
@@ -25,68 +42,68 @@ export class PaperlessAPI {
 		});
 
 		if (!response.ok) {
-			console.error({
-				error: 'Error executing request',
-				url,
-				options,
-				status: response.status,
-				response: await response.json(),
-			});
-			throw new Error(`HTTP error! status: ${response.status}`);
+			const body: unknown = await response.json().catch(() => null);
+			throw new Error(
+				`HTTP ${response.status} from ${path}: ${JSON.stringify(body)}`,
+			);
 		}
 
-		return response.json();
+		return response.json() as Promise<T>;
 	}
 
 	// Document operations
-	async bulkEditDocuments(documents, method, parameters = {}) {
+	async bulkEditDocuments(
+		documents: number[],
+		method: string,
+		parameters: Record<string, unknown> = {},
+	): Promise<unknown> {
 		return this.request('/documents/bulk_edit/', {
 			method: 'POST',
-
-			body: JSON.stringify({
-				documents,
-				method,
-				parameters,
-			}),
+			body: JSON.stringify({ documents, method, parameters }),
 		});
 	}
 
 	async postDocument(
 		file: File,
-		metadata: Record<string, string | string[]> = {},
-	) {
+		metadata: PostDocumentMetadata = {},
+	): Promise<unknown> {
 		const formData = new FormData();
 		formData.append('document', file);
 
-		// Add optional metadata fields
-		if (metadata.title) formData.append('title', metadata.title);
-		if (metadata.created) formData.append('created', metadata.created);
-		if (metadata.correspondent) {
-			formData.append('correspondent', metadata.correspondent);
+		if (metadata.title != null) {
+			formData.append('title', metadata.title);
 		}
-		if (metadata.document_type) {
-			formData.append('document_type', metadata.document_type);
+		if (metadata.created != null) {
+			formData.append('created', metadata.created);
 		}
-		if (metadata.storage_path) {
-			formData.append('storage_path', metadata.storage_path);
+		if (metadata.correspondent != null) {
+			formData.append('correspondent', String(metadata.correspondent));
 		}
-		if (metadata.tags) {
-			(metadata.tags as string[]).forEach((tag) => formData.append('tags', tag));
+		if (metadata.document_type != null) {
+			formData.append('document_type', String(metadata.document_type));
 		}
-		if (metadata.archive_serial_number) {
+		if (metadata.storage_path != null) {
+			formData.append('storage_path', String(metadata.storage_path));
+		}
+		if (metadata.tags != null) {
+			for (const tag of metadata.tags) {
+				formData.append('tags', String(tag));
+			}
+		}
+		if (metadata.archive_serial_number != null) {
 			formData.append('archive_serial_number', metadata.archive_serial_number);
 		}
-		if (metadata.custom_fields) {
-			(metadata.custom_fields as string[]).forEach((field) => formData.append('custom_fields', field));
+		if (metadata.custom_fields != null) {
+			for (const field of metadata.custom_fields) {
+				formData.append('custom_fields', String(field));
+			}
 		}
 
 		const response = await fetch(
 			`${this.baseUrl}/api/documents/post_document/`,
 			{
 				method: 'POST',
-				headers: {
-					Authorization: `Token ${this.token}`,
-				},
+				headers: { Authorization: `Token ${this.token}` },
 				body: formData,
 			},
 		);
@@ -95,84 +112,77 @@ export class PaperlessAPI {
 			throw new Error(`HTTP error! status: ${response.status}`);
 		}
 
-		return response.json();
+		return response.json() as Promise<unknown>;
 	}
 
-	async getDocuments(query = '') {
+	async getDocuments(query = ''): Promise<unknown> {
 		return this.request(`/documents/${query}`);
 	}
 
-	async getDocument(id) {
+	async getDocument(id: number): Promise<unknown> {
 		return this.request(`/documents/${id}/`);
 	}
 
-	async searchDocuments(query, page?, pageSize?) {
+	async searchDocuments(
+		query: string,
+		page?: number,
+		pageSize?: number,
+	): Promise<SearchResponse> {
 		const params = new URLSearchParams();
 		params.set('query', query);
-		if (page) params.set('page', page.toString());
-		if (pageSize) params.set('page_size', pageSize.toString());
+		if (page != null) params.set('page', page.toString());
+		if (pageSize != null) params.set('page_size', pageSize.toString());
 
-		const response: any = await this.request(`/documents/?${params.toString()}`);
+		const response = await this.request<SearchResponse>(
+			`/documents/?${params.toString()}`,
+		);
 
-		// Filter out content field and long URLs to reduce token usage
-		if (response.results) {
-			response.results = response.results.map((doc: any) => {
-				const { content, download_url, thumbnail_url, ...rest } = doc;
-				return {
-					...rest,
-					// Include only document ID for constructing URLs if needed
-					id: doc.id,
-				};
-			});
-		}
+		// Strip content/URLs to reduce token usage
+		response.results = response.results.map((doc) => {
+			const { content: _, download_url: _d, thumbnail_url: _t, ...rest } = doc;
+			return rest;
+		});
 
 		return response;
 	}
 
-	async downloadDocument(id, asOriginal = false) {
+	async downloadDocument(id: number, asOriginal = false): Promise<Response> {
 		const query = asOriginal ? '?original=true' : '';
-		const response = await fetch(
+		return fetch(
 			`${this.baseUrl}/api/documents/${id}/download/${query}`,
-			{
-				headers: {
-					Authorization: `Token ${this.token}`,
-				},
-			},
+			{ headers: { Authorization: `Token ${this.token}` } },
 		);
-		return response;
 	}
 
 	// Tag operations
-	async getTags() {
+	async getTags(): Promise<unknown> {
 		return this.request('/tags/');
 	}
 
-	async createTag(data) {
+	async createTag(data: Record<string, unknown>): Promise<unknown> {
 		return this.request('/tags/', {
 			method: 'POST',
 			body: JSON.stringify(data),
 		});
 	}
 
-	async updateTag(id, data) {
+	async updateTag(id: number, data: Record<string, unknown>): Promise<unknown> {
 		return this.request(`/tags/${id}/`, {
 			method: 'PUT',
 			body: JSON.stringify(data),
 		});
 	}
 
-	async deleteTag(id) {
-		return this.request(`/tags/${id}/`, {
-			method: 'DELETE',
-		});
+	async deleteTag(id: number): Promise<unknown> {
+		return this.request(`/tags/${id}/`, { method: 'DELETE' });
 	}
 
 	// Correspondent operations
-	async getCorrespondents() {
+	async getCorrespondents(): Promise<unknown> {
 		return this.request('/correspondents/');
 	}
 
-	async createCorrespondent(data) {
+	async createCorrespondent(data: Record<string, unknown>): Promise<unknown> {
 		return this.request('/correspondents/', {
 			method: 'POST',
 			body: JSON.stringify(data),
@@ -180,11 +190,11 @@ export class PaperlessAPI {
 	}
 
 	// Document type operations
-	async getDocumentTypes() {
+	async getDocumentTypes(): Promise<unknown> {
 		return this.request('/document_types/');
 	}
 
-	async createDocumentType(data) {
+	async createDocumentType(data: Record<string, unknown>): Promise<unknown> {
 		return this.request('/document_types/', {
 			method: 'POST',
 			body: JSON.stringify(data),
@@ -192,10 +202,14 @@ export class PaperlessAPI {
 	}
 
 	// Bulk object operations
-	async bulkEditObjects(objects, objectType, operation, parameters = {}) {
+	async bulkEditObjects(
+		objects: number[],
+		objectType: string,
+		operation: string,
+		parameters: Record<string, unknown> = {},
+	): Promise<unknown> {
 		return this.request('/bulk_edit_objects/', {
 			method: 'POST',
-
 			body: JSON.stringify({
 				objects,
 				object_type: objectType,
