@@ -11,7 +11,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Environment variable config: `PAPERLESS_URL` + `PAPERLESS_API_KEY` (or legacy
   `API_KEY`). Works in both stdio and HTTP modes. CLI args still take precedence.
-- Agent Skill section in README linking to skills.sh registry.
+- Agent Skill section in README with install command, moved higher for
+  visibility.
+- OpenCode project config (`.opencode/opencode.jsonc`).
 
 ### Changed
 
@@ -21,6 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Removed `"claude"` from package keywords.
 - MCP server version read from `package.json` at build time — no longer
   hardcoded.
+- Removed unused GraphQL plugin from dprint config.
 
 ### Fixed
 
@@ -35,6 +38,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Skill docs: added verification steps to merge, upload, and tag-cleanup
   workflows.
 - Removed `!` non-null assertion in CLI arg parsing (project convention).
+- Inconsistent `Paperless-NGX` casing -> `Paperless-ngx` in tool descriptions,
+  types, and API docs.
 
 ## [2.0.1] - 2026-02-21
 
