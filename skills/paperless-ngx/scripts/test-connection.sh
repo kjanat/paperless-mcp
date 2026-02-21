@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Test Paperless-NGX API connectivity and authentication.
+# Test Paperless-ngx API connectivity and authentication.
 # Usage: test-connection.sh <base_url> <api_token>
 # Example: test-connection.sh https://docs.example.com abc123token
 
@@ -35,7 +35,7 @@ echo "  Reachable (HTTP ${HTTP_CODE})"
 AUTH_CODE=$(curl -s -o /dev/null -w "%{http_code}" \
 	--max-time 10 \
 	-H "Authorization: Token ${TOKEN}" \
-	-H "Accept: application/json; version=5" \
+	-H "Accept: application/json; version=6" \
 	"${BASE_URL}/api/documents/" 2>/dev/null)
 
 if [[ "${AUTH_CODE}" == "401" || "${AUTH_CODE}" == "403" ]]; then
@@ -53,7 +53,7 @@ echo "  Authenticated (HTTP ${AUTH_CODE})"
 # 3. Quick stats
 RESPONSE=$(curl -s --max-time 10 \
 	-H "Authorization: Token ${TOKEN}" \
-	-H "Accept: application/json; version=5" \
+	-H "Accept: application/json; version=6" \
 	"${BASE_URL}/api/documents/?page_size=1" 2>/dev/null)
 
 DOC_COUNT=$(echo "${RESPONSE}" | grep -o '"count":[0-9]*' | head -1 | cut -d: -f2)
@@ -61,7 +61,7 @@ echo "  Documents: ${DOC_COUNT:-unknown}"
 
 TAG_RESPONSE=$(curl -s --max-time 10 \
 	-H "Authorization: Token ${TOKEN}" \
-	-H "Accept: application/json; version=5" \
+	-H "Accept: application/json; version=6" \
 	"${BASE_URL}/api/tags/" 2>/dev/null)
 
 TAG_COUNT=$(echo "${TAG_RESPONSE}" | grep -o '"count":[0-9]*' | head -1 | cut -d: -f2)

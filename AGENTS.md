@@ -4,7 +4,7 @@
 
 ## OVERVIEW
 
-MCP server bridging AI assistants to Paperless-NGX document management. TypeScript,
+MCP server bridging AI assistants to Paperless-ngx document management. TypeScript,
 `@modelcontextprotocol/sdk`, Zod v4, dual transport: stdio + Streamable HTTP.
 API types derived from OpenAPI schema v6.0.0.
 
@@ -15,7 +15,7 @@ src/
 ├── index.ts                 # Entry: CLI parsing, server factory, dual transport
 ├── types.ts                 # Typed interfaces from OpenAPI schema (v6.0.0)
 ├── api/
-│   ├── paperless-api.ts     # HTTP client wrapping Paperless-NGX REST API
+│   ├── paperless-api.ts     # HTTP client wrapping Paperless-ngx REST API
 │   └── paperless-api.test.ts
 └── tools/
     ├── utils.ts             # Shared jsonResult() helper
@@ -43,7 +43,7 @@ No barrel files. No cross-imports between leaf modules.
 
 ### Types (src/types.ts)
 
-All typed interfaces derived from the Paperless-NGX OpenAPI schema v6.0.0.
+All typed interfaces derived from the Paperless-ngx OpenAPI schema v6.0.0.
 Includes: `Document`, `DocumentSummary`, `Tag`, `Correspondent`, `DocumentType`,
 `PaginatedList<T>`, request types (`TagRequest`, etc.), bulk edit types, shared
 enums (`BulkEditMethod`, `MatchingAlgorithm`), and nested types (`ObjectPermissions`,
@@ -117,8 +117,7 @@ All callbacks accept `_extra` parameter (SDK requirement).
 - `postDocument`/`downloadDocument` bypass `this.request()` — dual fetch paths
   with inconsistent error handling and headers.
 - No Docker support — Dockerfile was removed (was broken, used npm/build/).
-- `package.json` `main` points to `src/index.ts` (TS source, not built output).
-  Unreachable in published package (`"files"` excludes `src/`).
+- ~~`package.json` `main` pointed to `src/index.ts`~~ — removed in v2.0.1.
 - `process.exit(1)` for missing config makes startup logic untestable.
 - No tests for tool registration or callback logic. Only the API client is tested.
 - `as` casts exist in `paperless-api.ts` (response JSON cast to generic `T`
@@ -142,11 +141,13 @@ bun run inspect              # Launch MCP inspector
 
 - `searchDocuments` strips `content`, `download_url`, `thumbnail_url` from results
   to reduce token usage. `get_document` returns full content.
-- HTTP mode: env vars `PAPERLESS_URL` + `API_KEY`. Stdio: positional CLI args.
+- Config: `PAPERLESS_URL` + `PAPERLESS_API_KEY` env vars (both modes), or
+  positional CLI args. CLI args take precedence. Legacy `API_KEY` env var
+  supported as fallback.
 - Console logging is unstructured — error messages could leak sensitive data.
 - `skills/` directory ships in npm package (`"files": ["dist", "skills"]`) —
-  contains Paperless-NGX reference docs, not runtime code.
+  contains Paperless-ngx reference docs, not runtime code.
 - `updateTag` uses PATCH (not PUT) — per OpenAPI schema's `PatchedTagRequest`.
-- `express` is in `optionalDependencies` — only needed for HTTP transport mode.
-- `zod` is an explicit dependency (v4) despite also coming transitively via SDK.
+- All dependencies (`@modelcontextprotocol/sdk`, `zod`, `express`) are
+  `devDependencies` — the bundle is fully self-contained.
 - `scripts/openapi.py` is a Python (3.14+) tool using `uv` — separate toolchain.

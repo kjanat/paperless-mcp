@@ -1,10 +1,10 @@
 # Common Workflows
 
-Multi-step operations for Paperless-NGX document management.
+Multi-step operations for Paperless-ngx document management.
 
 ## 1. Classify Untagged Documents
 
-```
+```txt
 1. search_documents(query="NOT tag:*")
    → get list of untagged document IDs + titles
 
@@ -24,7 +24,7 @@ Multi-step operations for Paperless-NGX document management.
 
 ## 2. Bulk Reclassify by Correspondent
 
-```
+```txt
 1. list_correspondents()
    → identify current + target correspondent IDs
 
@@ -40,7 +40,7 @@ Multi-step operations for Paperless-NGX document management.
 
 ## 3. Upload and Categorize a Batch
 
-```
+```txt
 For each file:
 
 1. Resolve metadata:
@@ -60,7 +60,7 @@ For each file:
 
 ## 4. Merge Related Documents
 
-```
+```txt
 1. search_documents(query="invoice acme created:[2024-01 to 2024-03]")
    → collect document IDs
 
@@ -77,7 +77,7 @@ For each file:
 
 ## 5. Export Documents for External Use
 
-```
+```txt
 1. search_documents(query="tag:export-ready")
    → collect IDs
 
@@ -90,31 +90,31 @@ For each file:
 
 ## 6. Set Up Auto-Classification Rules
 
-```
+```txt
 1. create_tag(
      name="electricity",
      match="electricity power grid kwh",
-     matching_algorithm=0     # any word matches
+     matching_algorithm=1     # 1=any word matches
    )
 
 2. create_correspondent(
      name="Power Company",
      match="Power Co energy provider",
-     matching_algorithm="fuzzy"    # note: string enum for correspondents
+     matching_algorithm=5     # 5=fuzzy
    )
 
 3. create_document_type(
      name="Utility Bill",
      match="utility bill statement due",
-     matching_algorithm="any"
+     matching_algorithm=1     # 1=any word matches
    )
 
-Future uploads auto-classified by Paperless-NGX matching engine.
+Future uploads auto-classified by Paperless-ngx matching engine.
 ```
 
 ## 7. Audit and Clean Up Tags
 
-```
+```txt
 1. list_tags()
    → review all tags, identify duplicates/unused
 
@@ -132,7 +132,7 @@ Future uploads auto-classified by Paperless-NGX matching engine.
 
 All document operations use numeric IDs, not names. Always:
 
-```
+```txt
 list_*()  → find ID for name
            → if not found: create_*() → get ID from response
            → then use ID in subsequent operations

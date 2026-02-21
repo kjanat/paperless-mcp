@@ -1,16 +1,16 @@
 ---
 name: paperless-ngx
-description: Manage documents in Paperless-NGX via MCP tools. Search, upload, tag, organize, and bulk-edit documents, correspondents, and document types. Use when working with Paperless-NGX, document management, OCR, or any mcp_paperless_* tool task.
-license: ISC
-compatibility: Requires a running Paperless-NGX instance with API token. MCP server must be connected with mcp_paperless_* tools available.
+description: Manage documents in Paperless-ngx via MCP tools. Search, upload, tag, organize, and bulk-edit documents, correspondents, and document types. Use when working with Paperless-ngx, document management, OCR, or any mcp_paperless_* tool task.
+license: MIT
+compatibility: Requires a running Paperless-ngx instance with API token. MCP server must be connected with mcp_paperless_* tools available.
 metadata:
   author: kjanat
-  version: "1.0"
+  version: "2.0.1"
 ---
 
-# Paperless-NGX Document Management
+# Paperless-ngx Document Management
 
-Orchestrate Paperless-NGX through 16 MCP tools across 4 domains.
+Orchestrate Paperless-ngx through 16 MCP tools across 4 domains.
 
 ## Tool Catalog
 
@@ -54,7 +54,7 @@ Orchestrate Paperless-NGX through 16 MCP tools across 4 domains.
 
 ### Find a Document
 
-```
+```txt
 What do you know?
 ├─ Keywords/content     → search_documents(query="term1 term2")
 ├─ Document ID          → get_document(id=N)
@@ -67,7 +67,7 @@ What do you know?
 
 ### Organize Documents
 
-```
+```txt
 What operation?
 ├─ Add tag         → bulk_edit_documents(method="add_tag", tag=ID)
 ├─ Remove tag      → bulk_edit_documents(method="remove_tag", tag=ID)
@@ -83,7 +83,7 @@ What operation?
 
 ### Upload a Document
 
-```
+```txt
 1. Resolve metadata IDs first:
    ├─ list_tags            → find or create_tag
    ├─ list_correspondents  → find or create_correspondent
@@ -93,7 +93,7 @@ What operation?
 
 ### Manage Taxonomy (Tags/Correspondents/Types)
 
-```
+```txt
 Need to change metadata objects?
 ├─ View all          → list_tags / list_correspondents / list_document_types
 ├─ Create new        → create_tag / create_correspondent / create_document_type
@@ -107,9 +107,9 @@ Need to change metadata objects?
 - **search_documents strips `content`** to save tokens. Use `get_document` for
   full OCR text.
 - **post_document requires base64** file content, not file paths.
-- **matching_algorithm inconsistency**: numeric `0-4` for tags, string enum
-  (`"any"`, `"all"`, `"exact"`, `"regular expression"`, `"fuzzy"`) for
-  correspondents/document types. See [tools.md](references/tools.md).
+- **matching_algorithm** is integer `0-6` across all endpoints (tags,
+  correspondents, document types): `0`=none, `1`=any, `2`=all, `3`=exact,
+  `4`=regex, `5`=fuzzy, `6`=auto. See [tools.md](references/tools.md).
 - **Bulk delete is permanent and irreversible.**
 - **download_document** returns base64 blob + filename from content-disposition.
 

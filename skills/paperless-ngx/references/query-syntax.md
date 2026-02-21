@@ -1,4 +1,4 @@
-# Paperless-NGX Search Query Syntax
+# Paperless-ngx Search Query Syntax
 
 Reference for the `query` parameter of `search_documents`.
 
@@ -6,7 +6,7 @@ Reference for the `query` parameter of `search_documents`.
 
 Words separated by spaces match documents containing **ALL** words.
 
-```
+```txt
 invoice electricity    # docs with BOTH "invoice" AND "electricity"
 ```
 
@@ -23,7 +23,7 @@ invoice electricity    # docs with BOTH "invoice" AND "electricity"
 
 ## Logical Operators
 
-```
+```txt
 term1 AND term2            # Both required (default behavior)
 term1 OR term2             # Either matches
 NOT term1                  # Exclude term
@@ -43,14 +43,14 @@ term1 AND (term2 OR term3) # Grouping with parentheses
 
 ## Wildcards
 
-```
+```txt
 prod*name      # Matches "production name", "product name", etc.
 inv?ice        # Single character wildcard
 ```
 
 ## Combined Queries
 
-```
+```txt
 # Unpaid invoices from 2024
 tag:unpaid type:invoice created:2024
 

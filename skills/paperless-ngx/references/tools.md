@@ -1,6 +1,6 @@
 # MCP Tool Reference
 
-Full parameter signatures for all 16 Paperless-NGX MCP tools.
+Full parameter signatures for all 16 Paperless-ngx MCP tools.
 
 ## Document Tools
 
@@ -8,7 +8,7 @@ Full parameter signatures for all 16 Paperless-NGX MCP tools.
 
 | Param       | Type   | Required | Notes                       |
 | ----------- | ------ | -------- | --------------------------- |
-| `query`     | string | yes      | Paperless-NGX search syntax |
+| `query`     | string | yes      | Paperless-ngx search syntax |
 | `page`      | number | no       | Pagination, starts at 1     |
 | `page_size` | number | no       | Default 25, max 100         |
 
@@ -75,12 +75,12 @@ No parameters. Returns all tags with name, color, matching rules.
 
 ### create_tag
 
-| Param                | Type   | Required | Notes                                             |
-| -------------------- | ------ | -------- | ------------------------------------------------- |
-| `name`               | string | yes      | Unique tag name                                   |
-| `color`              | string | no       | Hex: `#FF0000`                                    |
-| `match`              | string | no       | Auto-assign pattern                               |
-| `matching_algorithm` | int    | no       | `0`=any, `1`=all, `2`=exact, `3`=regex, `4`=fuzzy |
+| Param                | Type   | Required | Notes                                                                 |
+| -------------------- | ------ | -------- | --------------------------------------------------------------------- |
+| `name`               | string | yes      | Unique tag name                                                       |
+| `color`              | string | no       | Hex: `#FF0000`                                                        |
+| `match`              | string | no       | Auto-assign pattern                                                   |
+| `matching_algorithm` | int    | no       | `0`=none, `1`=any, `2`=all, `3`=exact, `4`=regex, `5`=fuzzy, `6`=auto |
 
 ### update_tag
 
@@ -90,7 +90,7 @@ No parameters. Returns all tags with name, color, matching rules.
 | `name`               | string | yes      | New name                 |
 | `color`              | string | no       | Hex color                |
 | `match`              | string | no       | Auto-assign pattern      |
-| `matching_algorithm` | int    | no       | `0`-`4` (same as create) |
+| `matching_algorithm` | int    | no       | `0`-`6` (same as create) |
 
 ### delete_tag
 
@@ -116,13 +116,11 @@ No parameters.
 
 ### create_correspondent
 
-| Param                | Type   | Required | Notes                                                      |
-| -------------------- | ------ | -------- | ---------------------------------------------------------- |
-| `name`               | string | yes      | Person/company/org name                                    |
-| `match`              | string | no       | Auto-assign pattern                                        |
-| `matching_algorithm` | enum   | no       | `"any"`,`"all"`,`"exact"`,`"regular expression"`,`"fuzzy"` |
-
-**Note:** String enum, not numeric like tags.
+| Param                | Type   | Required | Notes                                                                 |
+| -------------------- | ------ | -------- | --------------------------------------------------------------------- |
+| `name`               | string | yes      | Person/company/org name                                               |
+| `match`              | string | no       | Auto-assign pattern                                                   |
+| `matching_algorithm` | int    | no       | `0`=none, `1`=any, `2`=all, `3`=exact, `4`=regex, `5`=fuzzy, `6`=auto |
 
 ### bulk_edit_correspondents
 
@@ -142,13 +140,11 @@ No parameters.
 
 ### create_document_type
 
-| Param                | Type   | Required | Notes                                                      |
-| -------------------- | ------ | -------- | ---------------------------------------------------------- |
-| `name`               | string | yes      | Type name (Invoice, Receipt, etc.)                         |
-| `match`              | string | no       | Auto-assign pattern                                        |
-| `matching_algorithm` | enum   | no       | `"any"`,`"all"`,`"exact"`,`"regular expression"`,`"fuzzy"` |
-
-**Note:** String enum, not numeric like tags.
+| Param                | Type   | Required | Notes                                                                 |
+| -------------------- | ------ | -------- | --------------------------------------------------------------------- |
+| `name`               | string | yes      | Type name (Invoice, Receipt, etc.)                                    |
+| `match`              | string | no       | Auto-assign pattern                                                   |
+| `matching_algorithm` | int    | no       | `0`=none, `1`=any, `2`=all, `3`=exact, `4`=regex, `5`=fuzzy, `6`=auto |
 
 ### bulk_edit_document_types
 

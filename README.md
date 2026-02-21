@@ -482,4 +482,13 @@ With a `.env` file, this simplifies to `bun start --http`.
 - Each request is handled statelessly, following the [StreamableHTTPServerTransport](https://github.com/modelcontextprotocol/typescript-sdk) pattern.
 - GET and DELETE requests to `/mcp` will return 405 Method Not Allowed.
 
+## Agent Skill
+
+This package ships an [Agent Skill](https://agentskills.io/specification) in
+`skills/paperless-ngx/` with decision trees, tool reference docs, query syntax
+guide, and workflow templates for AI agents.
+
+View the skill on the registry:
+<https://skills.sh/kjanat/paperless-mcp/paperless-ngx>
+
 <!--markdownlint-disable-file no-hard-tabs no-inline-html-->

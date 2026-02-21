@@ -11,13 +11,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Environment variable config: `PAPERLESS_URL` + `PAPERLESS_API_KEY` (or legacy
   `API_KEY`). Works in both stdio and HTTP modes. CLI args still take precedence.
+- Agent Skill section in README linking to skills.sh registry.
 
 ### Changed
 
-- Moved all runtime dependencies (`@modelcontextprotocol/sdk`, `zod`, `express`)
-  to `devDependencies` — bundle is fully self-contained, consumers no longer
-  download ~50 MB of unused packages.
+- Moved all production dependencies (`@modelcontextprotocol/sdk`, `zod`) and
+  optional dependency (`express`) to `devDependencies` — bundle is fully
+  self-contained, consumers no longer download ~50 MB of unused packages.
 - Removed `"claude"` from package keywords.
+- MCP server version now reports `2.0.1` instead of hardcoded `1.0.0`.
+
+### Fixed
+
+- Skill docs: `matching_algorithm` is integer `0-6` across all endpoints (tags,
+  correspondents, document types) — was incorrectly documented as string enum
+  for correspondents/types and wrong numeric range for tags.
+- Skill docs: `test-connection.sh` API version header updated from v5 to v6.
+- Removed `!` non-null assertion in CLI arg parsing (project convention).
 
 ## [2.0.1] - 2026-02-21
 
@@ -69,12 +79,12 @@ Major rewrite of internals while preserving the same MCP tool surface.
 
 ### Added
 
-- Typed API client (`PaperlessAPI`) with all responses derived from Paperless-NGX
+- Typed API client (`PaperlessAPI`) with all responses derived from Paperless-ngx
   OpenAPI schema v6.0.0.
 - Unit tests for `PaperlessAPI` (32 tests via `bun test`).
 - OpenAPI schema snapshot script (`scripts/openapi.py`) and generated schema.
 - `tsgo` typecheck support.
-- `AGENTS.md` project knowledge base and Paperless-NGX skill files.
+- `AGENTS.md` project knowledge base and Paperless-ngx skill files.
 - Hierarchical AGENTS.md documentation.
 - Shared `jsonResult()` helper for consistent tool responses.
 - Job-level permissions to npm-publish workflow for provenance.

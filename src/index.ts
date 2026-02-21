@@ -39,7 +39,8 @@ const port = parsePort();
 function positionalArgs(): string[] {
 	const result: string[] = [];
 	for (let i = 0; i < rawArgs.length; i++) {
-		const arg = rawArgs[i]!;
+		const arg = rawArgs[i];
+		if (arg == null) continue;
 		if (arg === '--http') continue;
 		if (arg === '--port') {
 			i++; // skip value
@@ -96,7 +97,7 @@ async function main(): Promise<void> {
 
 	/** Create a fresh McpServer with all tools registered. */
 	function createServer(): McpServer {
-		const server = new McpServer({ name: 'paperless-ngx', version: '1.0.0' });
+		const server = new McpServer({ name: 'paperless-ngx', version: '2.0.1' });
 		registerDocumentTools(server, api);
 		registerTagTools(server, api);
 		registerCorrespondentTools(server, api);
