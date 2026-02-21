@@ -1,52 +1,41 @@
-# Paperless-NGX MCP Server
+# Paperless-ngx MCP Server
 
-An MCP (Model Context Protocol) server for interacting with a Paperless-NGX API server. This server provides tools for managing documents, tags, correspondents, and document types in your Paperless-NGX instance.
+An MCP (Model Context Protocol) server for interacting with a Paperless-ngx API server. This server provides tools for managing documents, tags, correspondents, and document types in your Paperless-ngx instance.
 
 ## Quick Start
 
 ### Installation
-1. Install the MCP server:
-```bash
-npm install -g paperless-mcp
-```
 
-2. Add it to your Claude's MCP configuration:
+1. Install the MCP server (optional):
 
-For VSCode extension, edit `~/Library/Application Support/Code/User/globalStorage/saoudrizwan.claude-dev/settings/cline_mcp_settings.json`:
-```json
-{
-  "mcpServers": {
-    "paperless": {
-      "command": "npx",
-      "args": ["paperless-mcp", "http://your-paperless-instance:8000", "your-api-token"]
-    }
-  }
-}
-```
+   ```bash
+   bun install -g @kjanat/paperless-mcp
+   ```
 
-For Claude desktop app, edit `~/Library/Application Support/Claude/claude_desktop_config.json`:
-```json
-{
-  "mcpServers": {
-    "paperless": {
-      "command": "npx",
-      "args": ["paperless-mcp", "http://your-paperless-instance:8000", "your-api-token"]
-    }
-  }
-}
-```
+1. Add it to your configuration:
 
-3. Get your API token:
-   1. Log into your Paperless-NGX instance
+   ```jsonc
+   {
+    "mcpServers": {
+     "paperless": {
+      "command": "bunx", // or npx
+      "args": ["@kjanat/paperless-mcp", "http://your-paperless-instance:8000", "your-api-token"],
+     },
+    },
+   }
+   ```
+
+1. Get your API token:
+   1. Log into your Paperless-ngx instance
    2. Click your username in the top right
    3. Select "My Profile"
    4. Click the circular arrow button to generate a new token
 
-4. Replace the placeholders in your MCP config:
-   - `http://your-paperless-instance:8000` with your Paperless-NGX URL
+1. Replace the placeholders in your MCP config:
+   - `http://your-paperless-instance:8000` with your Paperless-ngx URL
    - `your-api-token` with the token you just generated
 
-That's it! Now you can ask Claude to help you manage your Paperless-NGX documents.
+That's it! Now you can ask Claude to help you manage your Paperless-ngx documents.
 
 ## Example Usage
 
@@ -63,62 +52,56 @@ Here are some things you can ask Claude to do:
 
 ### Document Operations
 
-#### list_documents
-Get a paginated list of all documents.
-
-Parameters:
-- page (optional): Page number
-- page_size (optional): Number of documents per page
-
-```typescript
-list_documents({
-  page: 1,
-  page_size: 25
-})
-```
-
 #### get_document
+
 Get a specific document by ID.
 
 Parameters:
+
 - id: Document ID
 
 ```typescript
 get_document({
-  id: 123
-})
+ id: 123,
+});
 ```
 
 #### search_documents
+
 Full-text search across documents.
 
 Parameters:
+
 - query: Search query string
 
 ```typescript
 search_documents({
-  query: "invoice 2024"
-})
+ query: 'invoice 2024',
+});
 ```
 
 #### download_document
+
 Download a document file by ID.
 
 Parameters:
+
 - id: Document ID
 - original (optional): If true, downloads original file instead of archived version
 
 ```typescript
 download_document({
-  id: 123,
-  original: false
-})
+ id: 123,
+ original: false,
+});
 ```
 
 #### bulk_edit_documents
+
 Perform bulk operations on multiple documents.
 
 Parameters:
+
 - documents: Array of document IDs
 - method: One of:
   - set_correspondent: Set correspondent for documents
@@ -148,49 +131,52 @@ Parameters:
   - degrees: Number for rotate (90, 180, or 270)
 
 Examples:
+
 ```typescript
 // Add a tag to multiple documents
 bulk_edit_documents({
-  documents: [1, 2, 3],
-  method: "add_tag",
-  tag: 5
-})
+ documents: [1, 2, 3],
+ method: 'add_tag',
+ tag: 5,
+});
 
 // Set correspondent and document type
 bulk_edit_documents({
-  documents: [4, 5],
-  method: "set_correspondent",
-  correspondent: 2
-})
+ documents: [4, 5],
+ method: 'set_correspondent',
+ correspondent: 2,
+});
 
 // Merge documents
 bulk_edit_documents({
-  documents: [6, 7, 8],
-  method: "merge",
-  metadata_document_id: 6,
-  delete_originals: true
-})
+ documents: [6, 7, 8],
+ method: 'merge',
+ metadata_document_id: 6,
+ delete_originals: true,
+});
 
 // Split document into parts
 bulk_edit_documents({
-  documents: [9],
-  method: "split",
-  pages: "[1-2,3-4,5]"
-})
+ documents: [9],
+ method: 'split',
+ pages: '[1-2,3-4,5]',
+});
 
 // Modify multiple tags at once
 bulk_edit_documents({
-  documents: [10, 11],
-  method: "modify_tags",
-  add_tags: [1, 2],
-  remove_tags: [3, 4]
-})
+ documents: [10, 11],
+ method: 'modify_tags',
+ add_tags: [1, 2],
+ remove_tags: [3, 4],
+});
 ```
 
 #### post_document
-Upload a new document to Paperless-NGX.
+
+Upload a new document to Paperless-ngx.
 
 Parameters:
+
 - file: Base64 encoded file content
 - filename: Name of the file
 - title (optional): Title for the document
@@ -204,30 +190,33 @@ Parameters:
 
 ```typescript
 post_document({
-  file: "base64_encoded_content",
-  filename: "invoice.pdf",
-  title: "January Invoice",
-  created: "2024-01-19",
-  correspondent: 1,
-  document_type: 2,
-  tags: [1, 3],
-  archive_serial_number: "2024-001"
-})
+ file: 'base64_encoded_content',
+ filename: 'invoice.pdf',
+ title: 'January Invoice',
+ created: '2024-01-19',
+ correspondent: 1,
+ document_type: 2,
+ tags: [1, 3],
+ archive_serial_number: '2024-001',
+});
 ```
 
 ### Tag Operations
 
 #### list_tags
+
 Get all tags.
 
 ```typescript
-list_tags()
+list_tags();
 ```
 
 #### create_tag
+
 Create a new tag.
 
 Parameters:
+
 - name: Tag name
 - color (optional): Hex color code (e.g. "#ff0000")
 - match (optional): Text pattern to match
@@ -235,68 +224,166 @@ Parameters:
 
 ```typescript
 create_tag({
-  name: "Invoice",
-  color: "#ff0000",
-  match: "invoice",
-  matching_algorithm: "fuzzy"
-})
+ name: 'Invoice',
+ color: '#ff0000',
+ match: 'invoice',
+ matching_algorithm: 'fuzzy',
+});
+```
+
+#### update_tag
+
+Update an existing tag's name, color, or matching rules.
+
+Parameters:
+
+- id: Tag ID
+- name: New tag name
+- color (optional): Hex color code (e.g. "#ff0000")
+- match (optional): Text pattern to match
+- matching_algorithm (optional): 0=any word, 1=all words, 2=exact phrase, 3=regular expression, 4=fuzzy
+
+```typescript
+update_tag({
+ id: 5,
+ name: 'Invoices',
+ color: '#00ff00',
+});
+```
+
+#### delete_tag
+
+Permanently delete a tag. Removes it from all documents.
+
+Parameters:
+
+- id: Tag ID
+
+```typescript
+delete_tag({
+ id: 5,
+});
+```
+
+#### bulk_edit_tags
+
+Bulk set permissions or delete multiple tags.
+
+Parameters:
+
+- tag_ids: Array of tag IDs
+- operation: "set_permissions" or "delete"
+- owner (optional): User ID (for set_permissions)
+- permissions (optional): Object with view/change user and group IDs
+- merge (optional): Merge with existing permissions (default false)
+
+```typescript
+bulk_edit_tags({
+ tag_ids: [1, 2, 3],
+ operation: 'delete',
+});
 ```
 
 ### Correspondent Operations
 
 #### list_correspondents
+
 Get all correspondents.
 
 ```typescript
-list_correspondents()
+list_correspondents();
 ```
 
 #### create_correspondent
+
 Create a new correspondent.
 
 Parameters:
+
 - name: Correspondent name
 - match (optional): Text pattern to match
 - matching_algorithm (optional): One of "any", "all", "exact", "regular expression", "fuzzy"
 
 ```typescript
 create_correspondent({
-  name: "ACME Corp",
-  match: "ACME",
-  matching_algorithm: "fuzzy"
-})
+ name: 'ACME Corp',
+ match: 'ACME',
+ matching_algorithm: 'fuzzy',
+});
+```
+
+#### bulk_edit_correspondents
+
+Bulk set permissions or delete multiple correspondents.
+
+Parameters:
+
+- correspondent_ids: Array of correspondent IDs
+- operation: "set_permissions" or "delete"
+- owner (optional): User ID (for set_permissions)
+- permissions (optional): Object with view/change user and group IDs
+- merge (optional): Merge with existing permissions (default false)
+
+```typescript
+bulk_edit_correspondents({
+ correspondent_ids: [1, 2],
+ operation: 'delete',
+});
 ```
 
 ### Document Type Operations
 
 #### list_document_types
+
 Get all document types.
 
 ```typescript
-list_document_types()
+list_document_types();
 ```
 
 #### create_document_type
+
 Create a new document type.
 
 Parameters:
+
 - name: Document type name
 - match (optional): Text pattern to match
 - matching_algorithm (optional): One of "any", "all", "exact", "regular expression", "fuzzy"
 
 ```typescript
 create_document_type({
-  name: "Invoice",
-  match: "invoice total amount due",
-  matching_algorithm: "any"
-})
+ name: 'Invoice',
+ match: 'invoice total amount due',
+ matching_algorithm: 'any',
+});
+```
+
+#### bulk_edit_document_types
+
+Bulk set permissions or delete multiple document types.
+
+Parameters:
+
+- document_type_ids: Array of document type IDs
+- operation: "set_permissions" or "delete"
+- owner (optional): User ID (for set_permissions)
+- permissions (optional): Object with view/change user and group IDs
+- merge (optional): Merge with existing permissions (default false)
+
+```typescript
+bulk_edit_document_types({
+ document_type_ids: [1, 2],
+ operation: 'delete',
+});
 ```
 
 ## Error Handling
 
 The server will show clear error messages if:
-- The Paperless-NGX URL or API token is incorrect
-- The Paperless-NGX server is unreachable
+
+- The Paperless-ngx URL or API token is incorrect
+- The Paperless-ngx server is unreachable
 - The requested operation fails
 - The provided parameters are invalid
 
@@ -306,23 +393,26 @@ Want to contribute or modify the server? Here's what you need to know:
 
 1. Clone the repository
 2. Install dependencies:
-```bash
-npm install
-```
 
-3. Make your changes to server.js
+   ```bash
+   bun install
+   ```
+
+3. Make your changes in `src/` (see `src/tools/` for MCP tools, `src/api/` for API client)
 4. Test locally:
-```bash
-node server.js http://localhost:8000 your-test-token
-```
+
+   ```bash
+   bun src/index.ts http://localhost:8000 your-test-token
+   ```
 
 The server is built with:
-- [litemcp](https://github.com/wong2/litemcp): A TypeScript framework for building MCP servers
+
+- [@modelcontextprotocol/sdk](https://github.com/modelcontextprotocol/typescript-sdk): Official TypeScript SDK for building MCP servers
 - [zod](https://github.com/colinhacks/zod): TypeScript-first schema validation
 
 ## API Documentation
 
-This MCP server implements endpoints from the Paperless-NGX REST API. For more details about the underlying API, see the [official documentation](https://docs.paperless-ngx.com/api/).
+This MCP server implements endpoints from the Paperless-ngx REST API. For more details about the underlying API, see the [official documentation](https://docs.paperless-ngx.com/api/).
 
 ## Running the MCP Server
 
@@ -333,7 +423,7 @@ The MCP server can be run in two modes:
 This is the default mode. The server communicates over stdio, suitable for CLI and direct integrations.
 
 ```
-npm run start -- <baseUrl> <token>
+bun start -- <baseUrl> <token>
 ```
 
 ### 2. HTTP (Streamable HTTP Transport)
@@ -341,7 +431,7 @@ npm run start -- <baseUrl> <token>
 To run the server as an HTTP service, use the `--http` flag. You can also specify the port with `--port` (default: 3000). This mode requires [Express](https://expressjs.com/) to be installed (it is included as a dependency).
 
 ```
-npm run start -- <baseUrl> <token> --http --port 3000
+bun start -- <baseUrl> <token> --http --port 3000
 ```
 
 - The MCP API will be available at `POST /mcp` on the specified port.
