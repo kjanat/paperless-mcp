@@ -19,7 +19,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   optional dependency (`express`) to `devDependencies` — bundle is fully
   self-contained, consumers no longer download ~50 MB of unused packages.
 - Removed `"claude"` from package keywords.
-- MCP server version now reports `2.0.1` instead of hardcoded `1.0.0`.
+- MCP server version read from `package.json` at build time — no longer
+  hardcoded.
 
 ### Fixed
 

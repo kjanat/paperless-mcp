@@ -5,6 +5,7 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
 
+import pkg from '../package.json';
 import { PaperlessAPI } from './api/paperless-api';
 import { registerCorrespondentTools } from './tools/correspondents';
 import { registerDocumentTools } from './tools/documents';
@@ -97,7 +98,7 @@ async function main(): Promise<void> {
 
 	/** Create a fresh McpServer with all tools registered. */
 	function createServer(): McpServer {
-		const server = new McpServer({ name: 'paperless-ngx', version: '2.0.1' });
+		const server = new McpServer({ name: 'paperless-ngx', version: pkg.version });
 		registerDocumentTools(server, api);
 		registerTagTools(server, api);
 		registerCorrespondentTools(server, api);

@@ -10,6 +10,7 @@
 		"module": "esnext",
 		"moduleResolution": "bundler",
 		"noEmit": true,
+		"resolveJsonModule": true,
 		/* Interop Constraints */
 		"isolatedModules": true,
 		"esModuleInterop": true,

@@ -122,7 +122,7 @@ All callbacks accept `_extra` parameter (SDK requirement).
 - No tests for tool registration or callback logic. Only the API client is tested.
 - `as` casts exist in `paperless-api.ts` (response JSON cast to generic `T`
   without runtime validation) despite project convention forbidding them.
-- Server version hardcoded as `'1.0.0'` — not synced with `package.json` version.
+- ~~Server version hardcoded as `'1.0.0'`~~ — now imported from `package.json`.
 - CI only runs `bun test` — no typecheck or format check in pipeline.
 
 ## COMMANDS
