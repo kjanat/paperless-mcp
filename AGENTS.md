@@ -116,7 +116,6 @@ All callbacks accept `_extra` parameter (SDK requirement).
 
 - `postDocument`/`downloadDocument` bypass `this.request()` — dual fetch paths
   with inconsistent error handling and headers.
-- No Docker support — Dockerfile was removed (was broken, used npm/build/).
 - ~~`package.json` `main` pointed to `src/index.ts`~~ — removed in v2.0.1.
 - `process.exit(1)` for missing config makes startup logic untestable.
 - No tests for tool registration or callback logic. Only the API client is tested.
