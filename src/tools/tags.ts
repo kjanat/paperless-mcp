@@ -1,7 +1,7 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
 
-import type { PaperlessAPI } from '../api/paperless-api';
+import type { PaperlessAPI } from '@/api/paperless-api';
 import { jsonResult } from './utils';
 
 export function registerTagTools(server: McpServer, api: PaperlessAPI): void {

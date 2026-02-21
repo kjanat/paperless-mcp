@@ -13,7 +13,7 @@ import type {
 	PostDocumentMetadata,
 	Tag,
 	TagRequest,
-} from '../types';
+} from '@/types';
 
 export class PaperlessAPI {
 	constructor(

@@ -1,8 +1,8 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
 
-import type { PaperlessAPI } from '../api/paperless-api';
-import type { PostDocumentMetadata } from '../types';
+import type { PaperlessAPI } from '@/api/paperless-api';
+import type { PostDocumentMetadata } from '@/types';
 import { jsonResult } from './utils';
 
 export function registerDocumentTools(server: McpServer, api: PaperlessAPI): void {
