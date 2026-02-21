@@ -1,11 +1,11 @@
 # PROJECT KNOWLEDGE BASE
 
-**Generated:** 2026-02-21 **Commit:** bf0dc45 **Branch:** deps-upgrade-tsconfig-stricten
+**Generated:** 2026-02-21 **Commit:** c152be1 **Branch:** master
 
 ## OVERVIEW
 
 MCP server bridging AI assistants to Paperless-NGX document management. TypeScript,
-`@modelcontextprotocol/sdk` (sole runtime dep), Zod, dual transport: stdio + HTTP.
+`@modelcontextprotocol/sdk`, Zod v4, dual transport: stdio + Streamable HTTP.
 API types derived from OpenAPI schema v6.0.0.
 
 ## STRUCTURE
@@ -91,8 +91,7 @@ All callbacks accept `_extra` parameter (SDK requirement).
 
 - **stdio**: single `McpServer` + `StdioServerTransport` (args: `<baseUrl> <token>`)
 - **HTTP**: `createMcpExpressApp()` from SDK on `0.0.0.0:port`; fresh `McpServer`
-  per request (stateless `StreamableHTTPServerTransport`) and per SSE session
-  (legacy `SSEServerTransport`)
+  per request (stateless `StreamableHTTPServerTransport`)
 
 ## CONVENTIONS
 
@@ -102,8 +101,6 @@ All callbacks accept `_extra` parameter (SDK requirement).
 - **`import { z } from 'zod'`** — not `import * as z from 'zod/v4'`.
 - **Named exports only**: No default exports.
 - **kebab-case filenames**: `paperless-api.ts`, not `PaperlessAPI.ts`.
-- **SDK-only dependency**: Only `@modelcontextprotocol/sdk` in `dependencies`.
-  Express and Zod come transitively.
 - **Bun-first**: `bun` for runtime, bundling (`bun bd`), and testing (`bun test`).
 - **dprint** for formatting (`bun run fmt`). Tab indentation, single quotes.
 - **tsgo** for typechecking (`bun run typecheck`). Not `tsc`.
@@ -121,10 +118,13 @@ All callbacks accept `_extra` parameter (SDK requirement).
   with inconsistent error handling and headers.
 - No Docker support — Dockerfile was removed (was broken, used npm/build/).
 - `package.json` `main` points to `src/index.ts` (TS source, not built output).
-- No `LICENSE` file despite ISC declaration.
-- SSE sessions are in-memory (`Map`). No horizontal scaling.
+  Unreachable in published package (`"files"` excludes `src/`).
 - `process.exit(1)` for missing config makes startup logic untestable.
 - No tests for tool registration or callback logic. Only the API client is tested.
+- `as` casts exist in `paperless-api.ts` (response JSON cast to generic `T`
+  without runtime validation) despite project convention forbidding them.
+- Server version hardcoded as `'1.0.0'` — not synced with `package.json` version.
+- CI only runs `bun test` — no typecheck or format check in pipeline.
 
 ## COMMANDS
 
@@ -147,3 +147,6 @@ bun run inspect              # Launch MCP inspector
 - `skills/` directory ships in npm package (`"files": ["dist", "skills"]`) —
   contains Paperless-NGX reference docs, not runtime code.
 - `updateTag` uses PATCH (not PUT) — per OpenAPI schema's `PatchedTagRequest`.
+- `express` is in `optionalDependencies` — only needed for HTTP transport mode.
+- `zod` is an explicit dependency (v4) despite also coming transitively via SDK.
+- `scripts/openapi.py` is a Python (3.14+) tool using `uv` — separate toolchain.

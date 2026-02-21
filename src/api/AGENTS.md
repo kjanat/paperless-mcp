@@ -17,8 +17,11 @@ Paperless-NGX REST API via `fetch()`. All methods return typed responses
 - **Dual fetch paths**: `request<T>()` is the shared base, but `postDocument()`
   and `downloadDocument()` call `fetch()` directly. Auth header changes or error
   handling updates must hit all three paths.
-- **`postDocument` error message** now matches `request()` format:
-  `"HTTP {status} from {path}: {body}"`.
+- **`as` casts on response JSON**: `response.json() as Promise<T>` — unvalidated
+  runtime trust boundary. If Paperless-NGX returns unexpected shape, it silently
+  becomes a type lie.
+- **`downloadDocument` error extraction differs**: uses `.text()` not `.json()`,
+  unlike the other two fetch paths.
 
 ## TESTING
 
