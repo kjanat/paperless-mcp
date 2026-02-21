@@ -115,7 +115,7 @@ export function registerDocumentTools(server: McpServer, api: PaperlessAPI): voi
 		'post_document',
 		{
 			description:
-				'Upload a new document to Paperless-NGX with metadata. Supports PDF, images (PNG/JPG/TIFF), and text files. Automatically processes for OCR and indexing.',
+				'Upload a new document to Paperless-ngx with metadata. Supports PDF, images (PNG/JPG/TIFF), and text files. Automatically processes for OCR and indexing.',
 			inputSchema: {
 				file: z.string().describe(
 					'Base64 encoded file content. Convert your file to base64 before uploading. Supports PDF, images (PNG, JPG, TIFF), and text files.',
@@ -196,10 +196,10 @@ export function registerDocumentTools(server: McpServer, api: PaperlessAPI): voi
 		'search_documents',
 		{
 			description:
-				'Search through documents using full-text search across content, titles, tags, and metadata. Returns document metadata WITHOUT the full OCR content field to prevent token overflow. Use get_document to retrieve full details for specific documents of interest. Supports Paperless-NGX advanced query syntax.',
+				'Search through documents using full-text search across content, titles, tags, and metadata. Returns document metadata WITHOUT the full OCR content field to prevent token overflow. Use get_document to retrieve full details for specific documents of interest. Supports Paperless-ngx advanced query syntax.',
 			inputSchema: {
 				query: z.string().describe(
-					"Search query using Paperless-NGX syntax. By default, matches documents containing ALL words. Advanced syntax: Field searches: 'tag:unpaid', 'type:invoice', 'correspondent:university'. Logical operators: 'term1 AND (term2 OR term3)'. Date ranges: 'created:[2020 to 2024]', 'added:yesterday', 'modified:today'. Wildcards: 'prod*name'. Combine multiple criteria as needed. Search looks through document content, title, correspondent, type, and tags.",
+					"Search query using Paperless-ngx syntax. By default, matches documents containing ALL words. Advanced syntax: Field searches: 'tag:unpaid', 'type:invoice', 'correspondent:university'. Logical operators: 'term1 AND (term2 OR term3)'. Date ranges: 'created:[2020 to 2024]', 'added:yesterday', 'modified:today'. Wildcards: 'prod*name'. Combine multiple criteria as needed. Search looks through document content, title, correspondent, type, and tags.",
 				),
 
 				page: z.number().optional().describe(

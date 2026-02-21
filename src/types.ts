@@ -1,5 +1,5 @@
 /**
- * Typed interfaces derived from the Paperless-NGX OpenAPI schema (v6.0.0).
+ * Typed interfaces derived from the Paperless-ngx OpenAPI schema (v6.0.0).
  * Source: schemas/openapi.json
  *
  * Only models types actually used by our API client and MCP tools.
@@ -91,7 +91,7 @@ export interface DuplicateDocumentSummary {
 // Paginated list (generic shape)
 // ---------------------------------------------------------------------------
 
-/** Paginated response from Paperless-NGX list endpoints. */
+/** Paginated response from Paperless-ngx list endpoints. */
 export interface PaginatedList<T> {
 	readonly count: number;
 	readonly next: string | null;

@@ -1,7 +1,7 @@
-# src/api/ — Paperless-NGX HTTP Client
+# src/api/ — Paperless-ngx HTTP Client
 
 Single class `PaperlessAPI` in `paperless-api.ts`. 16 methods wrapping the
-Paperless-NGX REST API via `fetch()`. All methods return typed responses
+Paperless-ngx REST API via `fetch()`. All methods return typed responses
 (interfaces from `src/types.ts`), not `Promise<unknown>`.
 
 ## KEY DETAILS
@@ -18,7 +18,7 @@ Paperless-NGX REST API via `fetch()`. All methods return typed responses
   and `downloadDocument()` call `fetch()` directly. Auth header changes or error
   handling updates must hit all three paths.
 - **`as` casts on response JSON**: `response.json() as Promise<T>` — unvalidated
-  runtime trust boundary. If Paperless-NGX returns unexpected shape, it silently
+  runtime trust boundary. If Paperless-ngx returns unexpected shape, it silently
   becomes a type lie.
 - **`downloadDocument` error extraction differs**: uses `.text()` not `.json()`,
   unlike the other two fetch paths.
