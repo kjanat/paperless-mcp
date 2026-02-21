@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.1.0] - 2026-02-21
+
 ### Added
 
 - Environment variable config: `PAPERLESS_URL` + `PAPERLESS_API_KEY` (or legacy
@@ -137,7 +139,8 @@ Major rewrite of internals while preserving the same MCP tool surface.
 - Smithery configuration (broken `smithery.yaml`).
 - Obsolete Cursor rules.
 
-[Unreleased]: https://github.com/kjanat/paperless-mcp/compare/v2.0.1...HEAD
+[Unreleased]: https://github.com/kjanat/paperless-mcp/compare/v2.1.0...HEAD
+[2.1.0]: https://github.com/kjanat/paperless-mcp/compare/v2.0.1...v2.1.0
 [2.0.1]: https://github.com/kjanat/paperless-mcp/compare/v2.0.0...v2.0.1
 [2.0.0]: https://github.com/kjanat/paperless-mcp/compare/v1.0.1-dev.2...v2.0.0
 [1.0.1-dev.2]: https://github.com/kjanat/paperless-mcp/compare/v1.0.1-dev.1...v1.0.1-dev.2
