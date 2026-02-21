@@ -27,10 +27,10 @@
   ],
   "scripts": {
     "bd": "bun build src/index.ts --minify --outdir=dist --target=node --banner='#!/usr/bin/env node'",
-    "fmt": "dprint fmt .",
-    "fmt:check": "dprint check .",
+    "fmt": "dprint fmt",
+    "fmt:check": "dprint check",
     "inspect": "bunx @modelcontextprotocol/inspector bun src/index.ts",
-    "prepack": "bun bd",
+    "prepack": "bun bd && bunx prettier README.md --write",
     "start": "bun src/index.ts",
     "typecheck": "tsgo --noEmit"
   },
@@ -40,7 +40,8 @@
   },
   "devDependencies": {
     "@types/bun": "^1.3.9",
-    "@typescript/native-preview": "^7.0.0-dev.20260220.1",
+    "@typescript/native-preview": "^7.0.0-dev.20260221.1",
+    "dprint": "^0.51.1",
     "typescript": "^5.9.3"
   },
   "optionalDependencies": {
