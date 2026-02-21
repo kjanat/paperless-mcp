@@ -1,1 +1,2 @@
 schemas/** linguist-generated -diff
+scripts/openapi.py -linguist-detectable
