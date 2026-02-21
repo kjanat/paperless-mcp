@@ -23,6 +23,8 @@
   },
   "scripts": {
     "build": "bun build src/index.ts",
+    "fmt": "dprint fmt .",
+    "fmt:check": "dprint check .",
     "inspect": "bunx @modelcontextprotocol/inspector bun src/index.ts",
     "start": "bun src/index.ts"
   },
