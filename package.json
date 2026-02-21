@@ -1,7 +1,7 @@
 {
   "name": "@kjanat/paperless-mcp",
   "version": "1.0.1-dev.0",
-  "description": "Model Context Protocol (MCP) server for interacting with Paperless-NGX document management system. Enables AI assistants to manage documents, tags, correspondents, and document types through the Paperless-NGX API.",
+  "description": "MCP server for interacting with Paperless-ngx document management system.",
   "keywords": [
     "mcp",
     "paperless-ngx",
@@ -15,7 +15,7 @@
     "type": "git",
     "url": "git+https://github.com/kjanat/paperless-mcp.git"
   },
-  "license": "ISC",
+  "license": "MIT",
   "author": "Kaj Kowalski",
   "main": "src/index.ts",
   "bin": {
