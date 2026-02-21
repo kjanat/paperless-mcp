@@ -48,7 +48,7 @@ An MCP (Model Context Protocol) server for interacting with a Paperless-ngx API 
 
    CLI args take precedence over env vars when both are provided.
 
-That's it! Now you can ask Claude to help you manage your Paperless-ngx documents.
+That's it!
 
 ## Example Usage
 
@@ -68,13 +68,13 @@ Here are some things you can ask Claude to do:
 
 ### Document Operations
 
-#### get_document
+#### `get_document`
 
 Get a specific document by ID.
 
 Parameters:
 
-- id: Document ID
+- `id`: Document ID
 
 ```typescript
 get_document({
@@ -82,13 +82,13 @@ get_document({
 });
 ```
 
-#### search_documents
+#### `search_documents`
 
 Full-text search across documents.
 
 Parameters:
 
-- query: Search query string
+- `query`: Search query string
 
 ```typescript
 search_documents({
@@ -96,14 +96,14 @@ search_documents({
 });
 ```
 
-#### download_document
+#### `download_document`
 
 Download a document file by ID.
 
 Parameters:
 
-- id: Document ID
-- original (optional): If true, downloads original file instead of archived version
+- `id`: Document ID
+- `original` (optional): If true, downloads original file instead of archived version
 
 ```typescript
 download_document({
@@ -112,39 +112,39 @@ download_document({
 });
 ```
 
-#### bulk_edit_documents
+#### `bulk_edit_documents`
 
 Perform bulk operations on multiple documents.
 
 Parameters:
 
-- documents: Array of document IDs
-- method: One of:
-  - set_correspondent: Set correspondent for documents
-  - set_document_type: Set document type for documents
-  - set_storage_path: Set storage path for documents
-  - add_tag: Add a tag to documents
-  - remove_tag: Remove a tag from documents
-  - modify_tags: Add and/or remove multiple tags
-  - delete: Delete documents
-  - reprocess: Reprocess documents
-  - set_permissions: Set document permissions
-  - merge: Merge multiple documents
-  - split: Split a document into multiple documents
-  - rotate: Rotate document pages
-  - delete_pages: Delete specific pages from a document
-- Additional parameters based on method:
-  - correspondent: ID for set_correspondent
-  - document_type: ID for set_document_type
-  - storage_path: ID for set_storage_path
-  - tag: ID for add_tag/remove_tag
-  - add_tags: Array of tag IDs for modify_tags
-  - remove_tags: Array of tag IDs for modify_tags
-  - permissions: Object for set_permissions with owner, permissions, merge flag
-  - metadata_document_id: ID for merge to specify metadata source
-  - delete_originals: Boolean for merge/split
-  - pages: String for split "[1,2-3,4,5-7]" or delete_pages "[2,3,4]"
-  - degrees: Number for rotate (90, 180, or 270)
+- `documents`: Array of document IDs
+- `method`: One of:
+  - `set_correspondent`: Set correspondent for documents
+  - `set_document_type`: Set document type for documents
+  - `set_storage_path`: Set storage path for documents
+  - `add_tag`: Add a tag to documents
+  - `remove_tag`: Remove a tag from documents
+  - `modify_tags`: Add and/or remove multiple tags
+  - `delete`: Delete documents
+  - `reprocess`: Reprocess documents
+  - `set_permissions`: Set document permissions
+  - `merge`: Merge multiple documents
+  - `split`: Split a document into multiple documents
+  - `rotate`: Rotate document pages
+  - `delete_pages`: Delete specific pages from a document
+- Additional parameters based on `method`:
+  - `correspondent`: ID for set_correspondent
+  - `document_type`: ID for set_document_type
+  - `storage_path`: ID for set_storage_path
+  - `tag`: ID for add_tag/remove_tag
+  - `add_tags`: Array of tag IDs for modify_tags
+  - `remove_tags`: Array of tag IDs for modify_tags
+  - `permissions`: Object for set_permissions with owner, permissions, merge flag
+  - `metadata_document_id`: ID for merge to specify metadata source
+  - `delete_originals`: Boolean for merge/split
+  - `pages`: String for split "[1,2-3,4,5-7]" or `delete_pages` "[2,3,4]"
+  - `degrees`: Number for rotate (90, 180, or 270)
 
 Examples:
 
@@ -187,22 +187,22 @@ bulk_edit_documents({
 });
 ```
 
-#### post_document
+#### `post_document`
 
 Upload a new document to Paperless-ngx.
 
 Parameters:
 
-- file: Base64 encoded file content
-- filename: Name of the file
-- title (optional): Title for the document
-- created (optional): DateTime when the document was created (e.g. "2024-01-19" or "2024-01-19 06:15:00+02:00")
-- correspondent (optional): ID of a correspondent
-- document_type (optional): ID of a document type
-- storage_path (optional): ID of a storage path
-- tags (optional): Array of tag IDs
-- archive_serial_number (optional): Archive serial number
-- custom_fields (optional): Array of custom field IDs
+- `file`: Base64 encoded file content
+- `filename`: Name of the file
+- `title` (optional): Title for the document
+- `created` (optional): DateTime when the document was created (e.g. "2024-01-19" or "2024-01-19 06:15:00+02:00")
+- `correspondent` (optional): ID of a correspondent
+- `document_type` (optional): ID of a document type
+- `storage_path` (optional): ID of a storage path
+- `tags` (optional): Array of tag IDs
+- `archive_serial_number` (optional): Archive serial number
+- `custom_fields` (optional): Array of custom field IDs
 
 ```typescript
 post_document({
@@ -223,7 +223,7 @@ post_document({
 
 ### Tag Operations
 
-#### list_tags
+#### `list_tags`
 
 Get all tags.
 
@@ -231,16 +231,16 @@ Get all tags.
 list_tags();
 ```
 
-#### create_tag
+#### `create_tag`
 
 Create a new tag.
 
 Parameters:
 
-- name: Tag name
-- color (optional): Hex color code (e.g. "#ff0000")
-- match (optional): Text pattern to match
-- matching_algorithm (optional): Integer 0-6 (0=none, 1=any, 2=all, 3=exact, 4=regex, 5=fuzzy, 6=auto)
+- `name`: Tag name
+- `color` (optional): Hex color code (e.g. "#ff0000")
+- `match` (optional): Text pattern to match
+- `matching_algorithm` (optional): Integer 0-6 (0=none, 1=any, 2=all, 3=exact, 4=regex, 5=fuzzy, 6=auto)
 
 ```typescript
 create_tag({
@@ -251,17 +251,17 @@ create_tag({
 });
 ```
 
-#### update_tag
+#### `update_tag`
 
 Update an existing tag's name, color, or matching rules.
 
 Parameters:
 
-- id: Tag ID
-- name: New tag name
-- color (optional): Hex color code (e.g. "#ff0000")
-- match (optional): Text pattern to match
-- matching_algorithm (optional): Integer 0-6 (0=none, 1=any, 2=all, 3=exact, 4=regex, 5=fuzzy, 6=auto)
+- `id`: Tag ID
+- `name`: New tag name
+- `color` (optional): Hex color code (e.g. "#ff0000")
+- `match` (optional): Text pattern to match
+- `matching_algorithm` (optional): Integer 0-6 (0=none, 1=any, 2=all, 3=exact, 4=regex, 5=fuzzy, 6=auto)
 
 ```typescript
 update_tag({
@@ -271,13 +271,13 @@ update_tag({
 });
 ```
 
-#### delete_tag
+#### `delete_tag`
 
 Permanently delete a tag. Removes it from all documents.
 
 Parameters:
 
-- id: Tag ID
+- `id`: Tag ID
 
 ```typescript
 delete_tag({
@@ -291,11 +291,11 @@ Bulk set permissions or delete multiple tags.
 
 Parameters:
 
-- tag_ids: Array of tag IDs
-- operation: "set_permissions" or "delete"
-- owner (optional): User ID (for set_permissions)
-- permissions (optional): Object with view/change user and group IDs
-- merge (optional): Merge with existing permissions (default false)
+- `tag_ids`: Array of tag IDs
+- `operation`: "set_permissions" or "delete"
+- `owner` (optional): User ID (for set_permissions)
+- `permissions` (optional): Object with view/change user and group IDs
+- `merge` (optional): Merge with existing permissions (default false)
 
 ```typescript
 bulk_edit_tags({
@@ -310,7 +310,7 @@ bulk_edit_tags({
 
 ### Correspondent Operations
 
-#### list_correspondents
+#### `list_correspondents`
 
 Get all correspondents.
 
@@ -324,9 +324,9 @@ Create a new correspondent.
 
 Parameters:
 
-- name: Correspondent name
-- match (optional): Text pattern to match
-- matching_algorithm (optional): Integer 0-6 (0=none, 1=any, 2=all, 3=exact, 4=regex, 5=fuzzy, 6=auto)
+- `name`: Correspondent name
+- `match` (optional): Text pattern to match
+- `matching_algorithm` (optional): Integer 0-6 (0=none, 1=any, 2=all, 3=exact, 4=regex, 5=fuzzy, 6=auto)
 
 ```typescript
 create_correspondent({
@@ -336,17 +336,17 @@ create_correspondent({
 });
 ```
 
-#### bulk_edit_correspondents
+#### `bulk_edit_correspondents`
 
 Bulk set permissions or delete multiple correspondents.
 
 Parameters:
 
-- correspondent_ids: Array of correspondent IDs
-- operation: "set_permissions" or "delete"
-- owner (optional): User ID (for set_permissions)
-- permissions (optional): Object with view/change user and group IDs
-- merge (optional): Merge with existing permissions (default false)
+- `correspondent_ids`: Array of correspondent IDs
+- `operation`: "set_permissions" or "delete"
+- `owner` (optional): User ID (for set_permissions)
+- `permissions` (optional): Object with view/change user and group IDs
+- `merge` (optional): Merge with existing permissions (default false)
 
 ```typescript
 bulk_edit_correspondents({
@@ -361,7 +361,7 @@ bulk_edit_correspondents({
 
 ### Document Type Operations
 
-#### list_document_types
+#### `list_document_types`
 
 Get all document types.
 
@@ -375,9 +375,9 @@ Create a new document type.
 
 Parameters:
 
-- name: Document type name
-- match (optional): Text pattern to match
-- matching_algorithm (optional): Integer 0-6 (0=none, 1=any, 2=all, 3=exact, 4=regex, 5=fuzzy, 6=auto)
+- `name`: Document type name
+- `match` (optional): Text pattern to match
+- `matching_algorithm` (optional): Integer 0-6 (0=none, 1=any, 2=all, 3=exact, 4=regex, 5=fuzzy, 6=auto)
 
 ```typescript
 create_document_type({
@@ -387,17 +387,17 @@ create_document_type({
 });
 ```
 
-#### bulk_edit_document_types
+#### `bulk_edit_document_types`
 
 Bulk set permissions or delete multiple document types.
 
 Parameters:
 
-- document_type_ids: Array of document type IDs
-- operation: "set_permissions" or "delete"
-- owner (optional): User ID (for set_permissions)
-- permissions (optional): Object with view/change user and group IDs
-- merge (optional): Merge with existing permissions (default false)
+- `document_type_ids`: Array of document type IDs
+- `operation`: "set_permissions" or "delete"
+- `owner` (optional): User ID (for set_permissions)
+- `permissions` (optional): Object with view/change user and group IDs
+- `merge` (optional): Merge with existing permissions (default false)
 
 ```typescript
 bulk_edit_document_types({
@@ -460,10 +460,11 @@ bun start
 PAPERLESS_URL=http://localhost:8000 PAPERLESS_API_KEY=your-token bun start
 
 # via positional args
-bun start -- http://localhost:8000 your-token
+bun start http://localhost:8000 your-token
 ```
 
-> **Tip:** When using Bun, env vars in a `.env` file are loaded automatically —
+> [!TIP]
+> When using Bun, env vars in a `.env` file are loaded automatically —
 > no extra setup needed. Just create a `.env` with `PAPERLESS_URL` and
 > `PAPERLESS_API_KEY` and run `bun start`.
 
@@ -472,10 +473,10 @@ bun start -- http://localhost:8000 your-token
 To run the server as an HTTP service, use the `--http` flag. You can also specify the port with `--port` (default: 3000).
 
 ```bash
-PAPERLESS_URL=http://localhost:8000 PAPERLESS_API_KEY=your-token bun start -- --http --port 3000
+PAPERLESS_URL=http://localhost:8000 PAPERLESS_API_KEY=your-token bun start --http --port 3000
 ```
 
-With a `.env` file, this simplifies to `bun start -- --http`.
+With a `.env` file, this simplifies to `bun start --http`.
 
 - The MCP API will be available at `POST /mcp` on the specified port.
 - Each request is handled statelessly, following the [StreamableHTTPServerTransport](https://github.com/modelcontextprotocol/typescript-sdk) pattern.
