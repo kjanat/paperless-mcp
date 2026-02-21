@@ -13159,7 +13159,7 @@
 		},
 		"/api/remote_version/": {
 			"get": {
-				"description": "Get the current version of the Paperless-NGX server",
+				"description": "Get the current version of the Paperless-ngx server",
 				"operationId": "remote_version_retrieve",
 				"responses": {
 					"200": {
@@ -14651,7 +14651,7 @@
 		},
 		"/api/status/": {
 			"get": {
-				"description": "Get the current system status of the Paperless-NGX server",
+				"description": "Get the current system status of the Paperless-ngx server",
 				"operationId": "status_retrieve",
 				"responses": {
 					"200": {
