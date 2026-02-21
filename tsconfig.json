@@ -9,6 +9,7 @@
 		/* Modules */
 		"module": "esnext",
 		"moduleResolution": "bundler",
+		"noEmit": true,
 		/* Interop Constraints */
 		"isolatedModules": true,
 		"esModuleInterop": true,
@@ -24,5 +25,6 @@
 		"noPropertyAccessFromIndexSignature": true,
 		/* Completeness */
 		"skipLibCheck": true
-	}
+	},
+	"exclude": ["dist"]
 }

@@ -2,7 +2,6 @@ import type { IncomingMessage, ServerResponse } from 'node:http';
 
 import { createMcpExpressApp } from '@modelcontextprotocol/sdk/server/express.js';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import { SSEServerTransport } from '@modelcontextprotocol/sdk/server/sse.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
 
@@ -39,7 +38,6 @@ const port = parsePort();
 /** Express request with parsed body attached by express.json() middleware. */
 interface ParsedRequest extends IncomingMessage {
 	body?: unknown;
-	query?: Record<string, string | string[] | undefined>;
 }
 
 /** JSON-RPC error response shape. */
@@ -98,9 +96,6 @@ async function main(): Promise<void> {
 	if (useHttp) {
 		const app = createMcpExpressApp({ host: '0.0.0.0' });
 
-		// In-memory SSE session store (no horizontal scaling)
-		const sseTransports = new Map<string, SSEServerTransport>();
-
 		app.post('/mcp', async (req: ParsedRequest, res: ServerResponse) => {
 			try {
 				const transport = new StreamableHTTPServerTransport({
@@ -129,42 +124,6 @@ async function main(): Promise<void> {
 		app.delete('/mcp', (_req: ParsedRequest, res: ServerResponse) => {
 			res.writeHead(405, { 'Content-Type': 'application/json' });
 			res.end(JSON.stringify(jsonRpcError(-32000, 'Method not allowed.')));
-		});
-
-		app.get('/sse', async (_req: ParsedRequest, res: ServerResponse) => {
-			console.log('SSE request received');
-			try {
-				const transport = new SSEServerTransport('/messages', res);
-				sseTransports.set(transport.sessionId, transport);
-				res.on('close', () => {
-					sseTransports.delete(transport.sessionId);
-					void transport.close();
-				});
-				const server = createServer();
-				await server.connect(transport);
-			} catch (error: unknown) {
-				console.error('Error handling SSE request:', error);
-				if (!res.headersSent) {
-					res.writeHead(500, { 'Content-Type': 'application/json' });
-					res.end(JSON.stringify(jsonRpcError(-32603, 'Internal server error')));
-				}
-			}
-		});
-
-		app.post('/messages', async (req: ParsedRequest, res: ServerResponse) => {
-			const sessionId = req.query?.['sessionId'];
-			if (typeof sessionId !== 'string') {
-				res.writeHead(400, { 'Content-Type': 'text/plain' });
-				res.end('Missing or invalid sessionId query parameter');
-				return;
-			}
-			const transport = sseTransports.get(sessionId);
-			if (transport) {
-				await transport.handlePostMessage(req, res, req.body);
-			} else {
-				res.writeHead(400, { 'Content-Type': 'text/plain' });
-				res.end('No transport found for sessionId');
-			}
 		});
 
 		app.listen(port, () => {

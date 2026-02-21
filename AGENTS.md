@@ -10,7 +10,7 @@ API types derived from OpenAPI schema v6.0.0.
 
 ## STRUCTURE
 
-```
+```tree
 src/
 ├── index.ts                 # Entry: CLI parsing, server factory, dual transport
 ├── types.ts                 # Typed interfaces from OpenAPI schema (v6.0.0)
