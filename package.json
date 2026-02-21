@@ -21,11 +21,16 @@
   "bin": {
     "paperless-mcp": "dist/index.js"
   },
+  "files": [
+    "dist",
+    "skills"
+  ],
   "scripts": {
-    "build": "bun build src/index.ts",
+    "bd": "bun build src/index.ts --minify --outdir=dist --target=node",
     "fmt": "dprint fmt .",
     "fmt:check": "dprint check .",
     "inspect": "bunx @modelcontextprotocol/inspector bun src/index.ts",
+    "prepack": "bun bd",
     "start": "bun src/index.ts"
   },
   "dependencies": {
