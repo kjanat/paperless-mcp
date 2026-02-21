@@ -17,7 +17,7 @@
   },
   "license": "MIT",
   "author": "Kaj Kowalski",
-  "main": "src/index.ts",
+  "type": "module",
   "bin": {
     "paperless-mcp": "dist/index.js"
   },
