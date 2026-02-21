@@ -16,12 +16,16 @@ An MCP (Model Context Protocol) server for interacting with a Paperless-ngx API 
 
    ```jsonc
    {
-   	"mcpServers": {
-   		"paperless": {
-   			"command": "bunx", // or npx
-   			"args": ["@kjanat/paperless-mcp", "http://your-paperless-instance:8000", "your-api-token"],
-   		},
-   	},
+     "mcpServers": {
+       "paperless": {
+         "command": "bunx", // or npx
+         "args": [
+           "@kjanat/paperless-mcp",
+           "http://your-paperless-instance:8000",
+           "your-api-token",
+         ],
+       },
+     },
    }
    ```
 
@@ -62,7 +66,7 @@ Parameters:
 
 ```typescript
 get_document({
-	id: 123,
+  id: 123,
 });
 ```
 
@@ -76,7 +80,7 @@ Parameters:
 
 ```typescript
 search_documents({
-	query: 'invoice 2024',
+  query: "invoice 2024",
 });
 ```
 
@@ -91,8 +95,8 @@ Parameters:
 
 ```typescript
 download_document({
-	id: 123,
-	original: false,
+  id: 123,
+  original: false,
 });
 ```
 
@@ -135,39 +139,39 @@ Examples:
 ```typescript
 // Add a tag to multiple documents
 bulk_edit_documents({
-	documents: [1, 2, 3],
-	method: 'add_tag',
-	tag: 5,
+  documents: [1, 2, 3],
+  method: "add_tag",
+  tag: 5,
 });
 
 // Set correspondent and document type
 bulk_edit_documents({
-	documents: [4, 5],
-	method: 'set_correspondent',
-	correspondent: 2,
+  documents: [4, 5],
+  method: "set_correspondent",
+  correspondent: 2,
 });
 
 // Merge documents
 bulk_edit_documents({
-	documents: [6, 7, 8],
-	method: 'merge',
-	metadata_document_id: 6,
-	delete_originals: true,
+  documents: [6, 7, 8],
+  method: "merge",
+  metadata_document_id: 6,
+  delete_originals: true,
 });
 
 // Split document into parts
 bulk_edit_documents({
-	documents: [9],
-	method: 'split',
-	pages: '[1-2,3-4,5]',
+  documents: [9],
+  method: "split",
+  pages: "[1-2,3-4,5]",
 });
 
 // Modify multiple tags at once
 bulk_edit_documents({
-	documents: [10, 11],
-	method: 'modify_tags',
-	add_tags: [1, 2],
-	remove_tags: [3, 4],
+  documents: [10, 11],
+  method: "modify_tags",
+  add_tags: [1, 2],
+  remove_tags: [3, 4],
 });
 ```
 
@@ -190,14 +194,14 @@ Parameters:
 
 ```typescript
 post_document({
-	file: 'base64_encoded_content',
-	filename: 'invoice.pdf',
-	title: 'January Invoice',
-	created: '2024-01-19',
-	correspondent: 1,
-	document_type: 2,
-	tags: [1, 3],
-	archive_serial_number: '2024-001',
+  file: "base64_encoded_content",
+  filename: "invoice.pdf",
+  title: "January Invoice",
+  created: "2024-01-19",
+  correspondent: 1,
+  document_type: 2,
+  tags: [1, 3],
+  archive_serial_number: "2024-001",
 });
 ```
 
@@ -224,10 +228,10 @@ Parameters:
 
 ```typescript
 create_tag({
-	name: 'Invoice',
-	color: '#ff0000',
-	match: 'invoice',
-	matching_algorithm: 'fuzzy',
+  name: "Invoice",
+  color: "#ff0000",
+  match: "invoice",
+  matching_algorithm: "fuzzy",
 });
 ```
 
@@ -245,9 +249,9 @@ Parameters:
 
 ```typescript
 update_tag({
-	id: 5,
-	name: 'Invoices',
-	color: '#00ff00',
+  id: 5,
+  name: "Invoices",
+  color: "#00ff00",
 });
 ```
 
@@ -261,7 +265,7 @@ Parameters:
 
 ```typescript
 delete_tag({
-	id: 5,
+  id: 5,
 });
 ```
 
@@ -279,8 +283,8 @@ Parameters:
 
 ```typescript
 bulk_edit_tags({
-	tag_ids: [1, 2, 3],
-	operation: 'delete',
+  tag_ids: [1, 2, 3],
+  operation: "delete",
 });
 ```
 
@@ -306,9 +310,9 @@ Parameters:
 
 ```typescript
 create_correspondent({
-	name: 'ACME Corp',
-	match: 'ACME',
-	matching_algorithm: 'fuzzy',
+  name: "ACME Corp",
+  match: "ACME",
+  matching_algorithm: "fuzzy",
 });
 ```
 
@@ -326,8 +330,8 @@ Parameters:
 
 ```typescript
 bulk_edit_correspondents({
-	correspondent_ids: [1, 2],
-	operation: 'delete',
+  correspondent_ids: [1, 2],
+  operation: "delete",
 });
 ```
 
@@ -353,9 +357,9 @@ Parameters:
 
 ```typescript
 create_document_type({
-	name: 'Invoice',
-	match: 'invoice total amount due',
-	matching_algorithm: 'any',
+  name: "Invoice",
+  match: "invoice total amount due",
+  matching_algorithm: "any",
 });
 ```
 
@@ -373,8 +377,8 @@ Parameters:
 
 ```typescript
 bulk_edit_document_types({
-	document_type_ids: [1, 2],
-	operation: 'delete',
+  document_type_ids: [1, 2],
+  operation: "delete",
 });
 ```
 
@@ -422,7 +426,7 @@ The MCP server can be run in two modes:
 
 This is the default mode. The server communicates over stdio, suitable for CLI and direct integrations.
 
-```
+```bash
 bun start -- <baseUrl> <token>
 ```
 
@@ -430,7 +434,7 @@ bun start -- <baseUrl> <token>
 
 To run the server as an HTTP service, use the `--http` flag. You can also specify the port with `--port` (default: 3000). This mode requires [Express](https://expressjs.com/) to be installed (it is included as a dependency).
 
-```
+```bash
 bun start -- <baseUrl> <token> --http --port 3000
 ```
 
