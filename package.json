@@ -1,6 +1,6 @@
 {
   "name": "@kjanat/paperless-mcp",
-  "version": "1.0.1-dev.0",
+  "version": "1.0.1-dev.1",
   "description": "MCP server for interacting with Paperless-ngx document management system.",
   "keywords": [
     "mcp",
