@@ -1,12 +1,8 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import * as z from 'zod/v4';
+import { z } from 'zod';
 
 import type { PaperlessAPI } from '../api/paperless-api';
-
-/** Wrap a JSON-serializable value in a CallToolResult. */
-function jsonResult(data: unknown) {
-	return { content: [{ type: 'text' as const, text: JSON.stringify(data, null, 2) }] };
-}
+import { jsonResult } from './utils';
 
 export function registerTagTools(server: McpServer, api: PaperlessAPI): void {
 	server.registerTool(
@@ -41,8 +37,20 @@ export function registerTagTools(server: McpServer, api: PaperlessAPI): void {
 					'Text pattern to automatically assign this tag to matching documents. Use keywords, phrases, or regular expressions depending on matching_algorithm.',
 				),
 
-				matching_algorithm: z.number().int().min(0).max(4).optional().describe(
-					'How to match text patterns: 0=any word, 1=all words, 2=exact phrase, 3=regular expression, 4=fuzzy matching. Default is 0 (any word).',
+				matching_algorithm: z.number().int().min(0).max(6).optional().describe(
+					'How to match text patterns: 0=none, 1=any word, 2=all words, 3=exact match, 4=regular expression, 5=fuzzy word, 6=automatic. Default is 0.',
+				),
+
+				is_insensitive: z.boolean().optional().describe(
+					'Whether matching is case-insensitive. Default is true.',
+				),
+
+				is_inbox_tag: z.boolean().optional().describe(
+					'Whether this is an inbox tag. Documents with inbox tags appear in the inbox.',
+				),
+
+				parent: z.number().nullable().optional().describe(
+					'ID of the parent tag for hierarchical tag organization. Null for top-level tags.',
 				),
 			},
 		},
@@ -58,7 +66,8 @@ export function registerTagTools(server: McpServer, api: PaperlessAPI): void {
 				"Modify an existing tag's name, color, or automatic matching rules. Useful for refining tag organization and improving automatic document classification.",
 			inputSchema: {
 				id: z.number().describe('ID of the tag to update. Use list_tags to find existing tag IDs.'),
-				name: z.string().describe('New tag name. Must be unique among all tags.'),
+
+				name: z.string().optional().describe('New tag name. Must be unique among all tags.'),
 
 				color: z
 					.string()
@@ -71,8 +80,20 @@ export function registerTagTools(server: McpServer, api: PaperlessAPI): void {
 					'Text pattern for automatic tag assignment. Empty string removes auto-matching. Use keywords, phrases, or regex depending on matching_algorithm.',
 				),
 
-				matching_algorithm: z.number().int().min(0).max(4).optional().describe(
-					'Algorithm for pattern matching: 0=any word, 1=all words, 2=exact phrase, 3=regular expression, 4=fuzzy matching.',
+				matching_algorithm: z.number().int().min(0).max(6).optional().describe(
+					'Algorithm for pattern matching: 0=none, 1=any word, 2=all words, 3=exact match, 4=regular expression, 5=fuzzy word, 6=automatic.',
+				),
+
+				is_insensitive: z.boolean().optional().describe(
+					'Whether matching is case-insensitive.',
+				),
+
+				is_inbox_tag: z.boolean().optional().describe(
+					'Whether this is an inbox tag.',
+				),
+
+				parent: z.number().nullable().optional().describe(
+					'ID of the parent tag. Null for top-level tags.',
 				),
 			},
 		},

@@ -64,6 +64,7 @@ describe('PaperlessAPI.request', () => {
 		const headers = lastRequestInit().headers as Record<string, string>;
 		expect(headers['Authorization']).toBe(`Token ${TOKEN}`);
 		expect(headers['Accept']).toContain('application/json');
+		expect(headers['Accept']).toContain('version=6');
 		expect(headers['Content-Type']).toBe('application/json');
 	});
 
@@ -106,14 +107,14 @@ describe('PaperlessAPI.request', () => {
 
 describe('PaperlessAPI.bulkEditDocuments', () => {
 	test('sends correct payload', async () => {
-		stubFetch({ success: true });
+		stubFetch({ result: 'ok' });
 		await api.bulkEditDocuments([1, 2], 'delete', {});
 
 		expect(lastRequestBody()).toEqual({ documents: [1, 2], method: 'delete', parameters: {} });
 	});
 
 	test('includes extra parameters', async () => {
-		stubFetch({ success: true });
+		stubFetch({ result: 'ok' });
 		await api.bulkEditDocuments([3], 'set_correspondent', { correspondent: 5 });
 
 		expect(lastRequestBody()).toEqual({
@@ -126,7 +127,7 @@ describe('PaperlessAPI.bulkEditDocuments', () => {
 
 describe('PaperlessAPI.postDocument', () => {
 	test('sends FormData with file and metadata', async () => {
-		stubFetch({ id: 99 });
+		stubFetch('task-id-123');
 		const file = new File([new Blob(['hello'])], 'test.pdf');
 		await api.postDocument(file, { title: 'My Doc', tags: [1, 2] });
 
@@ -135,7 +136,7 @@ describe('PaperlessAPI.postDocument', () => {
 	});
 
 	test('includes all metadata fields in FormData', async () => {
-		stubFetch({ id: 100 });
+		stubFetch('task-id-456');
 		const file = new File([new Blob(['x'])], 'f.pdf');
 		await api.postDocument(file, {
 			title: 'T',
@@ -144,7 +145,7 @@ describe('PaperlessAPI.postDocument', () => {
 			document_type: 2,
 			storage_path: 3,
 			tags: [10, 20],
-			archive_serial_number: 'ASN-1',
+			archive_serial_number: 42,
 			custom_fields: [5, 6],
 		});
 
@@ -155,12 +156,12 @@ describe('PaperlessAPI.postDocument', () => {
 		expect(form.get('document_type')).toBe('2');
 		expect(form.get('storage_path')).toBe('3');
 		expect(form.getAll('tags')).toEqual(['10', '20']);
-		expect(form.get('archive_serial_number')).toBe('ASN-1');
+		expect(form.get('archive_serial_number')).toBe('42');
 		expect(form.getAll('custom_fields')).toEqual(['5', '6']);
 	});
 
 	test('omits null/undefined metadata fields', async () => {
-		stubFetch({ id: 101 });
+		stubFetch('task-id-789');
 		const file = new File([new Blob(['x'])], 'f.pdf');
 		await api.postDocument(file, {});
 
@@ -171,33 +172,34 @@ describe('PaperlessAPI.postDocument', () => {
 		expect(form.has('document')).toBe(true); // file is always present
 	});
 
-	test('throws on non-OK upload response', async () => {
-		stubFetch({}, 413);
+	test('throws on non-OK upload response with body', async () => {
+		stubFetch({ detail: 'Too large' }, 413);
 		const file = new File([new Blob(['x'])], 'big.pdf');
-		await expect(api.postDocument(file)).rejects.toThrow('HTTP error');
+		await expect(api.postDocument(file)).rejects.toThrow('HTTP 413');
 	});
 
-	test('sends auth header but no Content-Type (FormData sets it)', async () => {
-		stubFetch({ id: 1 });
+	test('sends auth and accept headers but no Content-Type (FormData sets it)', async () => {
+		stubFetch('task-id');
 		const file = new File([new Blob(['x'])], 'f.pdf');
 		await api.postDocument(file);
 
 		const headers = lastRequestInit().headers as Record<string, string>;
 		expect(headers['Authorization']).toBe(`Token ${TOKEN}`);
+		expect(headers['Accept']).toContain('version=6');
 		expect(headers).not.toHaveProperty('Content-Type');
 	});
 });
 
 describe('PaperlessAPI.getDocuments', () => {
 	test('fetches documents with default empty query', async () => {
-		stubFetch({ results: [] });
+		stubFetch({ count: 0, next: null, previous: null, all: [], results: [] });
 		await api.getDocuments();
 
 		expect(lastRequestUrl()).toBe(`${BASE_URL}/api/documents/`);
 	});
 
 	test('appends query string', async () => {
-		stubFetch({ results: [] });
+		stubFetch({ count: 0, next: null, previous: null, all: [], results: [] });
 		await api.getDocuments('?page=2');
 
 		expect(lastRequestUrl()).toBe(`${BASE_URL}/api/documents/?page=2`);
@@ -206,11 +208,11 @@ describe('PaperlessAPI.getDocuments', () => {
 
 describe('PaperlessAPI.getDocument', () => {
 	test('fetches single document by ID', async () => {
-		const doc = { id: 42, title: 'Invoice' };
-		stubFetch(doc);
+		stubFetch({ id: 42, title: 'Invoice' });
 
 		const result = await api.getDocument(42);
-		expect(result).toEqual(doc);
+		expect(result.id).toBe(42);
+		expect(result.title).toBe('Invoice');
 		expect(lastRequestUrl()).toBe(`${BASE_URL}/api/documents/42/`);
 	});
 });
@@ -237,6 +239,20 @@ describe('PaperlessAPI.searchDocuments', () => {
 		expect(result.results[0]).not.toHaveProperty('content');
 		expect(result.results[0]).not.toHaveProperty('download_url');
 		expect(result.results[0]).not.toHaveProperty('thumbnail_url');
+	});
+
+	test('does not mutate original response object', async () => {
+		const original = {
+			count: 1,
+			next: null,
+			previous: null,
+			results: [{ id: 1, content: 'text' }],
+		};
+		stubFetch(original);
+
+		const result = await api.searchDocuments('test');
+		// Result should be a new object, not the same reference
+		expect(result.results).not.toBe(original.results);
 	});
 
 	test('passes page and page_size as query params', async () => {
@@ -282,12 +298,13 @@ describe('PaperlessAPI.downloadDocument', () => {
 		expect(lastRequestUrl()).not.toContain('original');
 	});
 
-	test('sends auth header', async () => {
+	test('sends auth and accept headers', async () => {
 		stubFetchRaw('data');
 		await api.downloadDocument(1);
 
 		const headers = lastRequestInit().headers as Record<string, string>;
 		expect(headers['Authorization']).toBe(`Token ${TOKEN}`);
+		expect(headers['Accept']).toContain('version=6');
 	});
 });
 
@@ -297,11 +314,11 @@ describe('PaperlessAPI.downloadDocument', () => {
 
 describe('PaperlessAPI.getTags', () => {
 	test('fetches /tags/', async () => {
-		const tags = { results: [{ id: 1, name: 'urgent' }] };
-		stubFetch(tags);
+		stubFetch({ count: 1, next: null, previous: null, all: [1], results: [{ id: 1, name: 'urgent' }] });
 
 		const result = await api.getTags();
-		expect(result).toEqual(tags);
+		expect(result.count).toBe(1);
+		expect(result.results[0]?.name).toBe('urgent');
 		expect(lastRequestUrl()).toBe(`${BASE_URL}/api/tags/`);
 	});
 });
@@ -317,12 +334,12 @@ describe('PaperlessAPI.createTag', () => {
 });
 
 describe('PaperlessAPI.updateTag', () => {
-	test('PUTs to /tags/{id}/', async () => {
+	test('PATCHes to /tags/{id}/', async () => {
 		stubFetch({ id: 3, name: 'renamed' });
 		await api.updateTag(3, { name: 'renamed' });
 
 		expect(lastRequestUrl()).toBe(`${BASE_URL}/api/tags/3/`);
-		expect(lastRequestInit().method).toBe('PUT');
+		expect(lastRequestInit().method).toBe('PATCH');
 		expect(lastRequestBody()).toEqual({ name: 'renamed' });
 	});
 });
@@ -343,7 +360,7 @@ describe('PaperlessAPI.deleteTag', () => {
 
 describe('PaperlessAPI.getCorrespondents', () => {
 	test('fetches /correspondents/', async () => {
-		stubFetch({ results: [] });
+		stubFetch({ count: 0, next: null, previous: null, all: [], results: [] });
 		await api.getCorrespondents();
 
 		expect(lastRequestUrl()).toBe(`${BASE_URL}/api/correspondents/`);
@@ -359,6 +376,13 @@ describe('PaperlessAPI.createCorrespondent', () => {
 		expect(lastRequestBody()).toEqual({ name: 'Acme Corp' });
 		expect(lastRequestUrl()).toBe(`${BASE_URL}/api/correspondents/`);
 	});
+
+	test('includes matching_algorithm as integer', async () => {
+		stubFetch({ id: 2, name: 'Bank' });
+		await api.createCorrespondent({ name: 'Bank', matching_algorithm: 4 });
+
+		expect(lastRequestBody()).toEqual({ name: 'Bank', matching_algorithm: 4 });
+	});
 });
 
 // ---------------------------------------------------------------------------
@@ -367,7 +391,7 @@ describe('PaperlessAPI.createCorrespondent', () => {
 
 describe('PaperlessAPI.getDocumentTypes', () => {
 	test('fetches /document_types/', async () => {
-		stubFetch({ results: [] });
+		stubFetch({ count: 0, next: null, previous: null, all: [], results: [] });
 		await api.getDocumentTypes();
 
 		expect(lastRequestUrl()).toBe(`${BASE_URL}/api/document_types/`);
@@ -382,6 +406,13 @@ describe('PaperlessAPI.createDocumentType', () => {
 		expect(lastRequestInit().method).toBe('POST');
 		expect(lastRequestBody()).toEqual({ name: 'Invoice', match: 'invoice' });
 	});
+
+	test('includes matching_algorithm as integer', async () => {
+		stubFetch({ id: 3, name: 'Receipt' });
+		await api.createDocumentType({ name: 'Receipt', matching_algorithm: 5 });
+
+		expect(lastRequestBody()).toEqual({ name: 'Receipt', matching_algorithm: 5 });
+	});
 });
 
 // ---------------------------------------------------------------------------
@@ -390,7 +421,7 @@ describe('PaperlessAPI.createDocumentType', () => {
 
 describe('PaperlessAPI.bulkEditObjects', () => {
 	test('sends correct payload for set_permissions', async () => {
-		stubFetch({ success: true });
+		stubFetch({ result: 'ok' });
 		await api.bulkEditObjects([1, 2], 'tags', 'set_permissions', {
 			owner: 1,
 			permissions: { view: { users: [2] } },
@@ -406,7 +437,7 @@ describe('PaperlessAPI.bulkEditObjects', () => {
 	});
 
 	test('sends correct payload for delete', async () => {
-		stubFetch({ success: true });
+		stubFetch({ result: 'ok' });
 		await api.bulkEditObjects([5], 'correspondents', 'delete');
 
 		expect(lastRequestBody()).toEqual({

@@ -1,12 +1,9 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import * as z from 'zod/v4';
+import { z } from 'zod';
 
-import type { PaperlessAPI, PostDocumentMetadata } from '../api/paperless-api';
-
-/** Wrap a JSON-serializable value in a CallToolResult. */
-function jsonResult(data: unknown) {
-	return { content: [{ type: 'text' as const, text: JSON.stringify(data, null, 2) }] };
-}
+import type { PaperlessAPI } from '../api/paperless-api';
+import type { PostDocumentMetadata } from '../types';
+import { jsonResult } from './utils';
 
 export function registerDocumentTools(server: McpServer, api: PaperlessAPI): void {
 	server.registerTool(
@@ -26,6 +23,7 @@ export function registerDocumentTools(server: McpServer, api: PaperlessAPI): voi
 					'add_tag',
 					'remove_tag',
 					'modify_tags',
+					'modify_custom_fields',
 					'delete',
 					'reprocess',
 					'set_permissions',
@@ -33,8 +31,10 @@ export function registerDocumentTools(server: McpServer, api: PaperlessAPI): voi
 					'split',
 					'rotate',
 					'delete_pages',
+					'edit_pdf',
+					'remove_password',
 				]).describe(
-					'The bulk operation to perform: set_correspondent (assign sender/receiver), set_document_type (categorize documents), set_storage_path (organize file location), add_tag/remove_tag/modify_tags (manage labels), delete (permanently remove), reprocess (re-run OCR/indexing), set_permissions (control access), merge (combine documents), split (separate into multiple), rotate (adjust orientation), delete_pages (remove specific pages)',
+					'The bulk operation to perform.',
 				),
 
 				correspondent: z.number().optional().describe(
@@ -149,8 +149,8 @@ export function registerDocumentTools(server: McpServer, api: PaperlessAPI): voi
 					'Array of tag IDs to label this document. Use list_tags to find existing tags or create_tag to add new ones.',
 				),
 
-				archive_serial_number: z.string().optional().describe(
-					'Custom archive number for document organization and reference. Useful for maintaining external filing systems.',
+				archive_serial_number: z.number().int().min(0).optional().describe(
+					'Archive serial number for document organization and reference. Useful for maintaining external filing systems.',
 				),
 
 				custom_fields: z.array(z.number()).optional().describe(

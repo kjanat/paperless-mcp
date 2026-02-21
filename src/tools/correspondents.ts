@@ -1,12 +1,8 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import * as z from 'zod/v4';
+import { z } from 'zod';
 
 import type { PaperlessAPI } from '../api/paperless-api';
-
-/** Wrap a JSON-serializable value in a CallToolResult. */
-function jsonResult(data: unknown) {
-	return { content: [{ type: 'text' as const, text: JSON.stringify(data, null, 2) }] };
-}
+import { jsonResult } from './utils';
 
 export function registerCorrespondentTools(server: McpServer, api: PaperlessAPI): void {
 	server.registerTool(
@@ -34,11 +30,13 @@ export function registerCorrespondentTools(server: McpServer, api: PaperlessAPI)
 					'Text pattern to automatically assign this correspondent to matching documents. Use names, email addresses, or keywords that appear in documents from this correspondent.',
 				),
 
-				matching_algorithm: z
-					.enum(['any', 'all', 'exact', 'regular expression', 'fuzzy'])
-					.optional().describe(
-						"How to match text patterns: 'any'=any word matches, 'all'=all words must match, 'exact'=exact phrase match, 'regular expression'=use regex patterns, 'fuzzy'=approximate matching with typos. Default is 'any'.",
-					),
+				matching_algorithm: z.number().int().min(0).max(6).optional().describe(
+					'How to match text patterns: 0=none, 1=any word, 2=all words, 3=exact match, 4=regular expression, 5=fuzzy word, 6=automatic. Default is 0.',
+				),
+
+				is_insensitive: z.boolean().optional().describe(
+					'Whether matching is case-insensitive. Default is true.',
+				),
 			},
 		},
 		async (args, _extra) => {

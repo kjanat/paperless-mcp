@@ -1,22 +1,19 @@
-/** Metadata for document upload via FormData. */
-export interface PostDocumentMetadata {
-	readonly title?: string;
-	readonly created?: string;
-	readonly correspondent?: number;
-	readonly document_type?: number;
-	readonly storage_path?: number;
-	readonly tags?: readonly number[];
-	readonly archive_serial_number?: string;
-	readonly custom_fields?: readonly number[];
-}
-
-/** Minimal shape of Paperless-NGX paginated search response. */
-interface SearchResponse {
-	readonly count: number;
-	readonly next: string | null;
-	readonly previous: string | null;
-	results: Record<string, unknown>[];
-}
+import type {
+	BulkEditMethod,
+	BulkEditObjectType,
+	BulkEditOperation,
+	BulkEditResult,
+	Correspondent,
+	CorrespondentRequest,
+	Document,
+	DocumentType,
+	DocumentTypeRequest,
+	PaginatedDocumentList,
+	PaginatedList,
+	PostDocumentMetadata,
+	Tag,
+	TagRequest,
+} from '../types';
 
 export class PaperlessAPI {
 	constructor(
@@ -28,7 +25,7 @@ export class PaperlessAPI {
 		const url = `${this.baseUrl}/api${path}`;
 		const headers = {
 			Authorization: `Token ${this.token}`,
-			Accept: 'application/json; version=5',
+			Accept: 'application/json; version=6',
 			'Content-Type': 'application/json',
 			'Accept-Language': 'en-US,en;q=0.9',
 		};
@@ -52,12 +49,13 @@ export class PaperlessAPI {
 	}
 
 	// Document operations
+
 	async bulkEditDocuments(
-		documents: number[],
-		method: string,
+		documents: readonly number[],
+		method: BulkEditMethod,
 		parameters: Record<string, unknown> = {},
-	): Promise<unknown> {
-		return this.request('/documents/bulk_edit/', {
+	): Promise<BulkEditResult> {
+		return this.request<BulkEditResult>('/documents/bulk_edit/', {
 			method: 'POST',
 			body: JSON.stringify({ documents, method, parameters }),
 		});
@@ -66,7 +64,7 @@ export class PaperlessAPI {
 	async postDocument(
 		file: File,
 		metadata: PostDocumentMetadata = {},
-	): Promise<unknown> {
+	): Promise<string> {
 		const formData = new FormData();
 		formData.append('document', file);
 
@@ -91,7 +89,7 @@ export class PaperlessAPI {
 			}
 		}
 		if (metadata.archive_serial_number != null) {
-			formData.append('archive_serial_number', metadata.archive_serial_number);
+			formData.append('archive_serial_number', String(metadata.archive_serial_number));
 		}
 		if (metadata.custom_fields != null) {
 			for (const field of metadata.custom_fields) {
@@ -103,112 +101,129 @@ export class PaperlessAPI {
 			`${this.baseUrl}/api/documents/post_document/`,
 			{
 				method: 'POST',
-				headers: { Authorization: `Token ${this.token}` },
+				headers: {
+					Authorization: `Token ${this.token}`,
+					Accept: 'application/json; version=6',
+				},
 				body: formData,
 			},
 		);
 
 		if (!response.ok) {
-			throw new Error(`HTTP error! status: ${response.status}`);
+			const body: unknown = await response.json().catch(() => null);
+			throw new Error(
+				`HTTP ${response.status} from /documents/post_document/: ${JSON.stringify(body)}`,
+			);
 		}
 
-		return response.json() as Promise<unknown>;
+		// Returns a task ID string
+		return response.json() as Promise<string>;
 	}
 
-	async getDocuments(query = ''): Promise<unknown> {
-		return this.request(`/documents/${query}`);
+	async getDocuments(query = ''): Promise<PaginatedList<Document>> {
+		return this.request<PaginatedList<Document>>(`/documents/${query}`);
 	}
 
-	async getDocument(id: number): Promise<unknown> {
-		return this.request(`/documents/${id}/`);
+	async getDocument(id: number): Promise<Document> {
+		return this.request<Document>(`/documents/${id}/`);
 	}
 
 	async searchDocuments(
 		query: string,
 		page?: number,
 		pageSize?: number,
-	): Promise<SearchResponse> {
+	): Promise<PaginatedDocumentList> {
 		const params = new URLSearchParams();
 		params.set('query', query);
 		if (page != null) params.set('page', page.toString());
 		if (pageSize != null) params.set('page_size', pageSize.toString());
 
-		const response = await this.request<SearchResponse>(
+		const response = await this.request<PaginatedDocumentList>(
 			`/documents/?${params.toString()}`,
 		);
 
-		// Strip content/URLs to reduce token usage
-		response.results = response.results.map((doc) => {
-			const { content: _, download_url: _d, thumbnail_url: _t, ...rest } = doc;
-			return rest;
-		});
-
-		return response;
+		// Strip content/URLs to reduce token usage — return new object, don't mutate
+		return {
+			...response,
+			results: response.results.map((doc) => {
+				const { content: _, download_url: _d, thumbnail_url: _t, ...rest } = doc;
+				return rest;
+			}),
+		};
 	}
 
 	async downloadDocument(id: number, asOriginal = false): Promise<Response> {
 		const query = asOriginal ? '?original=true' : '';
 		return fetch(
 			`${this.baseUrl}/api/documents/${id}/download/${query}`,
-			{ headers: { Authorization: `Token ${this.token}` } },
+			{
+				headers: {
+					Authorization: `Token ${this.token}`,
+					Accept: 'application/json; version=6',
+				},
+			},
 		);
 	}
 
 	// Tag operations
-	async getTags(): Promise<unknown> {
-		return this.request('/tags/');
+
+	async getTags(): Promise<PaginatedList<Tag>> {
+		return this.request<PaginatedList<Tag>>('/tags/');
 	}
 
-	async createTag(data: Record<string, unknown>): Promise<unknown> {
-		return this.request('/tags/', {
+	async createTag(data: TagRequest): Promise<Tag> {
+		return this.request<Tag>('/tags/', {
 			method: 'POST',
 			body: JSON.stringify(data),
 		});
 	}
 
-	async updateTag(id: number, data: Record<string, unknown>): Promise<unknown> {
-		return this.request(`/tags/${id}/`, {
-			method: 'PUT',
+	async updateTag(id: number, data: Partial<TagRequest>): Promise<Tag> {
+		return this.request<Tag>(`/tags/${id}/`, {
+			method: 'PATCH',
 			body: JSON.stringify(data),
 		});
 	}
 
-	async deleteTag(id: number): Promise<unknown> {
-		return this.request(`/tags/${id}/`, { method: 'DELETE' });
+	async deleteTag(id: number): Promise<void> {
+		await this.request(`/tags/${id}/`, { method: 'DELETE' });
 	}
 
 	// Correspondent operations
-	async getCorrespondents(): Promise<unknown> {
-		return this.request('/correspondents/');
+
+	async getCorrespondents(): Promise<PaginatedList<Correspondent>> {
+		return this.request<PaginatedList<Correspondent>>('/correspondents/');
 	}
 
-	async createCorrespondent(data: Record<string, unknown>): Promise<unknown> {
-		return this.request('/correspondents/', {
+	async createCorrespondent(data: CorrespondentRequest): Promise<Correspondent> {
+		return this.request<Correspondent>('/correspondents/', {
 			method: 'POST',
 			body: JSON.stringify(data),
 		});
 	}
 
 	// Document type operations
-	async getDocumentTypes(): Promise<unknown> {
-		return this.request('/document_types/');
+
+	async getDocumentTypes(): Promise<PaginatedList<DocumentType>> {
+		return this.request<PaginatedList<DocumentType>>('/document_types/');
 	}
 
-	async createDocumentType(data: Record<string, unknown>): Promise<unknown> {
-		return this.request('/document_types/', {
+	async createDocumentType(data: DocumentTypeRequest): Promise<DocumentType> {
+		return this.request<DocumentType>('/document_types/', {
 			method: 'POST',
 			body: JSON.stringify(data),
 		});
 	}
 
 	// Bulk object operations
+
 	async bulkEditObjects(
-		objects: number[],
-		objectType: string,
-		operation: string,
+		objects: readonly number[],
+		objectType: BulkEditObjectType,
+		operation: BulkEditOperation,
 		parameters: Record<string, unknown> = {},
-	): Promise<unknown> {
-		return this.request('/bulk_edit_objects/', {
+	): Promise<BulkEditResult> {
+		return this.request<BulkEditResult>('/bulk_edit_objects/', {
 			method: 'POST',
 			body: JSON.stringify({
 				objects,
