@@ -99,6 +99,12 @@ describe('PaperlessAPI.request', () => {
 		);
 		await expect(api.request('/bad/')).rejects.toThrow('HTTP 500');
 	});
+
+	test('returns undefined for 204 No Content without calling json()', async () => {
+		stubFetchRaw('', {}, 204);
+		const result = await api.request('/tags/1/', { method: 'DELETE' });
+		expect(result).toBeUndefined();
+	});
 });
 
 // ---------------------------------------------------------------------------
@@ -345,8 +351,8 @@ describe('PaperlessAPI.updateTag', () => {
 });
 
 describe('PaperlessAPI.deleteTag', () => {
-	test('DELETEs /tags/{id}/', async () => {
-		stubFetch(null);
+	test('DELETEs /tags/{id}/ and handles 204 No Content', async () => {
+		stubFetchRaw('', {}, 204);
 		await api.deleteTag(7);
 
 		expect(lastRequestUrl()).toBe(`${BASE_URL}/api/tags/7/`);

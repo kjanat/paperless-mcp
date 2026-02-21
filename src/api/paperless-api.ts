@@ -45,6 +45,11 @@ export class PaperlessAPI {
 			);
 		}
 
+		// 204/205 have no body — return undefined (callers expecting void will discard it)
+		if (response.status === 204 || response.status === 205) {
+			return undefined as T & undefined;
+		}
+
 		return response.json() as Promise<T>;
 	}
 
