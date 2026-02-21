@@ -2,15 +2,17 @@
 # /// script
 # requires-python = ">=3.14"
 # dependencies = [
+#     "django>=5.2.11",
 #     "paperless-ngx",
+#     "pyyaml>=6.0.3",
 # ]
 #
 # [tool.uv.sources]
 # paperless-ngx = { git = "https://github.com/paperless-ngx/paperless-ngx.git" }
 # ///
-"""Generate, snapshot, and diff Paperless-NGX OpenAPI schemas.
+"""Generate, snapshot, and diff Paperless-ngx OpenAPI schemas.
 
-The primary command is ``generate``, which imports the Paperless-NGX Django
+The primary command is ``generate``, which imports the Paperless-ngx Django
 app (installed as a ``uv`` inline-script dependency) and uses
 ``drf-spectacular`` to produce the canonical OpenAPI 3.0 schema — **no
 running server required**.
@@ -50,8 +52,6 @@ CLI (via ``uv run``)
 Environment variables ``PAPERLESS_URL`` and ``API_KEY`` are used as
 defaults when ``--url`` / ``--token`` are omitted for the ``fetch`` command.
 """
-
-from __future__ import annotations
 
 import argparse
 import atexit
@@ -102,12 +102,12 @@ def fetch_schema(
     format: str = "json",
     timeout: int = 30,
 ) -> dict[str, Any]:
-    """Fetch the OpenAPI schema from a live Paperless-NGX instance.
+    """Fetch the OpenAPI schema from a live Paperless-ngx instance.
 
     Parameters
     ----------
     base_url:
-        Root URL of the Paperless-NGX instance (e.g. ``http://localhost:8000``).
+        Root URL of the Paperless-ngx instance (e.g. ``http://localhost:8000``).
     token:
         API authentication token.  When *None*, the request is sent without
         credentials (works only if the schema endpoint is public).
@@ -131,8 +131,7 @@ def fetch_schema(
     parsed = urllib.parse.urlparse(base_url)
     if parsed.scheme not in ("http", "https"):
         raise ValueError(
-            f"Unsupported URL scheme {parsed.scheme!r} in base_url;"
-            " only http and https are allowed"
+            f"Unsupported URL scheme {parsed.scheme!r} in base_url; only http and https are allowed"
         )
 
     url = base_url.rstrip("/") + SCHEMA_ENDPOINT
@@ -152,8 +151,7 @@ def fetch_schema(
             import yaml
         except ImportError as exc:
             raise ImportError(
-                "PyYAML is required to parse YAML responses;"
-                " add 'pyyaml' to script dependencies"
+                "PyYAML is required to parse YAML responses; add 'pyyaml' to script dependencies"
             ) from exc
         schema: dict[str, Any] = yaml.safe_load(body)
     else:
@@ -195,7 +193,7 @@ def generate_schema() -> dict[str, Any]:
 
     Bootstraps Django with minimal config (temp dirs, SQLite in-memory),
     then invokes ``drf-spectacular``'s schema generator.  **No running
-    Paperless-NGX server is required** — the schema is derived purely from
+    Paperless-ngx server is required** — the schema is derived purely from
     the serializer and viewset definitions in the source.
 
     The ``paperless-ngx`` package must be importable (installed via the
@@ -507,7 +505,7 @@ def _env_token() -> str | None:
 def _build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="openapi",
-        description="Paperless-NGX OpenAPI schema snapshot tool.",
+        description="Paperless-ngx OpenAPI schema snapshot tool.",
     )
     sub = parser.add_subparsers(dest="command", required=True)
 
@@ -535,7 +533,7 @@ def _build_parser() -> argparse.ArgumentParser:
         "-u",
         "--url",
         default=_env_url(),
-        help="Paperless-NGX base URL (default: $PAPERLESS_URL)",
+        help="Paperless-ngx base URL (default: $PAPERLESS_URL)",
     )
     fetch.add_argument(
         "-t", "--token", default=_env_token(), help="API token (default: $API_KEY)"
@@ -582,7 +580,7 @@ def _build_parser() -> argparse.ArgumentParser:
         "-u",
         "--url",
         default=_env_url(),
-        help="Paperless-NGX base URL (for live diff).",
+        help="Paperless-ngx base URL (for live diff).",
     )
     diff.add_argument(
         "-t", "--token", default=_env_token(), help="API token (for live diff)."
