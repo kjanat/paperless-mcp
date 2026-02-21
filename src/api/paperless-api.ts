@@ -159,8 +159,9 @@ export class PaperlessAPI {
 
 	async downloadDocument(id: number, asOriginal = false): Promise<Response> {
 		const query = asOriginal ? '?original=true' : '';
-		return fetch(
-			`${this.baseUrl}/api/documents/${id}/download/${query}`,
+		const path = `/documents/${id}/download/`;
+		const response = await fetch(
+			`${this.baseUrl}/api${path}${query}`,
 			{
 				headers: {
 					Authorization: `Token ${this.token}`,
@@ -168,6 +169,15 @@ export class PaperlessAPI {
 				},
 			},
 		);
+
+		if (!response.ok) {
+			const body = await response.text().catch(() => '');
+			throw new Error(
+				`HTTP ${response.status} from ${path}: ${body}`,
+			);
+		}
+
+		return response;
 	}
 
 	// Tag operations

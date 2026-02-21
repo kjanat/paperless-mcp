@@ -143,6 +143,12 @@ export interface PaginatedDocumentList {
 	readonly next: string | null;
 	readonly previous: string | null;
 	readonly all?: readonly number[];
+	/**
+	 * Intentionally `Record<string, unknown>[]` rather than `Document[]` or
+	 * `DocumentSummary[]` because `searchDocuments` dynamically strips fields
+	 * (content, download_url, thumbnail_url), producing objects that don't
+	 * conform to either typed interface.
+	 */
 	readonly results: readonly Record<string, unknown>[];
 }
 

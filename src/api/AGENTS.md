@@ -22,7 +22,7 @@ Paperless-NGX REST API via `fetch()`. All methods return typed responses
 
 ## TESTING
 
-`paperless-api.test.ts` (35 tests) covers all 16 methods via
+`paperless-api.test.ts` (36 tests) covers all 16 methods via
 `spyOn(globalThis, 'fetch')`. Helpers: `stubFetch()`, `stubFetchRaw()`,
 `lastRequestBody()`, `lastRequestUrl()`, `lastRequestInit()`.
 
