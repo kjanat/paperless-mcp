@@ -14,24 +14,24 @@ fi
 
 FILE_PATH="$1"
 
-if [[ ! -f "$FILE_PATH" ]]; then
+if [[ ! -f "${FILE_PATH}" ]]; then
 	echo "Error: File not found: ${FILE_PATH}" >&2
 	exit 1
 fi
 
-FILENAME=$(basename "$FILE_PATH")
-SIZE=$(wc -c <"$FILE_PATH" | tr -d ' ')
+FILENAME=$(basename "${FILE_PATH}")
+SIZE=$(wc -c <"${FILE_PATH}" | tr -d ' ')
 
 # Warn on large files (>50MB)
-if [[ "$SIZE" -gt 52428800 ]]; then
+if [[ "${SIZE}" -gt 52428800 ]]; then
 	echo "Warning: File is $((SIZE / 1048576))MB. Large uploads may be slow." >&2
 fi
 
 # Detect base64 flags (GNU vs BSD)
 if base64 --help 2>&1 | grep -q '\-w'; then
-	B64=$(base64 -w0 "$FILE_PATH")
+	B64=$(base64 -w0 "${FILE_PATH}")
 else
-	B64=$(base64 -i "$FILE_PATH")
+	B64=$(base64 -i "${FILE_PATH}")
 fi
 
 echo "Encoded ${FILENAME} (${SIZE} bytes)"
@@ -41,5 +41,5 @@ echo "  file: <base64 string, ${#B64} chars>"
 echo "  filename: \"${FILENAME}\""
 echo ""
 echo "--- BASE64 START ---"
-echo "$B64"
+echo "${B64}"
 echo "--- BASE64 END ---"
