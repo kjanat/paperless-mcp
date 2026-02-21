@@ -54,11 +54,15 @@ defaults when ``--url`` / ``--token`` are omitted for the ``fetch`` command.
 from __future__ import annotations
 
 import argparse
+import atexit
 import json
 import os
+import shutil
 import sys
 import tempfile
+import traceback
 import urllib.error
+import urllib.parse
 import urllib.request
 from pathlib import Path
 from typing import Any
@@ -95,7 +99,7 @@ def fetch_schema(
     base_url: str,
     *,
     token: str | None = None,
-    format: str = "json",  # noqa: A002 — shadows builtin intentionally
+    format: str = "json",
     timeout: int = 30,
 ) -> dict[str, Any]:
     """Fetch the OpenAPI schema from a live Paperless-NGX instance.
@@ -124,6 +128,13 @@ def fetch_schema(
     json.JSONDecodeError
         If the response is not valid JSON.
     """
+    parsed = urllib.parse.urlparse(base_url)
+    if parsed.scheme not in ("http", "https"):
+        raise ValueError(
+            f"Unsupported URL scheme {parsed.scheme!r} in base_url;"
+            " only http and https are allowed"
+        )
+
     url = base_url.rstrip("/") + SCHEMA_ENDPOINT
     if format == "yaml":
         url += "?format=yaml"
@@ -136,7 +147,17 @@ def fetch_schema(
     with urllib.request.urlopen(req, timeout=timeout) as resp:
         body = resp.read().decode("utf-8")
 
-    schema: dict[str, Any] = json.loads(body)
+    if format == "yaml":
+        try:
+            import yaml
+        except ImportError as exc:
+            raise ImportError(
+                "PyYAML is required to parse YAML responses;"
+                " add 'pyyaml' to script dependencies"
+            ) from exc
+        schema: dict[str, Any] = yaml.safe_load(body)
+    else:
+        schema: dict[str, Any] = json.loads(body)
     return schema
 
 
@@ -186,6 +207,7 @@ def generate_schema() -> dict[str, Any]:
         Parsed OpenAPI 3.0 schema.
     """
     tmpdir = tempfile.mkdtemp(prefix="paperless_schema_")
+    atexit.register(shutil.rmtree, tmpdir, ignore_errors=True)
     data_dir = Path(tmpdir) / "data"
     data_dir.mkdir()
     (data_dir / "log").mkdir()
@@ -578,8 +600,9 @@ def _cmd_generate(args: argparse.Namespace) -> int:
     print("Generating schema from paperless-ngx source ...", file=sys.stderr)
     try:
         schema = generate_schema()
-    except Exception as exc:
+    except (ImportError, RuntimeError) as exc:
         print(f"error: {exc}", file=sys.stderr)
+        traceback.print_exc(file=sys.stderr)
         return 1
 
     if args.extract:
