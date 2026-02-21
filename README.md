@@ -21,7 +21,7 @@ An MCP (Model Context Protocol) server for interacting with a Paperless-ngx API 
    			"command": "bunx", // or npx
    			"args": [
    				"@kjanat/paperless-mcp",
-   				"http://your-paperless-instance:8000",
+   				"http://your-paperless-instance:8000", // port if not default
    				"your-api-token",
    			],
    		},
@@ -449,7 +449,7 @@ bun start -- <baseUrl> <token>
 
 ### 2. HTTP (Streamable HTTP Transport)
 
-To run the server as an HTTP service, use the `--http` flag. You can also specify the port with `--port` (default: 3000). This mode requires [Express](https://expressjs.com/) to be installed (it is included as a dependency).
+To run the server as an HTTP service, use the `--http` flag. You can also specify the port with `--port` (default: 3000).
 
 ```bash
 bun start -- <baseUrl> <token> --http --port 3000
@@ -459,4 +459,4 @@ bun start -- <baseUrl> <token> --http --port 3000
 - Each request is handled statelessly, following the [StreamableHTTPServerTransport](https://github.com/modelcontextprotocol/typescript-sdk) pattern.
 - GET and DELETE requests to `/mcp` will return 405 Method Not Allowed.
 
-<!--markdownlint-disable-file no-hard-tabs-->
+<!--markdownlint-disable-file no-hard-tabs no-inline-html-->

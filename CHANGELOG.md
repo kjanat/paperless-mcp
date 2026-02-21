@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Moved all runtime dependencies (`@modelcontextprotocol/sdk`, `zod`, `express`)
+  to `devDependencies` — bundle is fully self-contained, consumers no longer
+  download ~50 MB of unused packages.
+- Removed `"claude"` from package keywords.
+
 ## [2.0.1] - 2026-02-21
 
 ### Added
@@ -97,3 +104,5 @@ Major rewrite of internals while preserving the same MCP tool surface.
 [1.0.1-dev.2]: https://github.com/kjanat/paperless-mcp/compare/v1.0.1-dev.1...v1.0.1-dev.2
 [1.0.1-dev.1]: https://github.com/kjanat/paperless-mcp/compare/v1.0.1-dev.0...v1.0.1-dev.1
 [1.0.1-dev.0]: https://github.com/kjanat/paperless-mcp/compare/4ba7457...v1.0.1-dev.0
+
+<!--markdownlint-disable-file no-duplicate-heading-->
