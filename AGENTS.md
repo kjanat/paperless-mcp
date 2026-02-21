@@ -97,7 +97,6 @@ with `if (!api) throw`. Zod schemas are inline (not extracted to shared types).
 - `console.error` on line 28-34 of PaperlessAPI.ts leaks auth token in headers.
 - `package.json` `main`/`bin` point to `src/index.js` (nonexistent). Should be
   `build/index.js`.
-- `smithery.yaml` also references `src/index.js`.
 - `typescript` is in `dependencies` (should be `devDependencies`).
 - Docker copies full `node_modules` including devDeps into production image.
 - `npm-publish.yml` runs `npm test` which always fails (blocking releases).
