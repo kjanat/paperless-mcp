@@ -1,7 +1,7 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import * as z from 'zod/v4';
 
-import type { PaperlessAPI } from '../api/PaperlessAPI';
+import type { PaperlessAPI } from '../api/paperless-api';
 
 /** Wrap a JSON-serializable value in a CallToolResult. */
 function jsonResult(data: unknown) {
