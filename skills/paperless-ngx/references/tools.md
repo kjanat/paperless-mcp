@@ -2,6 +2,13 @@
 
 Full parameter signatures for all 16 Paperless-ngx MCP tools.
 
+## Contents
+
+- [Document Tools](#document-tools) — search, get, post, download, bulk_edit
+- [Tag Tools](#tag-tools) — list, create, update, delete, bulk_edit
+- [Correspondent Tools](#correspondent-tools) — list, create, bulk_edit
+- [Document Type Tools](#document-type-tools) — list, create, bulk_edit
+
 ## Document Tools
 
 ### search_documents
@@ -32,7 +39,7 @@ Returns metadata **without** `content` field. Use `get_document` for full text.
 | `document_type`         | number   | no       | Document type ID                |
 | `storage_path`          | number   | no       | Storage path ID                 |
 | `tags`                  | number[] | no       | Array of tag IDs                |
-| `archive_serial_number` | string   | no       | External filing reference       |
+| `archive_serial_number` | integer  | no       | External filing reference (≥0)  |
 | `custom_fields`         | number[] | no       | Custom field IDs                |
 
 ### download_document
@@ -87,7 +94,7 @@ No parameters. Returns all tags with name, color, matching rules.
 | Param                | Type   | Required | Notes                    |
 | -------------------- | ------ | -------- | ------------------------ |
 | `id`                 | number | yes      | Tag ID from list_tags    |
-| `name`               | string | yes      | New name                 |
+| `name`               | string | no       | New name                 |
 | `color`              | string | no       | Hex color                |
 | `match`              | string | no       | Auto-assign pattern      |
 | `matching_algorithm` | int    | no       | `0`-`6` (same as create) |

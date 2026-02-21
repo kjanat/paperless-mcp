@@ -2,6 +2,16 @@
 
 Multi-step operations for Paperless-ngx document management.
 
+## Contents
+
+1. [Classify Untagged Documents](#1-classify-untagged-documents)
+2. [Bulk Reclassify by Correspondent](#2-bulk-reclassify-by-correspondent)
+3. [Upload and Categorize a Batch](#3-upload-and-categorize-a-batch)
+4. [Merge Related Documents](#4-merge-related-documents)
+5. [Export Documents for External Use](#5-export-documents-for-external-use)
+6. [Set Up Auto-Classification Rules](#6-set-up-auto-classification-rules)
+7. [Audit and Clean Up Tags](#7-audit-and-clean-up-tags)
+
 ## 1. Classify Untagged Documents
 
 ```txt
@@ -56,6 +66,10 @@ For each file:
      document_type=2,
      created="2024-03-15"
    )
+   → returns task ID (processing is async)
+
+3. Verify: search_documents(query="receipt-2024-03")
+   → confirm document appears with expected metadata
 ```
 
 ## 4. Merge Related Documents
@@ -73,6 +87,9 @@ For each file:
      metadata_document_id=PRIMARY_ID,
      delete_originals=false     # keep originals until verified
    )
+
+4. Verify: get_document(id=PRIMARY_ID)
+   → confirm merged content is correct before deleting originals
 ```
 
 ## 5. Export Documents for External Use
@@ -124,7 +141,10 @@ Future uploads auto-classified by Paperless-ngx matching engine.
 3. If migrating:
    search → collect IDs → bulk_edit add new tag → bulk_edit remove old tag
 
-4. delete_tag(id=OLD_TAG_ID)
+4. Verify: search_documents(query="tag:new-tag-name")
+   → confirm all documents migrated before deleting old tag
+
+5. delete_tag(id=OLD_TAG_ID)
    or bulk_edit_tags(tag_ids=[...], operation="delete")
 ```
 

@@ -27,6 +27,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   correspondents, document types) — was incorrectly documented as string enum
   for correspondents/types and wrong numeric range for tags.
 - Skill docs: `test-connection.sh` API version header updated from v5 to v6.
+- Skill docs: SKILL.md description uses third-person voice per best practices.
+- Skill docs: `update_tag` `name` param marked optional (PATCH endpoint).
+- Skill docs: `archive_serial_number` type corrected from string to integer.
+- Skill docs: added table of contents to tools.md and workflows.md.
+- Skill docs: added verification steps to merge, upload, and tag-cleanup
+  workflows.
 - Removed `!` non-null assertion in CLI arg parsing (project convention).
 
 ## [2.0.1] - 2026-02-21
