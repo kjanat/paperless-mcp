@@ -79,10 +79,12 @@ async function main() {
 				if (!res.headersSent) {
 					res.status(500).json({
 						jsonrpc: '2.0',
+
 						error: {
 							code: -32603,
 							message: 'Internal server error',
 						},
+
 						id: null,
 					});
 				}
@@ -93,10 +95,12 @@ async function main() {
 			res.writeHead(405).end(
 				JSON.stringify({
 					jsonrpc: '2.0',
+
 					error: {
 						code: -32000,
 						message: 'Method not allowed.',
 					},
+
 					id: null,
 				}),
 			);
@@ -106,10 +110,12 @@ async function main() {
 			res.writeHead(405).end(
 				JSON.stringify({
 					jsonrpc: '2.0',
+
 					error: {
 						code: -32000,
 						message: 'Method not allowed.',
 					},
+
 					id: null,
 				}),
 			);
@@ -130,10 +136,12 @@ async function main() {
 				if (!res.headersSent) {
 					res.status(500).json({
 						jsonrpc: '2.0',
+
 						error: {
 							code: -32603,
 							message: 'Internal server error',
 						},
+
 						id: null,
 					});
 				}

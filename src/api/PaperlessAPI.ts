@@ -42,6 +42,7 @@ export class PaperlessAPI {
 	async bulkEditDocuments(documents, method, parameters = {}) {
 		return this.request('/documents/bulk_edit/', {
 			method: 'POST',
+
 			body: JSON.stringify({
 				documents,
 				method,
@@ -194,6 +195,7 @@ export class PaperlessAPI {
 	async bulkEditObjects(objects, objectType, operation, parameters = {}) {
 		return this.request('/bulk_edit_objects/', {
 			method: 'POST',
+
 			body: JSON.stringify({
 				objects,
 				object_type: objectType,
