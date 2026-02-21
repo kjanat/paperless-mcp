@@ -5,6 +5,7 @@ on: { release: { types: [created] } }
 jobs:
   test:
     runs-on: ubuntu-latest
+    permissions: read-all
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-node@v6
@@ -16,6 +17,9 @@ jobs:
   publish-npm:
     needs: test
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-node@v6
