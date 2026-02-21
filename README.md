@@ -245,7 +245,7 @@ Parameters:
 - name: New tag name
 - color (optional): Hex color code (e.g. "#ff0000")
 - match (optional): Text pattern to match
-- matching_algorithm (optional): 0=any word, 1=all words, 2=exact phrase, 3=regular expression, 4=fuzzy
+- matching_algorithm (optional): Integer 0-6 (0=none, 1=any, 2=all, 3=exact, 4=regex, 5=fuzzy, 6=auto)
 
 ```typescript
 update_tag({
@@ -441,3 +441,5 @@ bun start -- <baseUrl> <token> --http --port 3000
 - The MCP API will be available at `POST /mcp` on the specified port.
 - Each request is handled statelessly, following the [StreamableHTTPServerTransport](https://github.com/modelcontextprotocol/typescript-sdk) pattern.
 - GET and DELETE requests to `/mcp` will return 405 Method Not Allowed.
+
+<!--markdownlint-disable-file no-hard-tabs-->
