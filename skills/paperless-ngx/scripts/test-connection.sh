@@ -24,7 +24,7 @@ HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" \
 	exit 1
 }
 
-if [[ "$HTTP_CODE" == "000" ]]; then
+if [[ "${HTTP_CODE}" == "000" ]]; then
 	echo "FAIL: Cannot reach ${BASE_URL} (DNS or connection refused)" >&2
 	exit 1
 fi
@@ -38,12 +38,12 @@ AUTH_CODE=$(curl -s -o /dev/null -w "%{http_code}" \
 	-H "Accept: application/json; version=5" \
 	"${BASE_URL}/api/documents/" 2>/dev/null)
 
-if [[ "$AUTH_CODE" == "401" || "$AUTH_CODE" == "403" ]]; then
+if [[ "${AUTH_CODE}" == "401" || "${AUTH_CODE}" == "403" ]]; then
 	echo "FAIL: Authentication failed (HTTP ${AUTH_CODE}). Check API token." >&2
 	exit 1
 fi
 
-if [[ "$AUTH_CODE" != "200" ]]; then
+if [[ "${AUTH_CODE}" != "200" ]]; then
 	echo "FAIL: Unexpected status ${AUTH_CODE} from documents endpoint." >&2
 	exit 1
 fi
@@ -56,7 +56,7 @@ RESPONSE=$(curl -s --max-time 10 \
 	-H "Accept: application/json; version=5" \
 	"${BASE_URL}/api/documents/?page_size=1" 2>/dev/null)
 
-DOC_COUNT=$(echo "$RESPONSE" | grep -o '"count":[0-9]*' | head -1 | cut -d: -f2)
+DOC_COUNT=$(echo "${RESPONSE}" | grep -o '"count":[0-9]*' | head -1 | cut -d: -f2)
 echo "  Documents: ${DOC_COUNT:-unknown}"
 
 TAG_RESPONSE=$(curl -s --max-time 10 \
@@ -64,7 +64,7 @@ TAG_RESPONSE=$(curl -s --max-time 10 \
 	-H "Accept: application/json; version=5" \
 	"${BASE_URL}/api/tags/" 2>/dev/null)
 
-TAG_COUNT=$(echo "$TAG_RESPONSE" | grep -o '"count":[0-9]*' | head -1 | cut -d: -f2)
+TAG_COUNT=$(echo "${TAG_RESPONSE}" | grep -o '"count":[0-9]*' | head -1 | cut -d: -f2)
 echo "  Tags: ${TAG_COUNT:-unknown}"
 
 echo "OK: Connection successful."

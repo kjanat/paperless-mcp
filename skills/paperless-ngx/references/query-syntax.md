@@ -12,14 +12,14 @@ invoice electricity    # docs with BOTH "invoice" AND "electricity"
 
 ## Field Searches
 
-| Field            | Syntax                          | Example                       |
-| ---------------- | ------------------------------- | ----------------------------- |
-| Tag              | `tag:name`                      | `tag:unpaid`                  |
-| Document type    | `type:name`                     | `type:invoice`                |
-| Correspondent    | `correspondent:name`            | `correspondent:university`    |
-| Title            | `title:text`                    | `title:electricity`           |
-| Content          | (default, no prefix)            | `electricity bill`            |
-| ASN              | `asn:number`                    | `asn:1234`                    |
+| Field         | Syntax               | Example                    |
+| ------------- | -------------------- | -------------------------- |
+| Tag           | `tag:name`           | `tag:unpaid`               |
+| Document type | `type:name`          | `type:invoice`             |
+| Correspondent | `correspondent:name` | `correspondent:university` |
+| Title         | `title:text`         | `title:electricity`        |
+| Content       | (default, no prefix) | `electricity bill`         |
+| ASN           | `asn:number`         | `asn:1234`                 |
 
 ## Logical Operators
 
@@ -32,14 +32,14 @@ term1 AND (term2 OR term3) # Grouping with parentheses
 
 ## Date Ranges
 
-| Syntax                            | Matches                    |
-| --------------------------------- | -------------------------- |
-| `created:[2024 to 2025]`         | Created in 2024-2025       |
-| `created:2024`                    | Created in 2024            |
-| `added:yesterday`                 | Added yesterday            |
-| `added:today`                     | Added today                |
-| `modified:today`                  | Modified today             |
-| `created:[2024-01 to 2024-06]`   | Jan-Jun 2024               |
+| Syntax                         | Matches              |
+| ------------------------------ | -------------------- |
+| `created:[2024 to 2025]`       | Created in 2024-2025 |
+| `created:2024`                 | Created in 2024      |
+| `added:yesterday`              | Added yesterday      |
+| `added:today`                  | Added today          |
+| `modified:today`               | Modified today       |
+| `created:[2024-01 to 2024-06]` | Jan-Jun 2024         |
 
 ## Wildcards
 

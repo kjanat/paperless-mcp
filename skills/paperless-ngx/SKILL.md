@@ -16,39 +16,39 @@ Orchestrate Paperless-NGX through 16 MCP tools across 4 domains.
 
 ### Documents (5 tools)
 
-| Tool                     | Operation        | Key Params                              |
-| ------------------------ | ---------------- | --------------------------------------- |
-| `search_documents`       | Full-text search | `query`, `page`, `page_size`            |
-| `get_document`           | Full details     | `id`                                    |
-| `post_document`          | Upload file      | `file` (base64), `filename`, metadata   |
-| `download_document`      | Get file base64  | `id`, `original` (bool)                 |
-| `bulk_edit_documents`    | Batch operations | `documents` (IDs), `method`, params     |
+| Tool                  | Operation        | Key Params                            |
+| --------------------- | ---------------- | ------------------------------------- |
+| `search_documents`    | Full-text search | `query`, `page`, `page_size`          |
+| `get_document`        | Full details     | `id`                                  |
+| `post_document`       | Upload file      | `file` (base64), `filename`, metadata |
+| `download_document`   | Get file base64  | `id`, `original` (bool)               |
+| `bulk_edit_documents` | Batch operations | `documents` (IDs), `method`, params   |
 
 ### Tags (5 tools)
 
-| Tool              | Operation                    |
-| ----------------- | ---------------------------- |
-| `list_tags`       | All tags + colors + matching |
-| `create_tag`      | New tag, optional auto-match |
-| `update_tag`      | Modify name/color/matching   |
-| `delete_tag`      | Remove permanently           |
-| `bulk_edit_tags`  | Batch permissions/deletion   |
+| Tool             | Operation                    |
+| ---------------- | ---------------------------- |
+| `list_tags`      | All tags + colors + matching |
+| `create_tag`     | New tag, optional auto-match |
+| `update_tag`     | Modify name/color/matching   |
+| `delete_tag`     | Remove permanently           |
+| `bulk_edit_tags` | Batch permissions/deletion   |
 
 ### Correspondents (3 tools)
 
-| Tool                      | Operation                |
-| ------------------------- | ------------------------ |
-| `list_correspondents`     | All correspondents       |
-| `create_correspondent`    | New, optional auto-match |
-| `bulk_edit_correspondents`| Batch permissions/delete |
+| Tool                       | Operation                |
+| -------------------------- | ------------------------ |
+| `list_correspondents`      | All correspondents       |
+| `create_correspondent`     | New, optional auto-match |
+| `bulk_edit_correspondents` | Batch permissions/delete |
 
 ### Document Types (3 tools)
 
-| Tool                      | Operation                |
-| ------------------------- | ------------------------ |
-| `list_document_types`     | All document types       |
-| `create_document_type`    | New, optional auto-match |
-| `bulk_edit_document_types`| Batch permissions/delete |
+| Tool                       | Operation                |
+| -------------------------- | ------------------------ |
+| `list_document_types`      | All document types       |
+| `create_document_type`     | New, optional auto-match |
+| `bulk_edit_document_types` | Batch permissions/delete |
 
 ## Decision Trees
 
@@ -115,8 +115,8 @@ Need to change metadata objects?
 
 ## References
 
-| Task                    | File                                             |
-| ----------------------- | ------------------------------------------------ |
-| Tool parameters & types | [tools.md](references/tools.md)                |
-| Search query syntax     | [query-syntax.md](references/query-syntax.md)  |
-| Multi-step workflows    | [workflows.md](references/workflows.md)        |
+| Task                    | File                                          |
+| ----------------------- | --------------------------------------------- |
+| Tool parameters & types | [tools.md](references/tools.md)               |
+| Search query syntax     | [query-syntax.md](references/query-syntax.md) |
+| Multi-step workflows    | [workflows.md](references/workflows.md)       |

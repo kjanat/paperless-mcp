@@ -1,125 +1,149 @@
 # PROJECT KNOWLEDGE BASE
 
-**Generated:** 2026-02-21 **Commit:** fa2d17b **Branch:** master
+**Generated:** 2026-02-21 **Commit:** bf0dc45 **Branch:** deps-upgrade-tsconfig-stricten
 
 ## OVERVIEW
 
 MCP server bridging AI assistants to Paperless-NGX document management. TypeScript,
-`@modelcontextprotocol/sdk`, Express 5, Zod. Dual transport: stdio + HTTP.
+`@modelcontextprotocol/sdk` (sole runtime dep), Zod, dual transport: stdio + HTTP.
+API types derived from OpenAPI schema v6.0.0.
 
 ## STRUCTURE
 
 ```
 src/
-├── index.ts              # Entry point: CLI arg parsing, server setup, dual transport
+├── index.ts                 # Entry: CLI parsing, server factory, dual transport
+├── types.ts                 # Typed interfaces from OpenAPI schema (v6.0.0)
 ├── api/
-│   └── PaperlessAPI.ts   # HTTP client wrapping Paperless-NGX REST API (fetch + token auth)
+│   ├── paperless-api.ts     # HTTP client wrapping Paperless-NGX REST API
+│   └── paperless-api.test.ts
 └── tools/
-    ├── documents.ts      # 5 tools: bulk_edit, post, get, search, download
-    ├── tags.ts           # 5 tools: list, create, update, delete, bulk_edit
-    ├── correspondents.ts # 3 tools: list, create, bulk_edit
-    └── documentTypes.ts  # 3 tools: list, create, bulk_edit
+    ├── utils.ts             # Shared jsonResult() helper
+    ├── documents.ts         # 5 tools: bulk_edit, post, get, search, download
+    ├── tags.ts              # 5 tools: list, create, update, delete, bulk_edit
+    ├── correspondents.ts    # 3 tools: list, create, bulk_edit
+    └── documentTypes.ts     # 3 tools: list, create, bulk_edit
 ```
 
-No barrel files. No cross-imports between leaf modules. All tools/ and api/ modules
-are imported only from `index.ts`.
+No barrel files. No cross-imports between leaf modules.
 
 ## WHERE TO LOOK
 
-| Task                        | Location                | Notes                                            |
-| --------------------------- | ----------------------- | ------------------------------------------------ |
-| Add new MCP tool domain     | `src/tools/` + register in `src/index.ts` | Follow `register*Tools(server, api)` pattern |
-| Add new API endpoint        | `src/api/PaperlessAPI.ts` | Methods wrap `this.request(path, options)`      |
-| Change transport/startup    | `src/index.ts`          | stdio vs HTTP decided by `--http` CLI flag       |
-| Zod input schemas           | `src/tools/*.ts`        | Inline in `server.tool()` calls                  |
-| Docker config               | `Dockerfile`            | Multi-stage, Node 20, hardcodes `--http --port 3000` |
-| CI/CD                       | `.github/workflows/`    | npm-publish (on release), docker-publish (on push to main) |
+| Task                     | Location                                  | Notes                                            |
+| ------------------------ | ----------------------------------------- | ------------------------------------------------ |
+| Add/change response type | `src/types.ts`                            | Interfaces from OpenAPI schema                   |
+| Add new MCP tool domain  | `src/tools/` + register in `src/index.ts` | Follow `register*Tools(server, api)` pattern     |
+| Add new API endpoint     | `src/api/paperless-api.ts`                | Methods wrap `this.request<T>(path, options)`    |
+| Change transport/startup | `src/index.ts`                            | stdio vs HTTP decided by `--http` CLI flag       |
+| Zod input schemas        | `src/tools/*.ts`                          | Inline in `server.registerTool()` calls          |
+| CI/CD                    | `.github/workflows/npm-publish.yml`       | Bun test + `npm publish --provenance` on release |
+| OpenAPI schema           | `schemas/openapi.json`                    | Snapshot via `scripts/openapi.py`                |
 
 ## CODE MAP
 
-### `PaperlessAPI` (src/api/PaperlessAPI.ts)
+### Types (src/types.ts)
 
-Single class, 16 methods. `request()` is the base -- adds token auth header, JSON content
-type, throws on non-OK. All other methods delegate to it.
+All typed interfaces derived from the Paperless-NGX OpenAPI schema v6.0.0.
+Includes: `Document`, `DocumentSummary`, `Tag`, `Correspondent`, `DocumentType`,
+`PaginatedList<T>`, request types (`TagRequest`, etc.), bulk edit types, shared
+enums (`BulkEditMethod`, `MatchingAlgorithm`), and nested types (`ObjectPermissions`,
+`CustomFieldInstance`, `Note`).
 
-| Method               | API Path                        | HTTP   |
-| -------------------- | ------------------------------- | ------ |
-| `request`            | `/api${path}`                   | varies |
-| `bulkEditDocuments`  | `/documents/bulk_edit/`         | POST   |
-| `postDocument`       | `/documents/post_document/`     | POST   |
-| `getDocuments`       | `/documents/{query}`            | GET    |
-| `getDocument`        | `/documents/{id}/`              | GET    |
-| `searchDocuments`    | `/documents/?query=...`         | GET    |
-| `downloadDocument`   | `/documents/{id}/download/`     | GET    |
-| `getTags`            | `/tags/`                        | GET    |
-| `createTag`          | `/tags/`                        | POST   |
-| `updateTag`          | `/tags/{id}/`                   | PUT    |
-| `deleteTag`          | `/tags/{id}/`                   | DELETE |
-| `getCorrespondents`  | `/correspondents/`              | GET    |
-| `createCorrespondent`| `/correspondents/`              | POST   |
-| `getDocumentTypes`   | `/document_types/`              | GET    |
-| `createDocumentType` | `/document_types/`              | POST   |
-| `bulkEditObjects`    | `/bulk_edit_objects/`           | POST   |
+### `PaperlessAPI` (src/api/paperless-api.ts)
 
-### Tool Registration Pattern (src/tools/)
+Single class, 16 methods. All return typed responses (not `Promise<unknown>`).
+`request<T>()` is generic base — adds token auth (`version=6`), JSON content type,
+throws on non-OK. Most methods delegate to it.
 
-Each file exports one `register*Tools(server, api)` function. Inside, multiple
-`server.tool(name, description, zodSchema, handler)` calls. All handlers guard
-with `if (!api) throw`. Zod schemas are inline (not extracted to shared types).
+**Exceptions**: `postDocument` and `downloadDocument` bypass `request()` — they call
+`fetch()` directly (FormData and raw Response respectively). Auth header changes
+must update both paths.
+
+| Method                | API Path                    | HTTP   |
+| --------------------- | --------------------------- | ------ |
+| `request<T>`          | `/api${path}`               | varies |
+| `bulkEditDocuments`   | `/documents/bulk_edit/`     | POST   |
+| `postDocument`        | `/documents/post_document/` | POST   |
+| `getDocuments`        | `/documents/{query}`        | GET    |
+| `getDocument`         | `/documents/{id}/`          | GET    |
+| `searchDocuments`     | `/documents/?query=...`     | GET    |
+| `downloadDocument`    | `/documents/{id}/download/` | GET    |
+| `getTags`             | `/tags/`                    | GET    |
+| `createTag`           | `/tags/`                    | POST   |
+| `updateTag`           | `/tags/{id}/`               | PATCH  |
+| `deleteTag`           | `/tags/{id}/`               | DELETE |
+| `getCorrespondents`   | `/correspondents/`          | GET    |
+| `createCorrespondent` | `/correspondents/`          | POST   |
+| `getDocumentTypes`    | `/document_types/`          | GET    |
+| `createDocumentType`  | `/document_types/`          | POST   |
+| `bulkEditObjects`     | `/bulk_edit_objects/`       | POST   |
+
+### Tool Registration (src/tools/)
+
+Each file exports `register*Tools(server, api)`. Inside: `server.registerTool()`
+with inline Zod schemas (`import { z } from 'zod'`). Callbacks return
+`CallToolResult` via shared `jsonResult()` in `src/tools/utils.ts`.
+All callbacks accept `_extra` parameter (SDK requirement).
 
 ### Entry Point (src/index.ts)
 
-`main()` parses CLI args, creates `McpServer` + `PaperlessAPI`, calls all four
-`register*Tools`, then starts either:
-- **stdio**: `StdioServerTransport` (args: `<baseUrl> <token>`)
-- **HTTP**: Express on port 3000 (env: `PAPERLESS_URL`, `API_KEY`) with both
-  `StreamableHTTPServerTransport` and legacy `SSEServerTransport`
+`main()` → parse CLI args → `PaperlessAPI` → `createServer()` factory → transport:
+
+- **stdio**: single `McpServer` + `StdioServerTransport` (args: `<baseUrl> <token>`)
+- **HTTP**: `createMcpExpressApp()` from SDK on `0.0.0.0:port`; fresh `McpServer`
+  per request (stateless `StreamableHTTPServerTransport`) and per SSE session
+  (legacy `SSEServerTransport`)
 
 ## CONVENTIONS
 
-- **Registration pattern**: New tool domains = new file in `src/tools/`, export
-  `register*Tools`, call from `index.ts`. Do not break this pattern.
+- **Registration pattern**: New tool domain = new file in `src/tools/`, export
+  `register*Tools`, call from `createServer()` in `index.ts`.
 - **Zod at boundary**: All MCP tool inputs validated via inline Zod schemas.
-- **Named exports only**: No default exports anywhere.
-- **CJS output**: `tsconfig` targets CommonJS via `tsc`. `outDir: build/`.
-- **No tests**: Zero test infrastructure. `npm test` is a failing stub.
-- **No linter/formatter**: No ESLint, Prettier, Biome, or EditorConfig.
+- **`import { z } from 'zod'`** — not `import * as z from 'zod/v4'`.
+- **Named exports only**: No default exports.
+- **kebab-case filenames**: `paperless-api.ts`, not `PaperlessAPI.ts`.
+- **SDK-only dependency**: Only `@modelcontextprotocol/sdk` in `dependencies`.
+  Express and Zod come transitively.
+- **Bun-first**: `bun` for runtime, bundling (`bun bd`), and testing (`bun test`).
+- **dprint** for formatting (`bun run fmt`). Tab indentation, single quotes.
+- **tsgo** for typechecking (`bun run typecheck`). Not `tsc`.
+- **Strict TypeScript**: `strict: true` + `noUncheckedIndexedAccess` +
+  `noPropertyAccessFromIndexSignature` + all `noUnused*`/`noImplicit*` flags.
+- **No `any`, no `as` casts, no `!` assertions**.
+- **Server-per-request**: HTTP mode creates fresh `McpServer` per request via
+  `createServer()` factory. Never share server state across requests.
+- **`matching_algorithm` is integer (0-6)** across all endpoints — tags,
+  correspondents, document types. Validated via `z.number().int().min(0).max(6)`.
 
 ## ANTI-PATTERNS (THIS PROJECT)
 
-- `noImplicitAny: false` in tsconfig overrides `strict: true`. Most function
-  params in PaperlessAPI are untyped (implicit `any`). **Enable `noImplicitAny`
-  and add types when touching these files.**
-- Explicit `any` in `searchDocuments()` (lines 115, 119). Use proper response types.
-- `as string[]` casts in `postDocument()` (lines 70, 78). Parse with Zod instead.
-- `req.query.sessionId as string` in `index.ts:144`. Validate at boundary.
-- `console.error` on line 28-34 of PaperlessAPI.ts leaks auth token in headers.
-- `package.json` `main`/`bin` point to `src/index.js` (nonexistent). Should be
-  `build/index.js`.
-- `smithery.yaml` also references `src/index.js`.
-- `typescript` is in `dependencies` (should be `devDependencies`).
-- Docker copies full `node_modules` including devDeps into production image.
-- `npm-publish.yml` runs `npm test` which always fails (blocking releases).
-- README references nonexistent `server.js`, `list_documents` tool, and `litemcp`.
+- `postDocument`/`downloadDocument` bypass `this.request()` — dual fetch paths
+  with inconsistent error handling and headers.
+- No Docker support — Dockerfile was removed (was broken, used npm/build/).
+- `package.json` `main` points to `src/index.ts` (TS source, not built output).
+- No `LICENSE` file despite ISC declaration.
+- SSE sessions are in-memory (`Map`). No horizontal scaling.
+- `process.exit(1)` for missing config makes startup logic untestable.
+- No tests for tool registration or callback logic. Only the API client is tested.
 
 ## COMMANDS
 
 ```bash
-npm start                    # Dev: ts-node src/index.ts
-npm run build                # Compile to build/ via tsc
-npm run inspect              # Build + launch MCP inspector
-docker build -t paperless-mcp .  # Docker build
+bun run start                # Dev: bun src/index.ts
+bun run bd                   # Bundle to dist/ via bun build
+bun run typecheck            # tsgo --noEmit
+bun run fmt                  # dprint fmt .
+bun run fmt:check            # dprint check .
+bun test                     # Run tests (auto-discovers *.test.ts)
+bun run inspect              # Launch MCP inspector
 ```
 
 ## NOTES
 
-- **HTTP mode SSE sessions are in-memory** (`sseTransports` Map). No horizontal scaling.
-- **Express 5** (^5.1.0) -- newer major, check compat if adding middleware.
-- `postDocument` bypasses `this.request()` -- builds its own fetch with FormData.
-  If modifying auth headers, update both paths.
 - `searchDocuments` strips `content`, `download_url`, `thumbnail_url` from results
   to reduce token usage. `get_document` returns full content.
-- `matching_algorithm` param is numeric (0-4) in tags but string enum in
-  correspondents/documentTypes. Inconsistency from upstream API.
-- No `LICENSE` file despite `package.json` declaring ISC.
-- `.cursor/rules/` contains AI assistant instructions (not runtime code).
+- HTTP mode: env vars `PAPERLESS_URL` + `API_KEY`. Stdio: positional CLI args.
+- Console logging is unstructured — error messages could leak sensitive data.
+- `skills/` directory ships in npm package (`"files": ["dist", "skills"]`) —
+  contains Paperless-NGX reference docs, not runtime code.
+- `updateTag` uses PATCH (not PUT) — per OpenAPI schema's `PatchedTagRequest`.
