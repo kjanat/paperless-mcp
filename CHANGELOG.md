@@ -14,9 +14,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Agent Skill section in README with install command, moved higher for
   visibility.
 - OpenCode project config (`.opencode/opencode.jsonc`).
+- `engines.node >= 22` requirement in package.json.
+- `@/` and `$/` tsconfig path aliases for cleaner imports.
+- `@types/express` dev dependency.
 
 ### Changed
 
+- CLI argument parsing rewritten with `node:util` `parseArgs` — replaces
+  hand-rolled parsing with stricter validation.
+- `--port` validates range 1–65535; rejects invalid values instead of silently
+  defaulting to 3000.
+- JSON-RPC error responses use SDK's `JSONRPCErrorResponse` type — dropped
+  custom `JsonRpcError` interface.
+- Flattened `index.ts` structure: `createServer()`, `handleMcpHttpRequest()`,
+  `sendJsonRpcError()`, `normalizeBaseUrl()` extracted as top-level functions.
+- All internal imports use `@/` path alias (`@/tools/...`, `@/api/...`).
 - Moved all production dependencies (`@modelcontextprotocol/sdk`, `zod`) and
   optional dependency (`express`) to `devDependencies` — bundle is fully
   self-contained, consumers no longer download ~50 MB of unused packages.
