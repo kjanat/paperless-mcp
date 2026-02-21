@@ -453,12 +453,19 @@ The MCP server can be run in two modes:
 This is the default mode. The server communicates over stdio, suitable for CLI and direct integrations.
 
 ```bash
-# via env vars
+# via .env file (Bun loads .env automatically)
+bun start
+
+# via inline env vars
 PAPERLESS_URL=http://localhost:8000 PAPERLESS_API_KEY=your-token bun start
 
 # via positional args
 bun start -- http://localhost:8000 your-token
 ```
+
+> **Tip:** When using Bun, env vars in a `.env` file are loaded automatically —
+> no extra setup needed. Just create a `.env` with `PAPERLESS_URL` and
+> `PAPERLESS_API_KEY` and run `bun start`.
 
 ### 2. HTTP (Streamable HTTP Transport)
 
@@ -467,6 +474,8 @@ To run the server as an HTTP service, use the `--http` flag. You can also specif
 ```bash
 PAPERLESS_URL=http://localhost:8000 PAPERLESS_API_KEY=your-token bun start -- --http --port 3000
 ```
+
+With a `.env` file, this simplifies to `bun start -- --http`.
 
 - The MCP API will be available at `POST /mcp` on the specified port.
 - Each request is handled statelessly, following the [StreamableHTTPServerTransport](https://github.com/modelcontextprotocol/typescript-sdk) pattern.
