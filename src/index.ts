@@ -78,11 +78,16 @@ async function main(): Promise<void> {
 	}
 
 	const api = new PaperlessAPI(baseUrl, token);
-	const server = new McpServer({ name: 'paperless-ngx', version: '1.0.0' });
-	registerDocumentTools(server, api);
-	registerTagTools(server, api);
-	registerCorrespondentTools(server, api);
-	registerDocumentTypeTools(server, api);
+
+	/** Create a fresh McpServer with all tools registered. */
+	function createServer(): McpServer {
+		const server = new McpServer({ name: 'paperless-ngx', version: '1.0.0' });
+		registerDocumentTools(server, api);
+		registerTagTools(server, api);
+		registerCorrespondentTools(server, api);
+		registerDocumentTypeTools(server, api);
+		return server;
+	}
 
 	if (useHttp) {
 		const app = createMcpExpressApp({ host: '0.0.0.0' });
@@ -98,6 +103,7 @@ async function main(): Promise<void> {
 				res.on('close', () => {
 					void transport.close();
 				});
+				const server = createServer();
 				await server.connect(transport);
 				await transport.handleRequest(req, res, req.body);
 			} catch (error: unknown) {
@@ -128,6 +134,7 @@ async function main(): Promise<void> {
 					sseTransports.delete(transport.sessionId);
 					void transport.close();
 				});
+				const server = createServer();
 				await server.connect(transport);
 			} catch (error: unknown) {
 				console.error('Error handling SSE request:', error);
@@ -160,6 +167,7 @@ async function main(): Promise<void> {
 			);
 		});
 	} else {
+		const server = createServer();
 		const transport = new StdioServerTransport();
 		await server.connect(transport);
 	}
