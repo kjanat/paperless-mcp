@@ -36,7 +36,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.0.1-dev.2] - 2026-02-21
 
-_No user-facing changes. Version bump only._
+*No user-facing changes. Version bump only.*
 
 ## [1.0.1-dev.1] - 2026-02-21
 

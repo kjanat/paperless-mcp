@@ -54,6 +54,9 @@ Here are some things you can ask Claude to do:
 
 ## Available Tools
 
+<details>
+<summary>Document Operations</summary>
+
 ### Document Operations
 
 #### get_document
@@ -205,6 +208,10 @@ post_document({
 });
 ```
 
+</details>
+<details>
+<summary>Tag Operations</summary>
+
 ### Tag Operations
 
 #### list_tags
@@ -288,6 +295,10 @@ bulk_edit_tags({
 });
 ```
 
+</details>
+<details>
+<summary>Correspondent Operations</summary>
+
 ### Correspondent Operations
 
 #### list_correspondents
@@ -335,6 +346,10 @@ bulk_edit_correspondents({
 });
 ```
 
+</details>
+<details>
+<summary>Document Type Operations</summary>
+
 ### Document Type Operations
 
 #### list_document_types
@@ -381,6 +396,8 @@ bulk_edit_document_types({
 	operation: 'delete',
 });
 ```
+
+</details>
 
 ## Error Handling
 
