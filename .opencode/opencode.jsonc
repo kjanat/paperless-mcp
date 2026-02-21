@@ -1,0 +1,38 @@
+{
+	"$schema": "https://opencode.ai/config.json",
+	"formatter": {
+		"dprint": {
+			"command": ["dprint", "fmt", "$FILE"],
+			"extensions": [
+				".sh",
+				".bash",
+				".toml",
+				".svg",
+				".json",
+				".jsonc",
+				".rs",
+				".md",
+				".ts",
+				".mts",
+				".cts",
+				".js",
+				".mjs",
+				".cjs",
+				".py",
+				".yml",
+				".yaml",
+			],
+		},
+	},
+	"mcp": {
+		"paperless": {
+			"type": "local",
+			"command": ["bun", "start"],
+			"enabled": true,
+			"environment": {
+				"PAPERLESS_URL": "{env:PAPERLESS_URL}",
+				"PAPERLESS_API_KEY": "{env:PAPERLESS_API_KEY}",
+			},
+		},
+	},
+}
