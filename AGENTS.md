@@ -26,14 +26,14 @@ are imported only from `index.ts`.
 
 ## WHERE TO LOOK
 
-| Task                        | Location                | Notes                                            |
-| --------------------------- | ----------------------- | ------------------------------------------------ |
-| Add new MCP tool domain     | `src/tools/` + register in `src/index.ts` | Follow `register*Tools(server, api)` pattern |
-| Add new API endpoint        | `src/api/PaperlessAPI.ts` | Methods wrap `this.request(path, options)`      |
-| Change transport/startup    | `src/index.ts`          | stdio vs HTTP decided by `--http` CLI flag       |
-| Zod input schemas           | `src/tools/*.ts`        | Inline in `server.tool()` calls                  |
-| Docker config               | `Dockerfile`            | Multi-stage, Node 20, hardcodes `--http --port 3000` |
-| CI/CD                       | `.github/workflows/`    | npm-publish (on release), docker-publish (on push to main) |
+| Task                     | Location                                  | Notes                                                      |
+| ------------------------ | ----------------------------------------- | ---------------------------------------------------------- |
+| Add new MCP tool domain  | `src/tools/` + register in `src/index.ts` | Follow `register*Tools(server, api)` pattern               |
+| Add new API endpoint     | `src/api/PaperlessAPI.ts`                 | Methods wrap `this.request(path, options)`                 |
+| Change transport/startup | `src/index.ts`                            | stdio vs HTTP decided by `--http` CLI flag                 |
+| Zod input schemas        | `src/tools/*.ts`                          | Inline in `server.tool()` calls                            |
+| Docker config            | `Dockerfile`                              | Multi-stage, Node 20, hardcodes `--http --port 3000`       |
+| CI/CD                    | `.github/workflows/`                      | npm-publish (on release), docker-publish (on push to main) |
 
 ## CODE MAP
 
@@ -42,24 +42,24 @@ are imported only from `index.ts`.
 Single class, 16 methods. `request()` is the base -- adds token auth header, JSON content
 type, throws on non-OK. All other methods delegate to it.
 
-| Method               | API Path                        | HTTP   |
-| -------------------- | ------------------------------- | ------ |
-| `request`            | `/api${path}`                   | varies |
-| `bulkEditDocuments`  | `/documents/bulk_edit/`         | POST   |
-| `postDocument`       | `/documents/post_document/`     | POST   |
-| `getDocuments`       | `/documents/{query}`            | GET    |
-| `getDocument`        | `/documents/{id}/`              | GET    |
-| `searchDocuments`    | `/documents/?query=...`         | GET    |
-| `downloadDocument`   | `/documents/{id}/download/`     | GET    |
-| `getTags`            | `/tags/`                        | GET    |
-| `createTag`          | `/tags/`                        | POST   |
-| `updateTag`          | `/tags/{id}/`                   | PUT    |
-| `deleteTag`          | `/tags/{id}/`                   | DELETE |
-| `getCorrespondents`  | `/correspondents/`              | GET    |
-| `createCorrespondent`| `/correspondents/`              | POST   |
-| `getDocumentTypes`   | `/document_types/`              | GET    |
-| `createDocumentType` | `/document_types/`              | POST   |
-| `bulkEditObjects`    | `/bulk_edit_objects/`           | POST   |
+| Method                | API Path                    | HTTP   |
+| --------------------- | --------------------------- | ------ |
+| `request`             | `/api${path}`               | varies |
+| `bulkEditDocuments`   | `/documents/bulk_edit/`     | POST   |
+| `postDocument`        | `/documents/post_document/` | POST   |
+| `getDocuments`        | `/documents/{query}`        | GET    |
+| `getDocument`         | `/documents/{id}/`          | GET    |
+| `searchDocuments`     | `/documents/?query=...`     | GET    |
+| `downloadDocument`    | `/documents/{id}/download/` | GET    |
+| `getTags`             | `/tags/`                    | GET    |
+| `createTag`           | `/tags/`                    | POST   |
+| `updateTag`           | `/tags/{id}/`               | PUT    |
+| `deleteTag`           | `/tags/{id}/`               | DELETE |
+| `getCorrespondents`   | `/correspondents/`          | GET    |
+| `createCorrespondent` | `/correspondents/`          | POST   |
+| `getDocumentTypes`    | `/document_types/`          | GET    |
+| `createDocumentType`  | `/document_types/`          | POST   |
+| `bulkEditObjects`     | `/bulk_edit_objects/`       | POST   |
 
 ### Tool Registration Pattern (src/tools/)
 
@@ -71,6 +71,7 @@ with `if (!api) throw`. Zod schemas are inline (not extracted to shared types).
 
 `main()` parses CLI args, creates `McpServer` + `PaperlessAPI`, calls all four
 `register*Tools`, then starts either:
+
 - **stdio**: `StdioServerTransport` (args: `<baseUrl> <token>`)
 - **HTTP**: Express on port 3000 (env: `PAPERLESS_URL`, `API_KEY`) with both
   `StreamableHTTPServerTransport` and legacy `SSEServerTransport`

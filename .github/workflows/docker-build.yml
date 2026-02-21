@@ -2,7 +2,7 @@ name: Docker Build (PR)
 on:
   pull_request:
     branches:
-      - '**'
+      - "**"
 jobs:
   build:
     runs-on: ubuntu-latest

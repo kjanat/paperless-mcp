@@ -18,4 +18,4 @@ startCommand:
   commandFunction:
     # A function that produces the CLI command to start the MCP on stdio.
     |-
-    (config) => ({command: 'node', args: ['src/index.js', config.baseUrl, config.token]})
+      (config) => ({command: 'node', args: ['src/index.js', config.baseUrl, config.token]})
