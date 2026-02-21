@@ -12,13 +12,13 @@ import { registerDocumentTypeTools } from './tools/documentTypes';
 import { registerTagTools } from './tools/tags';
 
 // CLI argument parsing
-const args = process.argv.slice(2);
-const useHttp = args.includes('--http');
+const rawArgs = process.argv.slice(2);
+const useHttp = rawArgs.includes('--http');
 
 function parsePort(): number {
-	const portIndex = args.indexOf('--port');
+	const portIndex = rawArgs.indexOf('--port');
 	if (portIndex !== -1) {
-		const raw = args[portIndex + 1];
+		const raw = rawArgs[portIndex + 1];
 		if (raw == null) {
 			console.warn('--port flag provided without a value, using default 3000');
 			return 3000;
@@ -34,6 +34,24 @@ function parsePort(): number {
 }
 
 const port = parsePort();
+
+/** Positional args only (strip --http, --port and its value). */
+function positionalArgs(): string[] {
+	const result: string[] = [];
+	for (let i = 0; i < rawArgs.length; i++) {
+		const arg = rawArgs[i]!;
+		if (arg === '--http') continue;
+		if (arg === '--port') {
+			i++; // skip value
+			continue;
+		}
+		if (arg.startsWith('--')) continue;
+		result.push(arg);
+	}
+	return result;
+}
+
+const args = positionalArgs();
 
 /** Express request with parsed body attached by express.json() middleware. */
 interface ParsedRequest extends IncomingMessage {
@@ -51,34 +69,27 @@ function jsonRpcError(code: number, message: string): JsonRpcError {
 	return { jsonrpc: '2.0', error: { code, message }, id: null };
 }
 
-async function main(): Promise<void> {
-	let baseUrl: string | undefined;
-	let token: string | undefined;
+/** Resolve API key from env, preferring PAPERLESS_API_KEY over legacy API_KEY. */
+function resolveToken(): string | undefined {
+	return process.env['PAPERLESS_API_KEY'] ?? process.env['API_KEY'];
+}
 
-	if (useHttp) {
-		baseUrl = process.env['PAPERLESS_URL'];
-		token = process.env['API_KEY'];
-		if (!baseUrl || !token) {
-			console.error(
-				'When using --http, PAPERLESS_URL and API_KEY environment variables must be set.',
-			);
-			process.exit(1);
-		}
-	} else {
-		baseUrl = args[0];
-		token = args[1];
-		if (!baseUrl || !token) {
-			console.error(
-				'Usage: paperless-mcp <baseUrl> <token> [--http] [--port <port>]',
-			);
-			console.error(
-				'Example: paperless-mcp http://localhost:8000 your-api-token --http --port 3000',
-			);
-			console.error(
-				'When using --http, PAPERLESS_URL and API_KEY environment variables must be set.',
-			);
-			process.exit(1);
-		}
+async function main(): Promise<void> {
+	// CLI args take precedence, then env vars
+	const baseUrl = args[0] ?? process.env['PAPERLESS_URL'];
+	const token = args[1] ?? resolveToken();
+
+	if (!baseUrl || !token) {
+		console.error(
+			'Usage: paperless-mcp [baseUrl] [token] [--http] [--port <port>]',
+		);
+		console.error(
+			'  Args:  paperless-mcp http://localhost:8000 your-api-token',
+		);
+		console.error(
+			'  Env:   PAPERLESS_URL + PAPERLESS_API_KEY (or legacy API_KEY)',
+		);
+		process.exit(1);
 	}
 
 	const api = new PaperlessAPI(baseUrl, token);

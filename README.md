@@ -6,13 +6,30 @@ An MCP (Model Context Protocol) server for interacting with a Paperless-ngx API 
 
 ### Installation
 
-1. Install the MCP server (optional):
+1. Get your API token:
+   1. Log into your Paperless-ngx instance
+   2. Click your username in the top right
+   3. Select "My Profile"
+   4. Click the circular arrow button to generate a new token
 
-   ```bash
-   bun install -g @kjanat/paperless-mcp
+1. Add it to your MCP client configuration (using env vars):
+
+   ```jsonc
+   {
+   	"mcpServers": {
+   		"paperless": {
+   			"command": "bunx", // or npx
+   			"args": ["@kjanat/paperless-mcp"],
+   			"env": {
+   				"PAPERLESS_URL": "http://your-paperless-instance:8000",
+   				"PAPERLESS_API_KEY": "your-api-token",
+   			},
+   		},
+   	},
+   }
    ```
 
-1. Add it to your configuration:
+   Or pass them as positional arguments:
 
    ```jsonc
    {
@@ -21,7 +38,7 @@ An MCP (Model Context Protocol) server for interacting with a Paperless-ngx API 
    			"command": "bunx", // or npx
    			"args": [
    				"@kjanat/paperless-mcp",
-   				"http://your-paperless-instance:8000", // port if not default
+   				"http://your-paperless-instance:8000",
    				"your-api-token",
    			],
    		},
@@ -29,15 +46,7 @@ An MCP (Model Context Protocol) server for interacting with a Paperless-ngx API 
    }
    ```
 
-1. Get your API token:
-   1. Log into your Paperless-ngx instance
-   2. Click your username in the top right
-   3. Select "My Profile"
-   4. Click the circular arrow button to generate a new token
-
-1. Replace the placeholders in your MCP config:
-   - `http://your-paperless-instance:8000` with your Paperless-ngx URL
-   - `your-api-token` with the token you just generated
+   CLI args take precedence over env vars when both are provided.
 
 That's it! Now you can ask Claude to help you manage your Paperless-ngx documents.
 
@@ -444,7 +453,11 @@ The MCP server can be run in two modes:
 This is the default mode. The server communicates over stdio, suitable for CLI and direct integrations.
 
 ```bash
-bun start -- <baseUrl> <token>
+# via env vars
+PAPERLESS_URL=http://localhost:8000 PAPERLESS_API_KEY=your-token bun start
+
+# via positional args
+bun start -- http://localhost:8000 your-token
 ```
 
 ### 2. HTTP (Streamable HTTP Transport)
@@ -452,7 +465,7 @@ bun start -- <baseUrl> <token>
 To run the server as an HTTP service, use the `--http` flag. You can also specify the port with `--port` (default: 3000).
 
 ```bash
-bun start -- <baseUrl> <token> --http --port 3000
+PAPERLESS_URL=http://localhost:8000 PAPERLESS_API_KEY=your-token bun start -- --http --port 3000
 ```
 
 - The MCP API will be available at `POST /mcp` on the specified port.

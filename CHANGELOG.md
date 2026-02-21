@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Environment variable config: `PAPERLESS_URL` + `PAPERLESS_API_KEY` (or legacy
+  `API_KEY`). Works in both stdio and HTTP modes. CLI args still take precedence.
+
 ### Changed
 
 - Moved all runtime dependencies (`@modelcontextprotocol/sdk`, `zod`, `express`)
