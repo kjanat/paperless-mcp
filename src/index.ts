@@ -20,10 +20,16 @@ function parsePort(): number {
 	const portIndex = args.indexOf('--port');
 	if (portIndex !== -1) {
 		const raw = args[portIndex + 1];
-		if (raw != null) {
-			const parsed = parseInt(raw, 10);
-			if (!isNaN(parsed)) return parsed;
+		if (raw == null) {
+			console.warn('--port flag provided without a value, using default 3000');
+			return 3000;
 		}
+		const parsed = parseInt(raw, 10);
+		if (isNaN(parsed)) {
+			console.warn(`--port value "${raw}" is not a valid number, using default 3000`);
+			return 3000;
+		}
+		return parsed;
 	}
 	return 3000;
 }
