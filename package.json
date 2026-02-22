@@ -31,7 +31,8 @@
     "inspect": "bunx @modelcontextprotocol/inspector bun src/index.ts",
     "prepack": "bun bd && bunx prettier README.md --write",
     "start": "bun src/index.ts",
-    "typecheck": "tsgo --noEmit"
+    "typecheck": "tsgo --noEmit",
+    "typegen": "./download-schema.ts"
   },
   "devDependencies": {
     "@modelcontextprotocol/sdk": "^1.26.0",
@@ -40,6 +41,7 @@
     "@typescript/native-preview": "^7.0.0-dev.20260221.1",
     "dprint": "^0.51.1",
     "express": "^5.2.1",
+    "openapi-typescript": "^7.13.0",
     "typescript": "^5.9.3",
     "zod": "^4.3.6"
   },
