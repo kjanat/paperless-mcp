@@ -1,5 +1,7 @@
 # Paperless-ngx MCP Server
 
+[![NPM Version](https://img.shields.io/npm/v/@kjanat/paperless-mcp?logo=npm&labelColor=CB3837&color=black)](https://www.npmjs.com/package/@kjanat/paperless-mcp)
+
 An MCP (Model Context Protocol) server for interacting with a Paperless-ngx API server. This server provides tools for managing documents, tags, correspondents, and document types in your Paperless-ngx instance.
 
 ## Quick Start
