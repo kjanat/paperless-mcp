@@ -116,17 +116,31 @@ describe('PaperlessAPI.bulkEditDocuments', () => {
 		stubFetch({ result: 'ok' });
 		await api.bulkEditDocuments([1, 2], 'delete', {});
 
-		expect(lastRequestBody()).toEqual({ documents: [1, 2], method: 'delete', parameters: {} });
+		expect(lastRequestBody()).toEqual({ documents: [1, 2], method: 'delete' });
 	});
 
-	test('includes extra parameters', async () => {
+	test('sends operation parameters at the top level', async () => {
 		stubFetch({ result: 'ok' });
 		await api.bulkEditDocuments([3], 'set_correspondent', { correspondent: 5 });
 
 		expect(lastRequestBody()).toEqual({
 			documents: [3],
 			method: 'set_correspondent',
-			parameters: { correspondent: 5 },
+			correspondent: 5,
+		});
+	});
+
+	test('omits undefined operation parameters', async () => {
+		stubFetch({ result: 'ok' });
+		await api.bulkEditDocuments([4], 'set_correspondent', {
+			correspondent: undefined,
+			document_type: 2,
+		});
+
+		expect(lastRequestBody()).toEqual({
+			documents: [4],
+			method: 'set_correspondent',
+			document_type: 2,
 		});
 	});
 });
@@ -319,13 +333,49 @@ describe('PaperlessAPI.downloadDocument', () => {
 // ---------------------------------------------------------------------------
 
 describe('PaperlessAPI.getTags', () => {
-	test('fetches /tags/', async () => {
+	test('fetches /tags/ with a larger page size', async () => {
 		stubFetch({ count: 1, next: null, previous: null, all: [1], results: [{ id: 1, name: 'urgent' }] });
 
 		const result = await api.getTags();
 		expect(result.count).toBe(1);
 		expect(result.results[0]?.name).toBe('urgent');
-		expect(lastRequestUrl()).toBe(`${BASE_URL}/api/tags/`);
+		expect(lastRequestUrl()).toBe(`${BASE_URL}/api/tags/?page=1&page_size=100`);
+	});
+
+	test('fetches all tag pages', async () => {
+		fetchSpy = spyOn(globalThis, 'fetch')
+			.mockResolvedValueOnce(
+				new Response(
+					JSON.stringify({
+						count: 2,
+						next: `${BASE_URL}/api/tags/?page=2&page_size=100`,
+						previous: null,
+						all: [1, 2],
+						results: [{ id: 1, name: 'first' }],
+					}),
+					{ status: 200, headers: { 'Content-Type': 'application/json' } },
+				),
+			)
+			.mockResolvedValueOnce(
+				new Response(
+					JSON.stringify({
+						count: 2,
+						next: null,
+						previous: `${BASE_URL}/api/tags/?page=1&page_size=100`,
+						all: [1, 2],
+						results: [{ id: 2, name: 'second' }],
+					}),
+					{ status: 200, headers: { 'Content-Type': 'application/json' } },
+				),
+			);
+
+		const result = await api.getTags();
+
+		expect(fetchSpy).toHaveBeenCalledTimes(2);
+		expect(result.next).toBeNull();
+		expect(result.previous).toBeNull();
+		expect(result.all).toEqual([1, 2]);
+		expect(result.results.map((tag) => tag.name)).toEqual(['first', 'second']);
 	});
 });
 
@@ -369,7 +419,7 @@ describe('PaperlessAPI.getCorrespondents', () => {
 		stubFetch({ count: 0, next: null, previous: null, all: [], results: [] });
 		await api.getCorrespondents();
 
-		expect(lastRequestUrl()).toBe(`${BASE_URL}/api/correspondents/`);
+		expect(lastRequestUrl()).toBe(`${BASE_URL}/api/correspondents/?page=1&page_size=100`);
 	});
 });
 
@@ -400,7 +450,7 @@ describe('PaperlessAPI.getDocumentTypes', () => {
 		stubFetch({ count: 0, next: null, previous: null, all: [], results: [] });
 		await api.getDocumentTypes();
 
-		expect(lastRequestUrl()).toBe(`${BASE_URL}/api/document_types/`);
+		expect(lastRequestUrl()).toBe(`${BASE_URL}/api/document_types/?page=1&page_size=100`);
 	});
 });
 

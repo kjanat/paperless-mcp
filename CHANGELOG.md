@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.1.1] - 2026-06-07
+
+### Changed
+
+- Return complete tag, correspondent, and document type lists across all pages
+  instead of only first-page details.
+- Harden npm publishing by using frozen Bun installs, running format/type/test
+  checks before release, reading publish metadata from package config, and using
+  `.npm-version` for the npm CLI version.
+- Update development dependencies, while keeping `dprint` pinned to `0.51.1` for
+  current Linux glibc compatibility.
+
+### Fixed
+
+- Send document bulk-edit operation parameters at the top level expected by
+  Paperless-ngx instead of nesting them under `parameters`.
+- Ignore irrelevant document bulk-edit arguments for the selected method, avoiding
+  invalid API payloads when optional tool fields are present.
+
 ## [2.1.0] - 2026-02-21
 
 ### Added
@@ -139,7 +158,8 @@ Major rewrite of internals while preserving the same MCP tool surface.
 - Smithery configuration (broken `smithery.yaml`).
 - Obsolete Cursor rules.
 
-[Unreleased]: https://github.com/kjanat/paperless-mcp/compare/v2.1.0...HEAD
+[Unreleased]: https://github.com/kjanat/paperless-mcp/compare/v2.1.1...HEAD
+[2.1.1]: https://github.com/kjanat/paperless-mcp/compare/v2.1.0...v2.1.1
 [2.1.0]: https://github.com/kjanat/paperless-mcp/compare/v2.0.1...v2.1.0
 [2.0.1]: https://github.com/kjanat/paperless-mcp/compare/v2.0.0...v2.0.1
 [2.0.0]: https://github.com/kjanat/paperless-mcp/compare/v1.0.1-dev.2...v2.0.0

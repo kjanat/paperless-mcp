@@ -261,7 +261,17 @@ export interface DocumentTypeRequest {
 export interface BulkEditDocumentsRequest {
 	readonly documents: readonly number[];
 	readonly method: BulkEditMethod;
-	readonly parameters: Record<string, unknown>;
+	readonly correspondent?: number;
+	readonly document_type?: number;
+	readonly storage_path?: number;
+	readonly tag?: number;
+	readonly add_tags?: readonly number[];
+	readonly remove_tags?: readonly number[];
+	readonly permissions?: Record<string, unknown>;
+	readonly metadata_document_id?: number;
+	readonly delete_originals?: boolean;
+	readonly pages?: string;
+	readonly degrees?: number;
 }
 
 /** Response from POST /documents/bulk_edit/. */

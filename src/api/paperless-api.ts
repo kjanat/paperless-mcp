@@ -62,7 +62,11 @@ export class PaperlessAPI {
 	): Promise<BulkEditResult> {
 		return this.request<BulkEditResult>('/documents/bulk_edit/', {
 			method: 'POST',
-			body: JSON.stringify({ documents, method, parameters }),
+			body: JSON.stringify({
+				documents,
+				method,
+				...omitUndefined(parameters),
+			}),
 		});
 	}
 
@@ -183,7 +187,7 @@ export class PaperlessAPI {
 	// Tag operations
 
 	async getTags(): Promise<PaginatedList<Tag>> {
-		return this.request<PaginatedList<Tag>>('/tags/');
+		return this.getAllPages<Tag>('/tags/');
 	}
 
 	async createTag(data: TagRequest): Promise<Tag> {
@@ -207,7 +211,7 @@ export class PaperlessAPI {
 	// Correspondent operations
 
 	async getCorrespondents(): Promise<PaginatedList<Correspondent>> {
-		return this.request<PaginatedList<Correspondent>>('/correspondents/');
+		return this.getAllPages<Correspondent>('/correspondents/');
 	}
 
 	async createCorrespondent(data: CorrespondentRequest): Promise<Correspondent> {
@@ -220,7 +224,7 @@ export class PaperlessAPI {
 	// Document type operations
 
 	async getDocumentTypes(): Promise<PaginatedList<DocumentType>> {
-		return this.request<PaginatedList<DocumentType>>('/document_types/');
+		return this.getAllPages<DocumentType>('/document_types/');
 	}
 
 	async createDocumentType(data: DocumentTypeRequest): Promise<DocumentType> {
@@ -248,4 +252,47 @@ export class PaperlessAPI {
 			}),
 		});
 	}
+
+	private async getAllPages<T>(path: string): Promise<PaginatedList<T>> {
+		const pageSize = 100;
+		const results: T[] = [];
+		let all: readonly number[] = [];
+		let count = 0;
+		let page = 1;
+
+		while (true) {
+			const separator = path.includes('?') ? '&' : '?';
+			const response = await this.request<PaginatedList<T>>(
+				`${path}${separator}page=${page}&page_size=${pageSize}`,
+			);
+
+			count = response.count;
+			if (page === 1) {
+				all = response.all;
+			}
+			results.push(...response.results);
+
+			if (response.next == null || results.length >= response.count) {
+				return {
+					count,
+					next: null,
+					previous: null,
+					all,
+					results,
+				};
+			}
+
+			page += 1;
+		}
+	}
+}
+
+function omitUndefined(data: Record<string, unknown>): Record<string, unknown> {
+	const result: Record<string, unknown> = {};
+	for (const [key, value] of Object.entries(data)) {
+		if (value !== undefined) {
+			result[key] = value;
+		}
+	}
+	return result;
 }

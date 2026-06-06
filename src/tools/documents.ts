@@ -107,7 +107,13 @@ export function registerDocumentTools(server: McpServer, api: PaperlessAPI): voi
 			},
 		},
 		async ({ documents, method, ...parameters }, _extra) => {
-			return jsonResult(await api.bulkEditDocuments(documents, method, parameters));
+			return jsonResult(
+				await api.bulkEditDocuments(
+					documents,
+					method,
+					documentBulkParameters(method, parameters),
+				),
+			);
 		},
 	);
 
@@ -241,4 +247,48 @@ export function registerDocumentTools(server: McpServer, api: PaperlessAPI): voi
 			});
 		},
 	);
+}
+
+function documentBulkParameters(
+	method: string,
+	parameters: Record<string, unknown>,
+): Record<string, unknown> {
+	switch (method) {
+		case 'set_correspondent':
+			return pickDefined(parameters, ['correspondent']);
+		case 'set_document_type':
+			return pickDefined(parameters, ['document_type']);
+		case 'set_storage_path':
+			return pickDefined(parameters, ['storage_path']);
+		case 'add_tag':
+		case 'remove_tag':
+			return pickDefined(parameters, ['tag']);
+		case 'modify_tags':
+			return pickDefined(parameters, ['add_tags', 'remove_tags']);
+		case 'set_permissions':
+			return pickDefined(parameters, ['permissions']);
+		case 'merge':
+		case 'split':
+			return pickDefined(parameters, ['metadata_document_id', 'delete_originals']);
+		case 'rotate':
+			return pickDefined(parameters, ['degrees']);
+		case 'delete_pages':
+			return pickDefined(parameters, ['pages']);
+		default:
+			return {};
+	}
+}
+
+function pickDefined(
+	parameters: Record<string, unknown>,
+	keys: readonly string[],
+): Record<string, unknown> {
+	const result: Record<string, unknown> = {};
+	for (const key of keys) {
+		const value = parameters[key];
+		if (value !== undefined) {
+			result[key] = value;
+		}
+	}
+	return result;
 }

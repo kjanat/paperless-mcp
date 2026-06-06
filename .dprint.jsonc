@@ -1,0 +1,10 @@
+{
+	"$schema": "https://dprint.dev/schemas/v0.json",
+	"extends": "https://github.com/kjanat/kjanat/raw/8cb7b67/configs/dprint.remote.json",
+	"excludes": ["**/node_modules", "**/.venv", "**/bun.lock*"],
+	"plugins": [
+		"https://plugins.dprint.dev/prettier-0.71.0.json@a2fb7c6369717c218d1c106764d9d2c8df3d193aa3c16afb5db10751674eeb81",
+	],
+	"markdown": { "associations": ["!README.md"] },
+	"prettier": { "associations": ["README.md"] },
+}

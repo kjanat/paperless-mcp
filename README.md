@@ -60,7 +60,7 @@ guide, and workflow templates for AI agents.
 
 View the skill on the registry: https://skills.sh/kjanat/paperless-mcp/paperless-ngx
 
-*Add using*:
+_Add using_:
 
 ```bash
 bunx skills add https://github.com/kjanat/paperless-mcp --skill paperless-ngx
@@ -110,7 +110,7 @@ Parameters:
 
 ```typescript
 search_documents({
-	query: 'invoice 2024',
+	query: "invoice 2024",
 });
 ```
 
@@ -170,21 +170,21 @@ Examples:
 // Add a tag to multiple documents
 bulk_edit_documents({
 	documents: [1, 2, 3],
-	method: 'add_tag',
+	method: "add_tag",
 	tag: 5,
 });
 
 // Set correspondent and document type
 bulk_edit_documents({
 	documents: [4, 5],
-	method: 'set_correspondent',
+	method: "set_correspondent",
 	correspondent: 2,
 });
 
 // Merge documents
 bulk_edit_documents({
 	documents: [6, 7, 8],
-	method: 'merge',
+	method: "merge",
 	metadata_document_id: 6,
 	delete_originals: true,
 });
@@ -192,14 +192,14 @@ bulk_edit_documents({
 // Split document into parts
 bulk_edit_documents({
 	documents: [9],
-	method: 'split',
-	pages: '[1-2,3-4,5]',
+	method: "split",
+	pages: "[1-2,3-4,5]",
 });
 
 // Modify multiple tags at once
 bulk_edit_documents({
 	documents: [10, 11],
-	method: 'modify_tags',
+	method: "modify_tags",
 	add_tags: [1, 2],
 	remove_tags: [3, 4],
 });
@@ -224,14 +224,14 @@ Parameters:
 
 ```typescript
 post_document({
-	file: 'base64_encoded_content',
-	filename: 'invoice.pdf',
-	title: 'January Invoice',
-	created: '2024-01-19',
+	file: "base64_encoded_content",
+	filename: "invoice.pdf",
+	title: "January Invoice",
+	created: "2024-01-19",
 	correspondent: 1,
 	document_type: 2,
 	tags: [1, 3],
-	archive_serial_number: '2024-001',
+	archive_serial_number: "2024-001",
 });
 ```
 
@@ -262,9 +262,9 @@ Parameters:
 
 ```typescript
 create_tag({
-	name: 'Invoice',
-	color: '#ff0000',
-	match: 'invoice',
+	name: "Invoice",
+	color: "#ff0000",
+	match: "invoice",
 	matching_algorithm: 5,
 });
 ```
@@ -284,8 +284,8 @@ Parameters:
 ```typescript
 update_tag({
 	id: 5,
-	name: 'Invoices',
-	color: '#00ff00',
+	name: "Invoices",
+	color: "#00ff00",
 });
 ```
 
@@ -318,7 +318,7 @@ Parameters:
 ```typescript
 bulk_edit_tags({
 	tag_ids: [1, 2, 3],
-	operation: 'delete',
+	operation: "delete",
 });
 ```
 
@@ -348,8 +348,8 @@ Parameters:
 
 ```typescript
 create_correspondent({
-	name: 'ACME Corp',
-	match: 'ACME',
+	name: "ACME Corp",
+	match: "ACME",
 	matching_algorithm: 5,
 });
 ```
@@ -369,7 +369,7 @@ Parameters:
 ```typescript
 bulk_edit_correspondents({
 	correspondent_ids: [1, 2],
-	operation: 'delete',
+	operation: "delete",
 });
 ```
 
@@ -399,8 +399,8 @@ Parameters:
 
 ```typescript
 create_document_type({
-	name: 'Invoice',
-	match: 'invoice total amount due',
+	name: "Invoice",
+	match: "invoice total amount due",
 	matching_algorithm: 1,
 });
 ```
@@ -420,7 +420,7 @@ Parameters:
 ```typescript
 bulk_edit_document_types({
 	document_type_ids: [1, 2],
-	operation: 'delete',
+	operation: "delete",
 });
 ```
 
