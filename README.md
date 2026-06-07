@@ -1,6 +1,9 @@
 # Paperless-ngx MCP Server
 
 [![NPM Version](https://img.shields.io/npm/v/@kjanat/paperless-mcp?logo=npm&labelColor=CB3837&color=black)](https://www.npmjs.com/package/@kjanat/paperless-mcp)
+[![Publish to npm](https://github.com/kjanat/paperless-mcp/actions/workflows/npm-publish.yml/badge.svg)](https://github.com/kjanat/paperless-mcp/actions/workflows/npm-publish.yml)
+[![Schema drift check](https://github.com/kjanat/paperless-mcp/actions/workflows/schema-check.yml/badge.svg)](https://github.com/kjanat/paperless-mcp/actions/workflows/schema-check.yml)
+[![Schema upstream sync](https://github.com/kjanat/paperless-mcp/actions/workflows/schema-update.yml/badge.svg)](https://github.com/kjanat/paperless-mcp/actions/workflows/schema-update.yml)
 
 An MCP (Model Context Protocol) server for interacting with a Paperless-ngx API server. This server provides tools for managing documents, tags, correspondents, and document types in your Paperless-ngx instance.
 
