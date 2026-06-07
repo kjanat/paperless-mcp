@@ -39,6 +39,6 @@ server.registerTool(
 
 ## GOTCHAS
 
-- **No cross-imports** between tool files. Each imports from `../api/paperless-api`
+- **No cross-imports** between tool files. Each imports from `../api/paperless`
   and `./utils` only.
 - **No tests** for tool registration or callback logic. Only the API client is tested.

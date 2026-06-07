@@ -13,7 +13,7 @@ import type {
 	PostDocumentMetadata,
 	Tag,
 	TagRequest,
-} from '@/types';
+} from '#types';
 
 export class PaperlessAPI {
 	constructor(
@@ -77,7 +77,7 @@ export class PaperlessAPI {
 		const formData = new FormData();
 		formData.append('document', file);
 
-		if (metadata.title != null) {
+		if (metadata['title'] != null) {
 			formData.append('title', metadata.title);
 		}
 		if (metadata.created != null) {

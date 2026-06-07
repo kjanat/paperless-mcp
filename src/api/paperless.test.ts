@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, spyOn, test } from 'bun:test';
 import type { Mock } from 'bun:test';
 
-import { PaperlessAPI } from './paperless-api';
+import { PaperlessAPI } from '#api/paperless';
 
 const BASE_URL = 'http://paperless.test';
 const TOKEN = 'test-token-123';
@@ -90,14 +90,14 @@ describe('PaperlessAPI.request', () => {
 
 	test('throws on non-OK response with status and path', async () => {
 		stubFetch({ detail: 'Not found' }, 404);
-		await expect(api.request('/documents/999/')).rejects.toThrow('HTTP 404');
+		expect(api.request('/documents/999/')).rejects.toThrow('HTTP 404');
 	});
 
 	test('throws on non-OK even when body is not JSON', async () => {
 		fetchSpy = spyOn(globalThis, 'fetch').mockResolvedValue(
 			new Response('not json', { status: 500 }),
 		);
-		await expect(api.request('/bad/')).rejects.toThrow('HTTP 500');
+		expect(api.request('/bad/')).rejects.toThrow('HTTP 500');
 	});
 
 	test('returns undefined for 204 No Content without calling json()', async () => {
@@ -195,7 +195,7 @@ describe('PaperlessAPI.postDocument', () => {
 	test('throws on non-OK upload response with body', async () => {
 		stubFetch({ detail: 'Too large' }, 413);
 		const file = new File([new Blob(['x'])], 'big.pdf');
-		await expect(api.postDocument(file)).rejects.toThrow('HTTP 413');
+		expect(api.postDocument(file)).rejects.toThrow('HTTP 413');
 	});
 
 	test('sends auth and accept headers but no Content-Type (FormData sets it)', async () => {

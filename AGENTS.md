@@ -15,8 +15,8 @@ src/
 ├── index.ts                 # Entry: dreamcli CLI, server factory, dual transport
 ├── types.ts                 # Typed interfaces from OpenAPI schema (v6.0.0)
 ├── api/
-│   ├── paperless-api.ts     # HTTP client wrapping Paperless-ngx REST API
-│   └── paperless-api.test.ts
+│   ├── paperless.ts     # HTTP client wrapping Paperless-ngx REST API
+│   └── paperless.test.ts
 └── tools/
     ├── utils.ts             # Shared jsonResult() helper
     ├── documents.ts         # 5 tools: bulk_edit, post, get, search, download
@@ -33,7 +33,7 @@ No barrel files. No cross-imports between leaf modules.
 | ------------------------ | ----------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Add/change response type | `src/types.ts`                            | Interfaces from OpenAPI schema                                                                                                                                                                                    |
 | Add new MCP tool domain  | `src/tools/` + register in `src/index.ts` | Follow `register*Tools(server, api)` pattern                                                                                                                                                                      |
-| Add new API endpoint     | `src/api/paperless-api.ts`                | Methods wrap `this.request<T>(path, options)`                                                                                                                                                                     |
+| Add new API endpoint     | `src/api/paperless.ts`                    | Methods wrap `this.request<T>(path, options)`                                                                                                                                                                     |
 | Change transport/startup | `src/index.ts`                            | stdio vs HTTP decided by `--http` CLI flag                                                                                                                                                                        |
 | Zod input schemas        | `src/tools/*.ts`                          | Inline in `server.registerTool()` calls                                                                                                                                                                           |
 | CI/CD                    | `.github/workflows/`                      | `npm-publish` (test + `npm publish --provenance` on release), <br> `release-notes` (set release body from CHANGELOG), <br> `schema-check` (codegen drift guard), <br> `schema-update` (weekly upstream-schema PR) |
@@ -49,7 +49,7 @@ Includes: `Document`, `DocumentSummary`, `Tag`, `Correspondent`, `DocumentType`,
 enums (`BulkEditMethod`, `MatchingAlgorithm`), and nested types (`ObjectPermissions`,
 `CustomFieldInstance`, `Note`).
 
-### `PaperlessAPI` (src/api/paperless-api.ts)
+### `PaperlessAPI` (src/api/paperless.ts)
 
 Single class, 16 methods. All return typed responses (not `Promise<unknown>`).
 `request<T>()` is generic base — adds token auth (`version=6`), JSON content type,
@@ -111,7 +111,7 @@ keep the server alive and shut it down gracefully.
 - **Zod at boundary**: All MCP tool inputs validated via inline Zod schemas.
 - **`import { z } from 'zod'`** — not `import * as z from 'zod/v4'`.
 - **Named exports only**: No default exports.
-- **kebab-case filenames**: `paperless-api.ts`, not `PaperlessAPI.ts`.
+- **kebab-case filenames**: `paperless.ts`, not `PaperlessAPI.ts`.
 - **Bun-first**: `bun` for runtime, bundling (`bun bd`), and testing (`bun test`).
 - **dprint** for formatting (`bun run fmt`). Tab indentation, single quotes.
 - **tsgo** for typechecking (`bun run typecheck`). Not `tsc`.
@@ -130,7 +130,7 @@ keep the server alive and shut it down gracefully.
 - ~~`package.json` `main` pointed to `src/index.ts`~~ — removed in v2.0.1.
 - `process.exit(1)` for missing config makes startup logic untestable.
 - No tests for tool registration or callback logic. Only the API client is tested.
-- `as` casts exist in `paperless-api.ts` (response JSON cast to generic `T`
+- `as` casts exist in `paperless.ts` (response JSON cast to generic `T`
   without runtime validation) despite project convention forbidding them.
 - ~~Server version hardcoded as `'1.0.0'`~~ — now imported from `package.json`.
 - CI only runs `bun test` — no typecheck or format check in pipeline.

@@ -249,7 +249,7 @@ Major rewrite of internals while preserving the same MCP tool surface.
 - Migrated runtime, bundler, and test runner from npm to **Bun**.
 - Reformatted entire codebase with dprint (tab indentation, single quotes).
 - Strictened tsconfig: ESNext target/module, strict mode enabled.
-- Renamed `PaperlessAPI.ts` to `paperless-api.ts` (kebab-case convention).
+- Renamed `PaperlessAPI.ts` to `paperless.ts` (kebab-case convention).
 - Moved `express` to `optionalDependencies` (only needed for HTTP transport).
 - Stateless HTTP transport: fresh `McpServer` created per request.
 
