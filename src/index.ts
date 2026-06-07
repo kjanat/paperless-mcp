@@ -1,6 +1,6 @@
 import type { IncomingMessage, ServerResponse } from 'node:http';
-import { parseArgs } from 'node:util';
 
+import { arg, cli, command, flag } from '@kjanat/dreamcli';
 import { createMcpExpressApp } from '@modelcontextprotocol/sdk/server/express.js';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
@@ -22,14 +22,6 @@ interface ParsedRequest extends IncomingMessage {
 	body?: unknown;
 }
 
-interface CliOptions {
-	readonly useHttp: boolean;
-	readonly port: number;
-	readonly positional: readonly string[];
-	readonly showVersion: boolean;
-	readonly showHelp: boolean;
-}
-
 function jsonRpcError(code: number, message: string): JSONRPCErrorResponse {
 	return { jsonrpc: '2.0', error: { code, message } };
 }
@@ -44,52 +36,14 @@ function sendJsonRpcError(
 	res.end(JSON.stringify(jsonRpcError(rpcCode, message)));
 }
 
-function printUsage(log: (message: string) => void = console.error): void {
-	log(
-		`Usage: paperless-mcp [baseUrl] [token] [--http] [--port <1-65535>] [-V|--version] [-h|--help]
-  Args:  paperless-mcp http://localhost:8000 your-api-token
-  Env:   PAPERLESS_URL + PAPERLESS_API_KEY (or legacy API_KEY)`,
-	);
-}
-
-function parsePort(raw: string): number {
+function parsePort(raw: unknown): number {
 	const port = Number(raw);
 
 	if (!Number.isInteger(port) || port < 1 || port > 65535) {
-		throw new Error(`Invalid --port value "${raw}". Expected an integer 1-65535.`);
+		throw new Error(`Invalid --port value "${String(raw)}". Expected an integer 1-65535.`);
 	}
 
 	return port;
-}
-
-function parseCliArgs(argv: readonly string[]): CliOptions {
-	const { values, positionals } = parseArgs({
-		args: [...argv],
-		options: {
-			http: { type: 'boolean', default: false },
-			port: { type: 'string' },
-			version: { type: 'boolean', short: 'V', default: false },
-			help: { type: 'boolean', short: 'h', default: false },
-		},
-		strict: true,
-		allowPositionals: true,
-	});
-
-	return {
-		useHttp: values.http,
-		// --version/--help short-circuit in main() before --port is validated.
-		port: values.port != null && !values.version && !values.help
-			? parsePort(values.port)
-			: DEFAULT_PORT,
-		positional: positionals,
-		showVersion: values.version,
-		showHelp: values.help,
-	};
-}
-
-/** Resolve API key from env, preferring PAPERLESS_API_KEY over legacy API_KEY. */
-function resolveToken(): string | undefined {
-	return process.env['PAPERLESS_API_KEY'] ?? process.env['API_KEY'];
 }
 
 function normalizeBaseUrl(input: string): string {
@@ -134,61 +88,73 @@ async function handleMcpHttpRequest(
 	}
 }
 
-async function main(): Promise<void> {
-	const cli = parseCliArgs(process.argv.slice(2));
+const serve = command('paperless-mcp')
+	.description('MCP server for the Paperless-ngx document management system.')
+	.arg(
+		'baseUrl',
+		arg
+			.string()
+			.env('PAPERLESS_URL')
+			.describe('Paperless-ngx base URL, e.g. http://localhost:8000'),
+	)
+	.arg(
+		'token',
+		arg
+			.string()
+			.env('PAPERLESS_API_KEY')
+			.describe('Paperless-ngx API token'),
+	)
+	.flag(
+		'http',
+		flag
+			.boolean()
+			.describe('Serve over Streamable HTTP instead of stdio (the default).'),
+	)
+	.flag(
+		'port',
+		flag
+			.custom(parsePort)
+			.default(DEFAULT_PORT)
+			.describe('Port for the HTTP transport (1-65535).'),
+	)
+	.example('paperless-mcp http://localhost:8000 your-api-token', 'Serve over stdio')
+	.example('paperless-mcp --http --port 8080', 'Serve over HTTP using env credentials')
+	.action(async ({ args, flags, out }) => {
+		const baseUrl = normalizeBaseUrl(args.baseUrl);
+		const api = new PaperlessAPI(baseUrl, args.token);
 
-	if (cli.showHelp) {
-		printUsage(console.log);
-		return;
-	}
+		if (flags.http) {
+			const app = createMcpExpressApp({ host: '0.0.0.0' });
 
-	if (cli.showVersion) {
-		console.log(pkg.version);
-		return;
-	}
+			app.post('/mcp', (req: ParsedRequest, res: ServerResponse) => {
+				void handleMcpHttpRequest(req, res, api);
+			});
 
-	const rawBaseUrl = cli.positional[0] ?? process.env['PAPERLESS_URL'];
-	const token = cli.positional[1] ?? resolveToken();
+			app.all('/mcp', (_req: ParsedRequest, res: ServerResponse) => {
+				sendJsonRpcError(res, 405, -32000, 'Method not allowed.');
+			});
 
-	if (!rawBaseUrl || !token) {
-		printUsage();
-		process.exitCode = 1;
-		return;
-	}
+			app.listen(flags.port, () => {
+				out.log(`MCP Stateless Streamable HTTP Server listening on port ${flags.port}`);
+			});
+		} else {
+			const server = createServer(api);
+			const transport = new StdioServerTransport();
+			await server.connect(transport);
+		}
 
-	const baseUrl = normalizeBaseUrl(rawBaseUrl);
-	const api = new PaperlessAPI(baseUrl, token);
+		// dreamcli's run() exits the process once the action resolves; keep it
+		// pending so the long-lived stdio/HTTP server stays up until terminated.
+		await new Promise<never>(() => {});
+	});
 
-	if (cli.useHttp) {
-		const app = createMcpExpressApp({ host: '0.0.0.0' });
-
-		app.post('/mcp', (req: ParsedRequest, res: ServerResponse) => {
-			void handleMcpHttpRequest(req, res, api);
-		});
-
-		app.all('/mcp', (_req: ParsedRequest, res: ServerResponse) => {
-			sendJsonRpcError(res, 405, -32000, 'Method not allowed.');
-		});
-
-		app.listen(cli.port, () => {
-			console.log(
-				`MCP Stateless Streamable HTTP Server listening on port ${cli.port}`,
-			);
-		});
-
-		return;
-	}
-
-	const server = createServer(api);
-	const transport = new StdioServerTransport();
-	await server.connect(transport);
+// Honor the legacy API_KEY env var by mapping it onto the name dreamcli resolves.
+if (process.env['PAPERLESS_API_KEY'] == null && process.env['API_KEY'] != null) {
+	process.env['PAPERLESS_API_KEY'] = process.env['API_KEY'];
 }
 
-main().catch((error: unknown) => {
-	if (error instanceof Error) {
-		console.error(error.stack ?? error.message);
-	} else {
-		console.error(String(error));
-	}
-	process.exitCode = 1;
-});
+void cli('paperless-mcp')
+	.version(pkg.version)
+	.description(pkg.description)
+	.default(serve)
+	.run();
