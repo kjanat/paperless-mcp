@@ -5,7 +5,7 @@ license: MIT
 compatibility: Requires a running Paperless-ngx instance with API token. MCP server must be connected with mcp_paperless_* tools available.
 metadata:
   author: kjanat
-  version: "2.3.1"
+  version: "2.3.2"
 ---
 
 # Paperless-ngx Document Management
