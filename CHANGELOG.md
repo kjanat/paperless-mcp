@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `-V`/`--version` prints the version, and `-h`/`--help` prints usage — both
+  exit cleanly instead of erroring with `ERR_PARSE_ARGS_UNKNOWN_OPTION`.
+
 ## [2.2.2] - 2026-06-07
 
 ### Changed

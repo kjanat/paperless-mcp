@@ -26,6 +26,8 @@ interface CliOptions {
 	readonly useHttp: boolean;
 	readonly port: number;
 	readonly positional: readonly string[];
+	readonly showVersion: boolean;
+	readonly showHelp: boolean;
 }
 
 function jsonRpcError(code: number, message: string): JSONRPCErrorResponse {
@@ -42,9 +44,9 @@ function sendJsonRpcError(
 	res.end(JSON.stringify(jsonRpcError(rpcCode, message)));
 }
 
-function printUsage(): void {
-	console.error(
-		`Usage: paperless-mcp [baseUrl] [token] [--http] [--port <1-65535>]
+function printUsage(log: (message: string) => void = console.error): void {
+	log(
+		`Usage: paperless-mcp [baseUrl] [token] [--http] [--port <1-65535>] [-V|--version] [-h|--help]
   Args:  paperless-mcp http://localhost:8000 your-api-token
   Env:   PAPERLESS_URL + PAPERLESS_API_KEY (or legacy API_KEY)`,
 	);
@@ -66,6 +68,8 @@ function parseCliArgs(argv: readonly string[]): CliOptions {
 		options: {
 			http: { type: 'boolean', default: false },
 			port: { type: 'string' },
+			version: { type: 'boolean', short: 'V', default: false },
+			help: { type: 'boolean', short: 'h', default: false },
 		},
 		strict: true,
 		allowPositionals: true,
@@ -73,8 +77,13 @@ function parseCliArgs(argv: readonly string[]): CliOptions {
 
 	return {
 		useHttp: values.http,
-		port: values.port != null ? parsePort(values.port) : DEFAULT_PORT,
+		// --version/--help short-circuit in main() before --port is validated.
+		port: values.port != null && !values.version && !values.help
+			? parsePort(values.port)
+			: DEFAULT_PORT,
 		positional: positionals,
+		showVersion: values.version,
+		showHelp: values.help,
 	};
 }
 
@@ -127,6 +136,16 @@ async function handleMcpHttpRequest(
 
 async function main(): Promise<void> {
 	const cli = parseCliArgs(process.argv.slice(2));
+
+	if (cli.showHelp) {
+		printUsage(console.log);
+		return;
+	}
+
+	if (cli.showVersion) {
+		console.log(pkg.version);
+		return;
+	}
 
 	const rawBaseUrl = cli.positional[0] ?? process.env['PAPERLESS_URL'];
 	const token = cli.positional[1] ?? resolveToken();
