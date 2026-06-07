@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.1.2] - 2026-06-07
+
+### Fixed
+
+- Keep README code examples formatted with spaces by overriding the remote dprint
+  tab configuration for the README Prettier plugin.
+- Use the correct `npm.im` package-version URL in the npm publish environment.
+
 ## [2.1.1] - 2026-06-07
 
 ### Changed
@@ -158,7 +166,8 @@ Major rewrite of internals while preserving the same MCP tool surface.
 - Smithery configuration (broken `smithery.yaml`).
 - Obsolete Cursor rules.
 
-[Unreleased]: https://github.com/kjanat/paperless-mcp/compare/v2.1.1...HEAD
+[Unreleased]: https://github.com/kjanat/paperless-mcp/compare/v2.1.2...HEAD
+[2.1.2]: https://github.com/kjanat/paperless-mcp/compare/v2.1.1...v2.1.2
 [2.1.1]: https://github.com/kjanat/paperless-mcp/compare/v2.1.0...v2.1.1
 [2.1.0]: https://github.com/kjanat/paperless-mcp/compare/v2.0.1...v2.1.0
 [2.0.1]: https://github.com/kjanat/paperless-mcp/compare/v2.0.0...v2.0.1
