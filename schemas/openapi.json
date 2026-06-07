@@ -1,6 +1,81 @@
 {
 	"components": {
 		"schemas": {
+			"AISuggestions": {
+				"properties": {
+					"correspondents": {
+						"items": {
+							"type": "integer"
+						},
+						"type": "array"
+					},
+					"dates": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					},
+					"document_types": {
+						"items": {
+							"type": "integer"
+						},
+						"type": "array"
+					},
+					"storage_paths": {
+						"items": {
+							"type": "integer"
+						},
+						"type": "array"
+					},
+					"suggested_correspondents": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					},
+					"suggested_document_types": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					},
+					"suggested_storage_paths": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					},
+					"suggested_tags": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					},
+					"tags": {
+						"items": {
+							"type": "integer"
+						},
+						"type": "array"
+					},
+					"title": {
+						"nullable": true,
+						"type": "string"
+					}
+				},
+				"required": [
+					"correspondents",
+					"dates",
+					"document_types",
+					"storage_paths",
+					"suggested_correspondents",
+					"suggested_document_types",
+					"suggested_storage_paths",
+					"suggested_tags",
+					"tags",
+					"title"
+				],
+				"type": "object"
+			},
 			"AccountTypeEnum": {
 				"description": "* `1` - IMAP\n* `2` - Gmail OAuth\n* `3` - Outlook OAuth",
 				"enum": [
@@ -18,6 +93,21 @@
 				},
 				"required": [
 					"result"
+				],
+				"type": "object"
+			},
+			"AcknowledgeTasksViewRequest": {
+				"properties": {
+					"tasks": {
+						"items": {
+							"type": "integer"
+						},
+						"type": "array",
+						"writeOnly": true
+					}
+				},
+				"required": [
+					"tasks"
 				],
 				"type": "object"
 			},
@@ -55,6 +145,21 @@
 						"nullable": true,
 						"title": "Application title",
 						"type": "string"
+					},
+					"archive_file_generation": {
+						"nullable": true,
+						"oneOf": [
+							{
+								"$ref": "#/components/schemas/ArchiveFileGenerationEnum"
+							},
+							{
+								"$ref": "#/components/schemas/BlankEnum"
+							},
+							{
+								"$ref": "#/components/schemas/NullEnum"
+							}
+						],
+						"title": "Controls archive file generation"
 					},
 					"barcode_asn_prefix": {
 						"maxLength": 32,
@@ -181,6 +286,14 @@
 						],
 						"title": "Sets the LLM backend"
 					},
+					"llm_context_size": {
+						"format": "int64",
+						"maximum": 9223372036854775807,
+						"minimum": 1,
+						"nullable": true,
+						"title": "Sets the LLM context size",
+						"type": "integer"
+					},
 					"llm_embedding_backend": {
 						"nullable": true,
 						"oneOf": [
@@ -195,6 +308,20 @@
 							}
 						],
 						"title": "Sets the LLM embedding backend"
+					},
+					"llm_embedding_chunk_size": {
+						"format": "int64",
+						"maximum": 9223372036854775807,
+						"minimum": 1,
+						"nullable": true,
+						"title": "Sets the LLM embedding chunk size",
+						"type": "integer"
+					},
+					"llm_embedding_endpoint": {
+						"maxLength": 256,
+						"nullable": true,
+						"title": "Sets the LLM embedding endpoint, optional",
+						"type": "string"
 					},
 					"llm_embedding_model": {
 						"maxLength": 128,
@@ -212,6 +339,12 @@
 						"maxLength": 128,
 						"nullable": true,
 						"title": "Sets the LLM model",
+						"type": "string"
+					},
+					"llm_output_language": {
+						"maxLength": 32,
+						"nullable": true,
+						"title": "Sets the LLM output language",
 						"type": "string"
 					},
 					"max_image_pixels": {
@@ -271,21 +404,6 @@
 						"title": "Sets the threshold for rotation of pages",
 						"type": "number"
 					},
-					"skip_archive_file": {
-						"nullable": true,
-						"oneOf": [
-							{
-								"$ref": "#/components/schemas/SkipArchiveFileEnum"
-							},
-							{
-								"$ref": "#/components/schemas/BlankEnum"
-							},
-							{
-								"$ref": "#/components/schemas/NullEnum"
-							}
-						],
-						"title": "Controls the generation of an archive file"
-					},
 					"unpaper_clean": {
 						"nullable": true,
 						"oneOf": [
@@ -331,6 +449,21 @@
 						"nullable": true,
 						"title": "Application title",
 						"type": "string"
+					},
+					"archive_file_generation": {
+						"nullable": true,
+						"oneOf": [
+							{
+								"$ref": "#/components/schemas/ArchiveFileGenerationEnum"
+							},
+							{
+								"$ref": "#/components/schemas/BlankEnum"
+							},
+							{
+								"$ref": "#/components/schemas/NullEnum"
+							}
+						],
+						"title": "Controls archive file generation"
 					},
 					"barcode_asn_prefix": {
 						"maxLength": 32,
@@ -454,6 +587,14 @@
 						],
 						"title": "Sets the LLM backend"
 					},
+					"llm_context_size": {
+						"format": "int64",
+						"maximum": 9223372036854775807,
+						"minimum": 1,
+						"nullable": true,
+						"title": "Sets the LLM context size",
+						"type": "integer"
+					},
 					"llm_embedding_backend": {
 						"nullable": true,
 						"oneOf": [
@@ -468,6 +609,20 @@
 							}
 						],
 						"title": "Sets the LLM embedding backend"
+					},
+					"llm_embedding_chunk_size": {
+						"format": "int64",
+						"maximum": 9223372036854775807,
+						"minimum": 1,
+						"nullable": true,
+						"title": "Sets the LLM embedding chunk size",
+						"type": "integer"
+					},
+					"llm_embedding_endpoint": {
+						"maxLength": 256,
+						"nullable": true,
+						"title": "Sets the LLM embedding endpoint, optional",
+						"type": "string"
 					},
 					"llm_embedding_model": {
 						"maxLength": 128,
@@ -485,6 +640,12 @@
 						"maxLength": 128,
 						"nullable": true,
 						"title": "Sets the LLM model",
+						"type": "string"
+					},
+					"llm_output_language": {
+						"maxLength": 32,
+						"nullable": true,
+						"title": "Sets the LLM output language",
 						"type": "string"
 					},
 					"max_image_pixels": {
@@ -544,21 +705,6 @@
 						"title": "Sets the threshold for rotation of pages",
 						"type": "number"
 					},
-					"skip_archive_file": {
-						"nullable": true,
-						"oneOf": [
-							{
-								"$ref": "#/components/schemas/SkipArchiveFileEnum"
-							},
-							{
-								"$ref": "#/components/schemas/BlankEnum"
-							},
-							{
-								"$ref": "#/components/schemas/NullEnum"
-							}
-						],
-						"title": "Controls the generation of an archive file"
-					},
 					"unpaper_clean": {
 						"nullable": true,
 						"oneOf": [
@@ -581,6 +727,38 @@
 				"required": [
 					"barcode_tag_mapping",
 					"user_args"
+				],
+				"type": "object"
+			},
+			"ArchiveFileGenerationEnum": {
+				"description": "* `auto` - auto\n* `always` - always\n* `never` - never",
+				"enum": [
+					"auto",
+					"always",
+					"never"
+				],
+				"type": "string"
+			},
+			"ArchiveMetadataEntry": {
+				"properties": {
+					"key": {
+						"type": "string"
+					},
+					"namespace": {
+						"type": "string"
+					},
+					"prefix": {
+						"type": "string"
+					},
+					"value": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"key",
+					"namespace",
+					"prefix",
+					"value"
 				],
 				"type": "object"
 			},
@@ -666,33 +844,45 @@
 					""
 				]
 			},
-			"BulkDownload": {
+			"BulkDeleteMailRequestRequest": {
 				"properties": {
-					"compression": {
-						"allOf": [
-							{
-								"$ref": "#/components/schemas/CompressionEnum"
-							}
-						],
-						"default": "none"
-					},
-					"content": {
-						"allOf": [
-							{
-								"$ref": "#/components/schemas/ContentEnum"
-							}
-						],
-						"default": "archive"
-					},
-					"follow_formatting": {
-						"default": false,
-						"type": "boolean"
+					"mail_ids": {
+						"items": {
+							"type": "integer"
+						},
+						"type": "array"
 					}
 				},
+				"required": [
+					"mail_ids"
+				],
+				"type": "object"
+			},
+			"BulkDeleteMailResponse": {
+				"properties": {
+					"deleted_mail_ids": {
+						"items": {
+							"type": "integer"
+						},
+						"type": "array"
+					},
+					"result": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"deleted_mail_ids",
+					"result"
+				],
 				"type": "object"
 			},
 			"BulkDownloadRequest": {
 				"properties": {
+					"all": {
+						"default": false,
+						"type": "boolean",
+						"writeOnly": true
+					},
 					"compression": {
 						"allOf": [
 							{
@@ -716,14 +906,16 @@
 						"type": "array",
 						"writeOnly": true
 					},
+					"filters": {
+						"additionalProperties": {},
+						"type": "object",
+						"writeOnly": true
+					},
 					"follow_formatting": {
 						"default": false,
 						"type": "boolean"
 					}
 				},
-				"required": [
-					"documents"
-				],
 				"type": "object"
 			},
 			"BulkEditDocumentsResult": {
@@ -739,6 +931,16 @@
 			},
 			"BulkEditObjectsRequest": {
 				"properties": {
+					"all": {
+						"default": false,
+						"type": "boolean",
+						"writeOnly": true
+					},
+					"filters": {
+						"additionalProperties": {},
+						"type": "object",
+						"writeOnly": true
+					},
 					"merge": {
 						"default": false,
 						"type": "boolean",
@@ -780,19 +982,32 @@
 				},
 				"required": [
 					"object_type",
-					"objects",
 					"operation"
 				],
 				"type": "object"
 			},
 			"BulkEditRequest": {
 				"properties": {
+					"all": {
+						"default": false,
+						"type": "boolean",
+						"writeOnly": true
+					},
 					"documents": {
 						"items": {
 							"type": "integer"
 						},
 						"type": "array",
 						"writeOnly": true
+					},
+					"filters": {
+						"additionalProperties": {},
+						"type": "object",
+						"writeOnly": true
+					},
+					"from_webui": {
+						"default": false,
+						"type": "boolean"
 					},
 					"method": {
 						"allOf": [
@@ -810,7 +1025,6 @@
 					}
 				},
 				"required": [
-					"documents",
 					"method"
 				],
 				"type": "object"
@@ -833,6 +1047,7 @@
 						"type": "integer"
 					},
 					"q": {
+						"maxLength": 4000,
 						"type": "string"
 					}
 				},
@@ -848,6 +1063,7 @@
 						"type": "integer"
 					},
 					"q": {
+						"maxLength": 4000,
 						"minLength": 1,
 						"type": "string"
 					}
@@ -1276,6 +1492,39 @@
 				],
 				"type": "object"
 			},
+			"DeleteDocumentsRequest": {
+				"properties": {
+					"all": {
+						"default": false,
+						"type": "boolean",
+						"writeOnly": true
+					},
+					"documents": {
+						"items": {
+							"type": "integer"
+						},
+						"type": "array",
+						"writeOnly": true
+					},
+					"filters": {
+						"additionalProperties": {},
+						"type": "object",
+						"writeOnly": true
+					}
+				},
+				"type": "object"
+			},
+			"DeleteDocumentsResult": {
+				"properties": {
+					"result": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"result"
+				],
+				"type": "object"
+			},
 			"DisplayModeEnum": {
 				"description": "* `table` - Table\n* `smallCards` - Small Cards\n* `largeCards` - Large Cards",
 				"enum": [
@@ -1423,6 +1672,10 @@
 						"readOnly": true,
 						"type": "object"
 					},
+					"root_document": {
+						"readOnly": true,
+						"type": "integer"
+					},
 					"storage_path": {
 						"nullable": true,
 						"type": "integer"
@@ -1440,6 +1693,13 @@
 					"user_can_change": {
 						"readOnly": true,
 						"type": "boolean"
+					},
+					"versions": {
+						"items": {
+							"$ref": "#/components/schemas/DocumentVersionInfo"
+						},
+						"readOnly": true,
+						"type": "array"
 					}
 				},
 				"required": [
@@ -1456,9 +1716,11 @@
 					"original_file_name",
 					"page_count",
 					"permissions",
+					"root_document",
 					"storage_path",
 					"tags",
-					"user_can_change"
+					"user_can_change",
+					"versions"
 				],
 				"type": "object"
 			},
@@ -1590,6 +1852,17 @@
 					"document_type",
 					"storage_path",
 					"tags"
+				],
+				"type": "object"
+			},
+			"DocumentRootResponse": {
+				"properties": {
+					"root_id": {
+						"type": "integer"
+					}
+				},
+				"required": [
+					"root_id"
 				],
 				"type": "object"
 			},
@@ -1774,6 +2047,52 @@
 				],
 				"type": "object"
 			},
+			"DocumentVersionInfo": {
+				"properties": {
+					"added": {
+						"format": "date-time",
+						"type": "string"
+					},
+					"checksum": {
+						"nullable": true,
+						"type": "string"
+					},
+					"id": {
+						"type": "integer"
+					},
+					"is_root": {
+						"type": "boolean"
+					},
+					"version_label": {
+						"nullable": true,
+						"type": "string"
+					}
+				},
+				"required": [
+					"added",
+					"id",
+					"is_root"
+				],
+				"type": "object"
+			},
+			"DocumentVersionRequest": {
+				"properties": {
+					"document": {
+						"format": "binary",
+						"type": "string",
+						"writeOnly": true
+					},
+					"version_label": {
+						"maxLength": 64,
+						"nullable": true,
+						"type": "string"
+					}
+				},
+				"required": [
+					"document"
+				],
+				"type": "object"
+			},
 			"DuplicateDocumentSummary": {
 				"properties": {
 					"deleted_at": {
@@ -1792,6 +2111,58 @@
 					"deleted_at",
 					"id",
 					"title"
+				],
+				"type": "object"
+			},
+			"EditPdfDocumentsRequest": {
+				"properties": {
+					"delete_original": {
+						"default": false,
+						"type": "boolean"
+					},
+					"documents": {
+						"items": {
+							"type": "integer"
+						},
+						"type": "array",
+						"writeOnly": true
+					},
+					"from_webui": {
+						"default": false,
+						"type": "boolean"
+					},
+					"include_metadata": {
+						"default": true,
+						"type": "boolean"
+					},
+					"operations": {
+						"items": {},
+						"type": "array"
+					},
+					"source_mode": {
+						"default": "latest_version",
+						"minLength": 1,
+						"type": "string"
+					},
+					"update_document": {
+						"default": false,
+						"type": "boolean"
+					}
+				},
+				"required": [
+					"documents",
+					"operations"
+				],
+				"type": "object"
+			},
+			"EditPdfDocumentsResult": {
+				"properties": {
+					"result": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"result"
 				],
 				"type": "object"
 			},
@@ -1970,18 +2341,19 @@
 				"type": "object"
 			},
 			"LlmBackendEnum": {
-				"description": "* `openai` - OpenAI\n* `ollama` - Ollama",
+				"description": "* `openai-like` - OpenAI-compatible\n* `ollama` - Ollama",
 				"enum": [
-					"openai",
+					"openai-like",
 					"ollama"
 				],
 				"type": "string"
 			},
 			"LlmEmbeddingBackendEnum": {
-				"description": "* `openai` - OpenAI\n* `huggingface` - Huggingface",
+				"description": "* `openai-like` - OpenAI-compatible\n* `huggingface` - Huggingface\n* `ollama` - Ollama",
 				"enum": [
-					"openai",
-					"huggingface"
+					"openai-like",
+					"huggingface",
+					"ollama"
 				],
 				"type": "string"
 			},
@@ -2620,19 +2992,72 @@
 				],
 				"type": "integer"
 			},
+			"MergeDocumentsRequest": {
+				"properties": {
+					"archive_fallback": {
+						"default": false,
+						"type": "boolean"
+					},
+					"delete_originals": {
+						"default": false,
+						"type": "boolean"
+					},
+					"documents": {
+						"items": {
+							"type": "integer"
+						},
+						"type": "array",
+						"writeOnly": true
+					},
+					"from_webui": {
+						"default": false,
+						"type": "boolean"
+					},
+					"metadata_document_id": {
+						"nullable": true,
+						"type": "integer"
+					},
+					"source_mode": {
+						"default": "latest_version",
+						"minLength": 1,
+						"type": "string"
+					}
+				},
+				"required": [
+					"documents"
+				],
+				"type": "object"
+			},
+			"MergeDocumentsResult": {
+				"properties": {
+					"result": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"result"
+				],
+				"type": "object"
+			},
 			"Metadata": {
 				"properties": {
 					"archive_checksum": {
+						"nullable": true,
 						"type": "string"
 					},
 					"archive_media_filename": {
+						"nullable": true,
 						"type": "string"
 					},
 					"archive_metadata": {
-						"additionalProperties": {},
-						"type": "object"
+						"items": {
+							"$ref": "#/components/schemas/ArchiveMetadataEntry"
+						},
+						"nullable": true,
+						"type": "array"
 					},
 					"archive_size": {
+						"nullable": true,
 						"type": "integer"
 					},
 					"has_archive_version": {
@@ -2651,8 +3076,10 @@
 						"type": "string"
 					},
 					"original_metadata": {
-						"additionalProperties": {},
-						"type": "object"
+						"items": {
+							"$ref": "#/components/schemas/OriginalMetadataEntry"
+						},
+						"type": "array"
 					},
 					"original_mime_type": {
 						"type": "string"
@@ -2662,10 +3089,6 @@
 					}
 				},
 				"required": [
-					"archive_checksum",
-					"archive_media_filename",
-					"archive_metadata",
-					"archive_size",
 					"has_archive_version",
 					"lang",
 					"media_filename",
@@ -2678,7 +3101,7 @@
 				"type": "object"
 			},
 			"MethodEnum": {
-				"description": "* `set_correspondent` - set_correspondent\n* `set_document_type` - set_document_type\n* `set_storage_path` - set_storage_path\n* `add_tag` - add_tag\n* `remove_tag` - remove_tag\n* `modify_tags` - modify_tags\n* `modify_custom_fields` - modify_custom_fields\n* `delete` - delete\n* `reprocess` - reprocess\n* `set_permissions` - set_permissions\n* `rotate` - rotate\n* `merge` - merge\n* `split` - split\n* `delete_pages` - delete_pages\n* `edit_pdf` - edit_pdf\n* `remove_password` - remove_password",
+				"description": "* `set_correspondent` - set_correspondent\n* `set_document_type` - set_document_type\n* `set_storage_path` - set_storage_path\n* `add_tag` - add_tag\n* `remove_tag` - remove_tag\n* `modify_tags` - modify_tags\n* `modify_custom_fields` - modify_custom_fields\n* `set_permissions` - set_permissions\n* `delete` - delete\n* `reprocess` - reprocess\n* `rotate` - rotate\n* `merge` - merge\n* `edit_pdf` - edit_pdf\n* `remove_password` - remove_password\n* `split` - split\n* `delete_pages` - delete_pages",
 				"enum": [
 					"set_correspondent",
 					"set_document_type",
@@ -2687,15 +3110,15 @@
 					"remove_tag",
 					"modify_tags",
 					"modify_custom_fields",
+					"set_permissions",
 					"delete",
 					"reprocess",
-					"set_permissions",
 					"rotate",
 					"merge",
-					"split",
-					"delete_pages",
 					"edit_pdf",
-					"remove_password"
+					"remove_password",
+					"split",
+					"delete_pages"
 				],
 				"type": "string"
 			},
@@ -2718,12 +3141,12 @@
 				"type": "object"
 			},
 			"ModeEnum": {
-				"description": "* `skip` - skip\n* `redo` - redo\n* `force` - force\n* `skip_noarchive` - skip_noarchive",
+				"description": "* `auto` - auto\n* `force` - force\n* `redo` - redo\n* `off` - off",
 				"enum": [
-					"skip",
-					"redo",
+					"auto",
 					"force",
-					"skip_noarchive"
+					"redo",
+					"off"
 				],
 				"type": "string"
 			},
@@ -2806,6 +3229,29 @@
 				],
 				"type": "string"
 			},
+			"OriginalMetadataEntry": {
+				"properties": {
+					"key": {
+						"type": "string"
+					},
+					"namespace": {
+						"type": "string"
+					},
+					"prefix": {
+						"type": "string"
+					},
+					"value": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"key",
+					"namespace",
+					"prefix",
+					"value"
+				],
+				"type": "object"
+			},
 			"OutputTypeEnum": {
 				"description": "* `pdf` - pdf\n* `pdfa` - pdfa\n* `pdfa-1` - pdfa-1\n* `pdfa-2` - pdfa-2\n* `pdfa-3` - pdfa-3",
 				"enum": [
@@ -2819,13 +3265,6 @@
 			},
 			"PaginatedCorrespondentList": {
 				"properties": {
-					"all": {
-						"example": "[1, 2, 3]",
-						"items": {
-							"type": "integer"
-						},
-						"type": "array"
-					},
 					"count": {
 						"example": 123,
 						"type": "integer"
@@ -2857,13 +3296,6 @@
 			},
 			"PaginatedCustomFieldList": {
 				"properties": {
-					"all": {
-						"example": "[1, 2, 3]",
-						"items": {
-							"type": "integer"
-						},
-						"type": "array"
-					},
 					"count": {
 						"example": 123,
 						"type": "integer"
@@ -2895,13 +3327,6 @@
 			},
 			"PaginatedDocumentList": {
 				"properties": {
-					"all": {
-						"example": "[1, 2, 3]",
-						"items": {
-							"type": "integer"
-						},
-						"type": "array"
-					},
 					"count": {
 						"example": 123,
 						"type": "integer"
@@ -2933,13 +3358,6 @@
 			},
 			"PaginatedDocumentTypeList": {
 				"properties": {
-					"all": {
-						"example": "[1, 2, 3]",
-						"items": {
-							"type": "integer"
-						},
-						"type": "array"
-					},
 					"count": {
 						"example": 123,
 						"type": "integer"
@@ -2971,13 +3389,6 @@
 			},
 			"PaginatedGroupList": {
 				"properties": {
-					"all": {
-						"example": "[1, 2, 3]",
-						"items": {
-							"type": "integer"
-						},
-						"type": "array"
-					},
 					"count": {
 						"example": 123,
 						"type": "integer"
@@ -3009,13 +3420,6 @@
 			},
 			"PaginatedLogEntryList": {
 				"properties": {
-					"all": {
-						"example": "[1, 2, 3]",
-						"items": {
-							"type": "integer"
-						},
-						"type": "array"
-					},
 					"count": {
 						"example": 123,
 						"type": "integer"
@@ -3047,13 +3451,6 @@
 			},
 			"PaginatedMailAccountList": {
 				"properties": {
-					"all": {
-						"example": "[1, 2, 3]",
-						"items": {
-							"type": "integer"
-						},
-						"type": "array"
-					},
 					"count": {
 						"example": 123,
 						"type": "integer"
@@ -3085,13 +3482,6 @@
 			},
 			"PaginatedMailRuleList": {
 				"properties": {
-					"all": {
-						"example": "[1, 2, 3]",
-						"items": {
-							"type": "integer"
-						},
-						"type": "array"
-					},
 					"count": {
 						"example": 123,
 						"type": "integer"
@@ -3121,53 +3511,8 @@
 				],
 				"type": "object"
 			},
-			"PaginatedNotesList": {
-				"properties": {
-					"all": {
-						"example": "[1, 2, 3]",
-						"items": {
-							"type": "integer"
-						},
-						"type": "array"
-					},
-					"count": {
-						"example": 123,
-						"type": "integer"
-					},
-					"next": {
-						"example": "http://api.example.org/accounts/?page=4",
-						"format": "uri",
-						"nullable": true,
-						"type": "string"
-					},
-					"previous": {
-						"example": "http://api.example.org/accounts/?page=2",
-						"format": "uri",
-						"nullable": true,
-						"type": "string"
-					},
-					"results": {
-						"items": {
-							"$ref": "#/components/schemas/Notes"
-						},
-						"type": "array"
-					}
-				},
-				"required": [
-					"count",
-					"results"
-				],
-				"type": "object"
-			},
 			"PaginatedProcessedMailList": {
 				"properties": {
-					"all": {
-						"example": "[1, 2, 3]",
-						"items": {
-							"type": "integer"
-						},
-						"type": "array"
-					},
 					"count": {
 						"example": 123,
 						"type": "integer"
@@ -3199,13 +3544,6 @@
 			},
 			"PaginatedSavedViewList": {
 				"properties": {
-					"all": {
-						"example": "[1, 2, 3]",
-						"items": {
-							"type": "integer"
-						},
-						"type": "array"
-					},
 					"count": {
 						"example": 123,
 						"type": "integer"
@@ -3237,13 +3575,6 @@
 			},
 			"PaginatedShareLinkBundleList": {
 				"properties": {
-					"all": {
-						"example": "[1, 2, 3]",
-						"items": {
-							"type": "integer"
-						},
-						"type": "array"
-					},
 					"count": {
 						"example": 123,
 						"type": "integer"
@@ -3275,13 +3606,6 @@
 			},
 			"PaginatedShareLinkList": {
 				"properties": {
-					"all": {
-						"example": "[1, 2, 3]",
-						"items": {
-							"type": "integer"
-						},
-						"type": "array"
-					},
 					"count": {
 						"example": 123,
 						"type": "integer"
@@ -3313,13 +3637,6 @@
 			},
 			"PaginatedStoragePathList": {
 				"properties": {
-					"all": {
-						"example": "[1, 2, 3]",
-						"items": {
-							"type": "integer"
-						},
-						"type": "array"
-					},
 					"count": {
 						"example": 123,
 						"type": "integer"
@@ -3351,13 +3668,6 @@
 			},
 			"PaginatedTagList": {
 				"properties": {
-					"all": {
-						"example": "[1, 2, 3]",
-						"items": {
-							"type": "integer"
-						},
-						"type": "array"
-					},
 					"count": {
 						"example": 123,
 						"type": "integer"
@@ -3387,15 +3697,39 @@
 				],
 				"type": "object"
 			},
-			"PaginatedUserList": {
+			"PaginatedTaskSerializerV10List": {
 				"properties": {
-					"all": {
-						"example": "[1, 2, 3]",
+					"count": {
+						"example": 123,
+						"type": "integer"
+					},
+					"next": {
+						"example": "http://api.example.org/accounts/?page=4",
+						"format": "uri",
+						"nullable": true,
+						"type": "string"
+					},
+					"previous": {
+						"example": "http://api.example.org/accounts/?page=2",
+						"format": "uri",
+						"nullable": true,
+						"type": "string"
+					},
+					"results": {
 						"items": {
-							"type": "integer"
+							"$ref": "#/components/schemas/TaskSerializerV10"
 						},
 						"type": "array"
-					},
+					}
+				},
+				"required": [
+					"count",
+					"results"
+				],
+				"type": "object"
+			},
+			"PaginatedUserList": {
+				"properties": {
 					"count": {
 						"example": 123,
 						"type": "integer"
@@ -3427,13 +3761,6 @@
 			},
 			"PaginatedWorkflowActionList": {
 				"properties": {
-					"all": {
-						"example": "[1, 2, 3]",
-						"items": {
-							"type": "integer"
-						},
-						"type": "array"
-					},
 					"count": {
 						"example": 123,
 						"type": "integer"
@@ -3465,13 +3792,6 @@
 			},
 			"PaginatedWorkflowList": {
 				"properties": {
-					"all": {
-						"example": "[1, 2, 3]",
-						"items": {
-							"type": "integer"
-						},
-						"type": "array"
-					},
 					"count": {
 						"example": 123,
 						"type": "integer"
@@ -3503,13 +3823,6 @@
 			},
 			"PaginatedWorkflowTriggerList": {
 				"properties": {
-					"all": {
-						"example": "[1, 2, 3]",
-						"items": {
-							"type": "integer"
-						},
-						"type": "array"
-					},
 					"count": {
 						"example": 123,
 						"type": "integer"
@@ -3595,6 +3908,21 @@
 						"nullable": true,
 						"title": "Application title",
 						"type": "string"
+					},
+					"archive_file_generation": {
+						"nullable": true,
+						"oneOf": [
+							{
+								"$ref": "#/components/schemas/ArchiveFileGenerationEnum"
+							},
+							{
+								"$ref": "#/components/schemas/BlankEnum"
+							},
+							{
+								"$ref": "#/components/schemas/NullEnum"
+							}
+						],
+						"title": "Controls archive file generation"
 					},
 					"barcode_asn_prefix": {
 						"maxLength": 32,
@@ -3718,6 +4046,14 @@
 						],
 						"title": "Sets the LLM backend"
 					},
+					"llm_context_size": {
+						"format": "int64",
+						"maximum": 9223372036854775807,
+						"minimum": 1,
+						"nullable": true,
+						"title": "Sets the LLM context size",
+						"type": "integer"
+					},
 					"llm_embedding_backend": {
 						"nullable": true,
 						"oneOf": [
@@ -3732,6 +4068,20 @@
 							}
 						],
 						"title": "Sets the LLM embedding backend"
+					},
+					"llm_embedding_chunk_size": {
+						"format": "int64",
+						"maximum": 9223372036854775807,
+						"minimum": 1,
+						"nullable": true,
+						"title": "Sets the LLM embedding chunk size",
+						"type": "integer"
+					},
+					"llm_embedding_endpoint": {
+						"maxLength": 256,
+						"nullable": true,
+						"title": "Sets the LLM embedding endpoint, optional",
+						"type": "string"
 					},
 					"llm_embedding_model": {
 						"maxLength": 128,
@@ -3749,6 +4099,12 @@
 						"maxLength": 128,
 						"nullable": true,
 						"title": "Sets the LLM model",
+						"type": "string"
+					},
+					"llm_output_language": {
+						"maxLength": 32,
+						"nullable": true,
+						"title": "Sets the LLM output language",
 						"type": "string"
 					},
 					"max_image_pixels": {
@@ -3807,21 +4163,6 @@
 						"nullable": true,
 						"title": "Sets the threshold for rotation of pages",
 						"type": "number"
-					},
-					"skip_archive_file": {
-						"nullable": true,
-						"oneOf": [
-							{
-								"$ref": "#/components/schemas/SkipArchiveFileEnum"
-							},
-							{
-								"$ref": "#/components/schemas/BlankEnum"
-							},
-							{
-								"$ref": "#/components/schemas/NullEnum"
-							}
-						],
-						"title": "Controls the generation of an archive file"
 					},
 					"unpaper_clean": {
 						"nullable": true,
@@ -4107,6 +4448,16 @@
 						},
 						"type": "object",
 						"writeOnly": true
+					}
+				},
+				"type": "object"
+			},
+			"PatchedDocumentVersionLabelRequest": {
+				"properties": {
+					"version_label": {
+						"maxLength": 64,
+						"nullable": true,
+						"type": "string"
 					}
 				},
 				"type": "object"
@@ -4498,11 +4849,45 @@
 						"title": "View page size",
 						"type": "integer"
 					},
-					"show_in_sidebar": {
-						"type": "boolean"
-					},
-					"show_on_dashboard": {
-						"type": "boolean"
+					"set_permissions": {
+						"properties": {
+							"change": {
+								"properties": {
+									"groups": {
+										"items": {
+											"type": "integer"
+										},
+										"type": "array"
+									},
+									"users": {
+										"items": {
+											"type": "integer"
+										},
+										"type": "array"
+									}
+								},
+								"type": "object"
+							},
+							"view": {
+								"properties": {
+									"groups": {
+										"items": {
+											"type": "integer"
+										},
+										"type": "array"
+									},
+									"users": {
+										"items": {
+											"type": "integer"
+										},
+										"type": "array"
+									}
+								},
+								"type": "object"
+							}
+						},
+						"type": "object",
+						"writeOnly": true
 					},
 					"sort_field": {
 						"maxLength": 128,
@@ -4530,22 +4915,6 @@
 						"nullable": true,
 						"type": "integer",
 						"writeOnly": true
-					},
-					"file_version": {
-						"$ref": "#/components/schemas/FileVersionEnum"
-					}
-				},
-				"type": "object"
-			},
-			"PatchedShareLinkRequest": {
-				"properties": {
-					"document": {
-						"type": "integer"
-					},
-					"expiration": {
-						"format": "date-time",
-						"nullable": true,
-						"type": "string"
 					},
 					"file_version": {
 						"$ref": "#/components/schemas/FileVersionEnum"
@@ -5333,15 +5702,6 @@
 				],
 				"type": "object"
 			},
-			"ProcessedMailRequest": {
-				"properties": {
-					"owner": {
-						"nullable": true,
-						"type": "integer"
-					}
-				},
-				"type": "object"
-			},
 			"Profile": {
 				"properties": {
 					"auth_token": {
@@ -5387,8 +5747,152 @@
 				],
 				"type": "object"
 			},
+			"RebuildBundleError": {
+				"properties": {
+					"detail": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"detail"
+				],
+				"type": "object"
+			},
+			"RemovePasswordDocumentsRequest": {
+				"properties": {
+					"delete_original": {
+						"default": false,
+						"type": "boolean"
+					},
+					"documents": {
+						"items": {
+							"type": "integer"
+						},
+						"type": "array",
+						"writeOnly": true
+					},
+					"from_webui": {
+						"default": false,
+						"type": "boolean"
+					},
+					"include_metadata": {
+						"default": true,
+						"type": "boolean"
+					},
+					"password": {
+						"minLength": 1,
+						"type": "string"
+					},
+					"source_mode": {
+						"default": "latest_version",
+						"minLength": 1,
+						"type": "string"
+					},
+					"update_document": {
+						"default": false,
+						"type": "boolean"
+					}
+				},
+				"required": [
+					"documents",
+					"password"
+				],
+				"type": "object"
+			},
+			"RemovePasswordDocumentsResult": {
+				"properties": {
+					"result": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"result"
+				],
+				"type": "object"
+			},
+			"ReprocessDocumentsRequest": {
+				"properties": {
+					"all": {
+						"default": false,
+						"type": "boolean",
+						"writeOnly": true
+					},
+					"documents": {
+						"items": {
+							"type": "integer"
+						},
+						"type": "array",
+						"writeOnly": true
+					},
+					"filters": {
+						"additionalProperties": {},
+						"type": "object",
+						"writeOnly": true
+					}
+				},
+				"type": "object"
+			},
+			"ReprocessDocumentsResult": {
+				"properties": {
+					"result": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"result"
+				],
+				"type": "object"
+			},
+			"RotateDocumentsRequest": {
+				"properties": {
+					"all": {
+						"default": false,
+						"type": "boolean",
+						"writeOnly": true
+					},
+					"degrees": {
+						"type": "integer"
+					},
+					"documents": {
+						"items": {
+							"type": "integer"
+						},
+						"type": "array",
+						"writeOnly": true
+					},
+					"filters": {
+						"additionalProperties": {},
+						"type": "object",
+						"writeOnly": true
+					},
+					"from_webui": {
+						"default": false,
+						"type": "boolean"
+					},
+					"source_mode": {
+						"default": "latest_version",
+						"minLength": 1,
+						"type": "string"
+					}
+				},
+				"required": [
+					"degrees"
+				],
+				"type": "object"
+			},
+			"RotateDocumentsResult": {
+				"properties": {
+					"result": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"result"
+				],
+				"type": "object"
+			},
 			"RuleTypeEnum": {
-				"description": "* `0` - title contains\n* `1` - content contains\n* `2` - ASN is\n* `3` - correspondent is\n* `4` - document type is\n* `5` - is in inbox\n* `6` - has tag\n* `7` - has any tag\n* `8` - created before\n* `9` - created after\n* `10` - created year is\n* `11` - created month is\n* `12` - created day is\n* `13` - added before\n* `14` - added after\n* `15` - modified before\n* `16` - modified after\n* `17` - does not have tag\n* `18` - does not have ASN\n* `19` - title or content contains\n* `20` - fulltext query\n* `21` - more like this\n* `22` - has tags in\n* `23` - ASN greater than\n* `24` - ASN less than\n* `25` - storage path is\n* `26` - has correspondent in\n* `27` - does not have correspondent in\n* `28` - has document type in\n* `29` - does not have document type in\n* `30` - has storage path in\n* `31` - does not have storage path in\n* `32` - owner is\n* `33` - has owner in\n* `34` - does not have owner\n* `35` - does not have owner in\n* `36` - has custom field value\n* `37` - is shared by me\n* `38` - has custom fields\n* `39` - has custom field in\n* `40` - does not have custom field in\n* `41` - does not have custom field\n* `42` - custom fields query\n* `43` - created to\n* `44` - created from\n* `45` - added to\n* `46` - added from\n* `47` - mime type is",
+				"description": "* `0` - title contains\n* `1` - content contains\n* `2` - ASN is\n* `3` - correspondent is\n* `4` - document type is\n* `5` - is in inbox\n* `6` - has tag\n* `7` - has any tag\n* `8` - created before\n* `9` - created after\n* `10` - created year is\n* `11` - created month is\n* `12` - created day is\n* `13` - added before\n* `14` - added after\n* `15` - modified before\n* `16` - modified after\n* `17` - does not have tag\n* `18` - does not have ASN\n* `19` - title or content contains\n* `20` - fulltext query\n* `21` - more like this\n* `22` - has tags in\n* `23` - ASN greater than\n* `24` - ASN less than\n* `25` - storage path is\n* `26` - has correspondent in\n* `27` - does not have correspondent in\n* `28` - has document type in\n* `29` - does not have document type in\n* `30` - has storage path in\n* `31` - does not have storage path in\n* `32` - owner is\n* `33` - has owner in\n* `34` - does not have owner\n* `35` - does not have owner in\n* `36` - has custom field value\n* `37` - is shared by me\n* `38` - has custom fields\n* `39` - has custom field in\n* `40` - does not have custom field in\n* `41` - does not have custom field\n* `42` - custom fields query\n* `43` - created to\n* `44` - created from\n* `45` - added to\n* `46` - added from\n* `47` - mime type is\n* `48` - simple title search\n* `49` - simple text search",
 				"enum": [
 					0,
 					1,
@@ -5437,9 +5941,49 @@
 					44,
 					45,
 					46,
-					47
+					47,
+					48,
+					49
 				],
 				"type": "integer"
+			},
+			"RunTask": {
+				"properties": {
+					"task_id": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"task_id"
+				],
+				"type": "object"
+			},
+			"RunTaskError": {
+				"properties": {
+					"error": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"error"
+				],
+				"type": "object"
+			},
+			"RunTaskRequest": {
+				"properties": {
+					"task_type": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/TaskTypeEnum"
+							}
+						],
+						"writeOnly": true
+					}
+				},
+				"required": [
+					"task_type"
+				],
+				"type": "object"
 			},
 			"SanityCheck": {
 				"properties": {
@@ -5508,11 +6052,45 @@
 						"title": "View page size",
 						"type": "integer"
 					},
-					"show_in_sidebar": {
-						"type": "boolean"
-					},
-					"show_on_dashboard": {
-						"type": "boolean"
+					"permissions": {
+						"properties": {
+							"change": {
+								"properties": {
+									"groups": {
+										"items": {
+											"type": "integer"
+										},
+										"type": "array"
+									},
+									"users": {
+										"items": {
+											"type": "integer"
+										},
+										"type": "array"
+									}
+								},
+								"type": "object"
+							},
+							"view": {
+								"properties": {
+									"groups": {
+										"items": {
+											"type": "integer"
+										},
+										"type": "array"
+									},
+									"users": {
+										"items": {
+											"type": "integer"
+										},
+										"type": "array"
+									}
+								},
+								"type": "object"
+							}
+						},
+						"readOnly": true,
+						"type": "object"
 					},
 					"sort_field": {
 						"maxLength": 128,
@@ -5531,8 +6109,7 @@
 					"filter_rules",
 					"id",
 					"name",
-					"show_in_sidebar",
-					"show_on_dashboard",
+					"permissions",
 					"user_can_change"
 				],
 				"type": "object"
@@ -5625,11 +6202,45 @@
 						"title": "View page size",
 						"type": "integer"
 					},
-					"show_in_sidebar": {
-						"type": "boolean"
-					},
-					"show_on_dashboard": {
-						"type": "boolean"
+					"set_permissions": {
+						"properties": {
+							"change": {
+								"properties": {
+									"groups": {
+										"items": {
+											"type": "integer"
+										},
+										"type": "array"
+									},
+									"users": {
+										"items": {
+											"type": "integer"
+										},
+										"type": "array"
+									}
+								},
+								"type": "object"
+							},
+							"view": {
+								"properties": {
+									"groups": {
+										"items": {
+											"type": "integer"
+										},
+										"type": "array"
+									},
+									"users": {
+										"items": {
+											"type": "integer"
+										},
+										"type": "array"
+									}
+								},
+								"type": "object"
+							}
+						},
+						"type": "object",
+						"writeOnly": true
 					},
 					"sort_field": {
 						"maxLength": 128,
@@ -5642,9 +6253,7 @@
 				},
 				"required": [
 					"filter_rules",
-					"name",
-					"show_in_sidebar",
-					"show_on_dashboard"
+					"name"
 				],
 				"type": "object"
 			},
@@ -5956,15 +6565,6 @@
 				},
 				"type": "object"
 			},
-			"SkipArchiveFileEnum": {
-				"description": "* `never` - never\n* `with_text` - with_text\n* `always` - always",
-				"enum": [
-					"never",
-					"with_text",
-					"always"
-				],
-				"type": "string"
-			},
 			"SocialAccount": {
 				"properties": {
 					"id": {
@@ -6170,6 +6770,24 @@
 				},
 				"required": [
 					"name",
+					"path"
+				],
+				"type": "object"
+			},
+			"StoragePathTestRequest": {
+				"properties": {
+					"document": {
+						"type": "integer",
+						"writeOnly": true
+					},
+					"path": {
+						"minLength": 1,
+						"type": "string",
+						"writeOnly": true
+					}
+				},
+				"required": [
+					"document",
 					"path"
 				],
 				"type": "object"
@@ -6437,14 +7055,223 @@
 				],
 				"type": "object"
 			},
-			"TaskNameEnum": {
-				"description": "* `consume_file` - Consume File\n* `train_classifier` - Train Classifier\n* `check_sanity` - Check Sanity\n* `index_optimize` - Index Optimize\n* `llmindex_update` - LLM Index Update",
+			"TaskSerializerV10": {
+				"description": "Task serializer for API v10+ using new field names.",
+				"properties": {
+					"acknowledged": {
+						"readOnly": true,
+						"type": "boolean"
+					},
+					"date_created": {
+						"format": "date-time",
+						"readOnly": true,
+						"title": "Created",
+						"type": "string"
+					},
+					"date_done": {
+						"format": "date-time",
+						"nullable": true,
+						"readOnly": true,
+						"title": "Completed",
+						"type": "string"
+					},
+					"date_started": {
+						"format": "date-time",
+						"nullable": true,
+						"readOnly": true,
+						"title": "Started",
+						"type": "string"
+					},
+					"duration_seconds": {
+						"description": "Elapsed time from start to completion",
+						"format": "double",
+						"nullable": true,
+						"readOnly": true,
+						"title": "Duration (seconds)",
+						"type": "number"
+					},
+					"id": {
+						"readOnly": true,
+						"type": "integer"
+					},
+					"input_data": {
+						"description": "Structured input parameters for the task",
+						"readOnly": true
+					},
+					"owner": {
+						"nullable": true,
+						"readOnly": true,
+						"type": "integer"
+					},
+					"related_document_ids": {
+						"items": {
+							"type": "integer"
+						},
+						"readOnly": true,
+						"type": "array"
+					},
+					"result_data": {
+						"description": "Structured result data from task execution",
+						"nullable": true,
+						"readOnly": true
+					},
+					"status": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/TaskSerializerV10StatusEnum"
+							}
+						],
+						"readOnly": true
+					},
+					"status_display": {
+						"readOnly": true,
+						"type": "string"
+					},
+					"task_id": {
+						"description": "Celery task ID",
+						"readOnly": true,
+						"type": "string"
+					},
+					"task_type": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/TaskTypeEnum"
+							}
+						],
+						"description": "The kind of work being performed\n\n* `consume_file` - Consume File\n* `train_classifier` - Train Classifier\n* `sanity_check` - Sanity Check\n* `index_optimize` - Index Optimize\n* `mail_fetch` - Mail Fetch\n* `llm_index` - LLM Index\n* `empty_trash` - Empty Trash\n* `check_workflows` - Check Workflows\n* `bulk_update` - Bulk Update\n* `reprocess_document` - Reprocess Document\n* `build_share_link` - Build Share Link\n* `bulk_delete` - Bulk Delete",
+						"readOnly": true
+					},
+					"task_type_display": {
+						"readOnly": true,
+						"type": "string"
+					},
+					"trigger_source": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/TriggerSourceEnum"
+							}
+						],
+						"description": "What initiated this task\n\n* `scheduled` - Scheduled\n* `web_ui` - Web UI\n* `api_upload` - API Upload\n* `folder_consume` - Folder Consume\n* `email_consume` - Email Consume\n* `system` - System\n* `manual` - Manual",
+						"readOnly": true
+					},
+					"trigger_source_display": {
+						"readOnly": true,
+						"type": "string"
+					},
+					"wait_time_seconds": {
+						"description": "Time from task creation to worker pickup",
+						"format": "double",
+						"nullable": true,
+						"readOnly": true,
+						"title": "Wait Time (seconds)",
+						"type": "number"
+					}
+				},
+				"required": [
+					"acknowledged",
+					"date_created",
+					"date_done",
+					"date_started",
+					"duration_seconds",
+					"id",
+					"input_data",
+					"owner",
+					"related_document_ids",
+					"result_data",
+					"status",
+					"status_display",
+					"task_id",
+					"task_type",
+					"task_type_display",
+					"trigger_source",
+					"trigger_source_display",
+					"wait_time_seconds"
+				],
+				"type": "object"
+			},
+			"TaskSerializerV10StatusEnum": {
+				"description": "* `pending` - Pending\n* `started` - Started\n* `success` - Success\n* `failure` - Failure\n* `revoked` - Revoked",
+				"enum": [
+					"pending",
+					"started",
+					"success",
+					"failure",
+					"revoked"
+				],
+				"type": "string"
+			},
+			"TaskSummary": {
+				"properties": {
+					"avg_duration_seconds": {
+						"format": "double",
+						"nullable": true,
+						"type": "number"
+					},
+					"avg_wait_time_seconds": {
+						"format": "double",
+						"nullable": true,
+						"type": "number"
+					},
+					"failure_count": {
+						"type": "integer"
+					},
+					"last_failure": {
+						"format": "date-time",
+						"nullable": true,
+						"type": "string"
+					},
+					"last_run": {
+						"format": "date-time",
+						"nullable": true,
+						"type": "string"
+					},
+					"last_success": {
+						"format": "date-time",
+						"nullable": true,
+						"type": "string"
+					},
+					"pending_count": {
+						"type": "integer"
+					},
+					"success_count": {
+						"type": "integer"
+					},
+					"task_type": {
+						"type": "string"
+					},
+					"total_count": {
+						"type": "integer"
+					}
+				},
+				"required": [
+					"avg_duration_seconds",
+					"avg_wait_time_seconds",
+					"failure_count",
+					"last_failure",
+					"last_run",
+					"last_success",
+					"pending_count",
+					"success_count",
+					"task_type",
+					"total_count"
+				],
+				"type": "object"
+			},
+			"TaskTypeEnum": {
+				"description": "* `consume_file` - Consume File\n* `train_classifier` - Train Classifier\n* `sanity_check` - Sanity Check\n* `index_optimize` - Index Optimize\n* `mail_fetch` - Mail Fetch\n* `llm_index` - LLM Index\n* `empty_trash` - Empty Trash\n* `check_workflows` - Check Workflows\n* `bulk_update` - Bulk Update\n* `reprocess_document` - Reprocess Document\n* `build_share_link` - Build Share Link\n* `bulk_delete` - Bulk Delete",
 				"enum": [
 					"consume_file",
 					"train_classifier",
-					"check_sanity",
+					"sanity_check",
 					"index_optimize",
-					"llmindex_update"
+					"mail_fetch",
+					"llm_index",
+					"empty_trash",
+					"check_workflows",
+					"bulk_update",
+					"reprocess_document",
+					"build_share_link",
+					"bulk_delete"
 				],
 				"type": "string"
 			},
@@ -6461,215 +7288,46 @@
 					},
 					"redis_url": {
 						"type": "string"
+					},
+					"summary": {
+						"$ref": "#/components/schemas/TasksSummaryOverview"
 					}
 				},
 				"required": [
 					"celery_status",
 					"redis_error",
 					"redis_status",
-					"redis_url"
+					"redis_url",
+					"summary"
 				],
 				"type": "object"
 			},
-			"TasksView": {
+			"TasksSummaryOverview": {
 				"properties": {
-					"acknowledged": {
-						"description": "If the task is acknowledged via the frontend or API",
-						"type": "boolean"
-					},
-					"date_created": {
-						"description": "Datetime field when the task result was created in UTC",
-						"format": "date-time",
-						"nullable": true,
-						"title": "Created DateTime",
-						"type": "string"
-					},
-					"date_done": {
-						"description": "Datetime field when the task was completed in UTC",
-						"format": "date-time",
-						"nullable": true,
-						"title": "Completed DateTime",
-						"type": "string"
-					},
-					"duplicate_documents": {
-						"items": {
-							"$ref": "#/components/schemas/DuplicateDocumentSummary"
-						},
-						"readOnly": true,
-						"type": "array"
-					},
-					"id": {
-						"readOnly": true,
+					"days": {
 						"type": "integer"
 					},
-					"owner": {
-						"nullable": true,
+					"failure_count": {
 						"type": "integer"
 					},
-					"related_document": {
-						"nullable": true,
-						"readOnly": true,
-						"type": "string"
+					"pending_count": {
+						"type": "integer"
 					},
-					"result": {
-						"description": "The data returned by the task",
-						"nullable": true,
-						"title": "Result Data",
-						"type": "string"
+					"success_count": {
+						"type": "integer"
 					},
-					"status": {
-						"allOf": [
-							{
-								"$ref": "#/components/schemas/TasksViewStatusEnum"
-							}
-						],
-						"description": "Current state of the task being run\n\n* `FAILURE` - FAILURE\n* `PENDING` - PENDING\n* `RECEIVED` - RECEIVED\n* `RETRY` - RETRY\n* `REVOKED` - REVOKED\n* `STARTED` - STARTED\n* `SUCCESS` - SUCCESS",
-						"title": "Task State"
-					},
-					"task_file_name": {
-						"description": "Name of the file which the Task was run for",
-						"maxLength": 255,
-						"nullable": true,
-						"title": "Task Filename",
-						"type": "string"
-					},
-					"task_id": {
-						"description": "Celery ID for the Task that was run",
-						"maxLength": 255,
-						"type": "string"
-					},
-					"task_name": {
-						"description": "Name of the task that was run\n\n* `consume_file` - Consume File\n* `train_classifier` - Train Classifier\n* `check_sanity` - Check Sanity\n* `index_optimize` - Index Optimize\n* `llmindex_update` - LLM Index Update",
-						"nullable": true,
-						"oneOf": [
-							{
-								"$ref": "#/components/schemas/TaskNameEnum"
-							},
-							{
-								"$ref": "#/components/schemas/NullEnum"
-							}
-						]
-					},
-					"type": {
-						"allOf": [
-							{
-								"$ref": "#/components/schemas/TasksViewTypeEnum"
-							}
-						],
-						"description": "The type of task that was run\n\n* `auto_task` - Auto Task\n* `scheduled_task` - Scheduled Task\n* `manual_task` - Manual Task",
-						"title": "Task Type"
+					"total_count": {
+						"type": "integer"
 					}
 				},
 				"required": [
-					"duplicate_documents",
-					"id",
-					"related_document",
-					"task_id"
+					"days",
+					"failure_count",
+					"pending_count",
+					"success_count",
+					"total_count"
 				],
 				"type": "object"
-			},
-			"TasksViewRequest": {
-				"properties": {
-					"acknowledged": {
-						"description": "If the task is acknowledged via the frontend or API",
-						"type": "boolean"
-					},
-					"date_created": {
-						"description": "Datetime field when the task result was created in UTC",
-						"format": "date-time",
-						"nullable": true,
-						"title": "Created DateTime",
-						"type": "string"
-					},
-					"date_done": {
-						"description": "Datetime field when the task was completed in UTC",
-						"format": "date-time",
-						"nullable": true,
-						"title": "Completed DateTime",
-						"type": "string"
-					},
-					"owner": {
-						"nullable": true,
-						"type": "integer"
-					},
-					"result": {
-						"description": "The data returned by the task",
-						"minLength": 1,
-						"nullable": true,
-						"title": "Result Data",
-						"type": "string"
-					},
-					"status": {
-						"allOf": [
-							{
-								"$ref": "#/components/schemas/TasksViewStatusEnum"
-							}
-						],
-						"description": "Current state of the task being run\n\n* `FAILURE` - FAILURE\n* `PENDING` - PENDING\n* `RECEIVED` - RECEIVED\n* `RETRY` - RETRY\n* `REVOKED` - REVOKED\n* `STARTED` - STARTED\n* `SUCCESS` - SUCCESS",
-						"title": "Task State"
-					},
-					"task_file_name": {
-						"description": "Name of the file which the Task was run for",
-						"maxLength": 255,
-						"minLength": 1,
-						"nullable": true,
-						"title": "Task Filename",
-						"type": "string"
-					},
-					"task_id": {
-						"description": "Celery ID for the Task that was run",
-						"maxLength": 255,
-						"minLength": 1,
-						"type": "string"
-					},
-					"task_name": {
-						"description": "Name of the task that was run\n\n* `consume_file` - Consume File\n* `train_classifier` - Train Classifier\n* `check_sanity` - Check Sanity\n* `index_optimize` - Index Optimize\n* `llmindex_update` - LLM Index Update",
-						"nullable": true,
-						"oneOf": [
-							{
-								"$ref": "#/components/schemas/TaskNameEnum"
-							},
-							{
-								"$ref": "#/components/schemas/NullEnum"
-							}
-						]
-					},
-					"type": {
-						"allOf": [
-							{
-								"$ref": "#/components/schemas/TasksViewTypeEnum"
-							}
-						],
-						"description": "The type of task that was run\n\n* `auto_task` - Auto Task\n* `scheduled_task` - Scheduled Task\n* `manual_task` - Manual Task",
-						"title": "Task Type"
-					}
-				},
-				"required": [
-					"task_id"
-				],
-				"type": "object"
-			},
-			"TasksViewStatusEnum": {
-				"description": "* `FAILURE` - FAILURE\n* `PENDING` - PENDING\n* `RECEIVED` - RECEIVED\n* `RETRY` - RETRY\n* `REVOKED` - REVOKED\n* `STARTED` - STARTED\n* `SUCCESS` - SUCCESS",
-				"enum": [
-					"FAILURE",
-					"PENDING",
-					"RECEIVED",
-					"RETRY",
-					"REVOKED",
-					"STARTED",
-					"SUCCESS"
-				],
-				"type": "string"
-			},
-			"TasksViewTypeEnum": {
-				"description": "* `auto_task` - Auto Task\n* `scheduled_task` - Scheduled Task\n* `manual_task` - Manual Task",
-				"enum": [
-					"auto_task",
-					"scheduled_task",
-					"manual_task"
-				],
-				"type": "string"
 			},
 			"TrashActionEnum": {
 				"description": "* `restore` - restore\n* `empty` - empty",
@@ -6701,6 +7359,19 @@
 					"action"
 				],
 				"type": "object"
+			},
+			"TriggerSourceEnum": {
+				"description": "* `scheduled` - Scheduled\n* `web_ui` - Web UI\n* `api_upload` - API Upload\n* `folder_consume` - Folder Consume\n* `email_consume` - Email Consume\n* `system` - System\n* `manual` - Manual",
+				"enum": [
+					"scheduled",
+					"web_ui",
+					"api_upload",
+					"folder_consume",
+					"email_consume",
+					"system",
+					"manual"
+				],
+				"type": "string"
 			},
 			"UiSettingsView": {
 				"properties": {
@@ -6737,6 +7408,34 @@
 					"none"
 				],
 				"type": "string"
+			},
+			"UpdateDocumentVersionLabelResult": {
+				"properties": {
+					"added": {
+						"format": "date-time",
+						"type": "string"
+					},
+					"checksum": {
+						"nullable": true,
+						"type": "string"
+					},
+					"id": {
+						"type": "integer"
+					},
+					"is_root": {
+						"type": "boolean"
+					},
+					"version_label": {
+						"nullable": true,
+						"type": "string"
+					}
+				},
+				"required": [
+					"added",
+					"id",
+					"is_root"
+				],
+				"type": "object"
 			},
 			"User": {
 				"properties": {
@@ -7422,13 +8121,14 @@
 				"type": "object"
 			},
 			"WorkflowActionTypeEnum": {
-				"description": "* `1` - Assignment\n* `2` - Removal\n* `3` - Email\n* `4` - Webhook\n* `5` - Password removal",
+				"description": "* `1` - Assignment\n* `2` - Removal\n* `3` - Email\n* `4` - Webhook\n* `5` - Password removal\n* `6` - Move to trash",
 				"enum": [
 					1,
 					2,
 					3,
 					4,
-					5
+					5,
+					6
 				],
 				"type": "integer"
 			},
@@ -9526,6 +10226,7 @@
 						"in": "query",
 						"name": "content__icontains",
 						"schema": {
+							"minLength": 1,
 							"type": "string"
 						}
 					},
@@ -9533,6 +10234,7 @@
 						"in": "query",
 						"name": "content__iendswith",
 						"schema": {
+							"minLength": 1,
 							"type": "string"
 						}
 					},
@@ -9540,6 +10242,7 @@
 						"in": "query",
 						"name": "content__iexact",
 						"schema": {
+							"minLength": 1,
 							"type": "string"
 						}
 					},
@@ -9547,6 +10250,7 @@
 						"in": "query",
 						"name": "content__istartswith",
 						"schema": {
+							"minLength": 1,
 							"type": "string"
 						}
 					},
@@ -10038,7 +10742,7 @@
 						}
 					},
 					{
-						"description": "Advanced search query string",
+						"description": "Advanced Tantivy search query string",
 						"in": "query",
 						"name": "query",
 						"schema": {
@@ -10180,6 +10884,14 @@
 						}
 					},
 					{
+						"description": "Simple Tantivy-backed text search query string",
+						"in": "query",
+						"name": "text",
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
 						"in": "query",
 						"name": "title__icontains",
 						"schema": {
@@ -10214,6 +10926,14 @@
 							"minLength": 1,
 							"type": "string"
 						}
+					},
+					{
+						"description": "Simple Tantivy-backed title-only search query string",
+						"in": "query",
+						"name": "title_search",
+						"schema": {
+							"type": "string"
+						}
 					}
 				],
 				"responses": {
@@ -10246,7 +10966,8 @@
 		},
 		"/api/documents/bulk_download/": {
 			"post": {
-				"operationId": "documents_bulk_download_create",
+				"description": "Download multiple documents as a ZIP archive.",
+				"operationId": "bulk_download",
 				"requestBody": {
 					"content": {
 						"application/json": {
@@ -10254,19 +10975,22 @@
 								"$ref": "#/components/schemas/BulkDownloadRequest"
 							}
 						}
-					},
-					"required": true
+					}
 				},
 				"responses": {
 					"200": {
 						"content": {
-							"application/json": {
+							"application/zip": {
 								"schema": {
-									"$ref": "#/components/schemas/BulkDownload"
+									"format": "binary",
+									"type": "string"
 								}
 							}
 						},
 						"description": ""
+					},
+					"403": {
+						"description": "No response body"
 					}
 				},
 				"security": [
@@ -10382,6 +11106,89 @@
 				]
 			}
 		},
+		"/api/documents/delete/": {
+			"post": {
+				"description": "Move selected documents to trash",
+				"operationId": "documents_delete",
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/DeleteDocumentsRequest"
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/DeleteDocumentsResult"
+								}
+							}
+						},
+						"description": ""
+					}
+				},
+				"security": [
+					{
+						"PaperelessBasicAuthentication": []
+					},
+					{
+						"tokenAuth": []
+					},
+					{
+						"cookieAuth": []
+					}
+				],
+				"tags": [
+					"documents"
+				]
+			}
+		},
+		"/api/documents/edit_pdf/": {
+			"post": {
+				"description": "Perform PDF edit operations on a selected document",
+				"operationId": "documents_edit_pdf",
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/EditPdfDocumentsRequest"
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/EditPdfDocumentsResult"
+								}
+							}
+						},
+						"description": ""
+					}
+				},
+				"security": [
+					{
+						"PaperelessBasicAuthentication": []
+					},
+					{
+						"tokenAuth": []
+					},
+					{
+						"cookieAuth": []
+					}
+				],
+				"tags": [
+					"documents"
+				]
+			}
+		},
 		"/api/documents/email/": {
 			"post": {
 				"description": "Email one or more documents as attachments to one or more recipients.",
@@ -10428,6 +11235,48 @@
 					},
 					"500": {
 						"description": "No response body"
+					}
+				},
+				"security": [
+					{
+						"PaperelessBasicAuthentication": []
+					},
+					{
+						"tokenAuth": []
+					},
+					{
+						"cookieAuth": []
+					}
+				],
+				"tags": [
+					"documents"
+				]
+			}
+		},
+		"/api/documents/merge/": {
+			"post": {
+				"description": "Merge selected documents into a new document",
+				"operationId": "documents_merge",
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/MergeDocumentsRequest"
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/MergeDocumentsResult"
+								}
+							}
+						},
+						"description": ""
 					}
 				},
 				"security": [
@@ -10502,6 +11351,131 @@
 							"application/json": {
 								"schema": {
 									"type": "string"
+								}
+							}
+						},
+						"description": ""
+					}
+				},
+				"security": [
+					{
+						"PaperelessBasicAuthentication": []
+					},
+					{
+						"tokenAuth": []
+					},
+					{
+						"cookieAuth": []
+					}
+				],
+				"tags": [
+					"documents"
+				]
+			}
+		},
+		"/api/documents/remove_password/": {
+			"post": {
+				"description": "Remove password protection from selected PDFs",
+				"operationId": "documents_remove_password",
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/RemovePasswordDocumentsRequest"
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/RemovePasswordDocumentsResult"
+								}
+							}
+						},
+						"description": ""
+					}
+				},
+				"security": [
+					{
+						"PaperelessBasicAuthentication": []
+					},
+					{
+						"tokenAuth": []
+					},
+					{
+						"cookieAuth": []
+					}
+				],
+				"tags": [
+					"documents"
+				]
+			}
+		},
+		"/api/documents/reprocess/": {
+			"post": {
+				"description": "Reprocess selected documents",
+				"operationId": "documents_reprocess",
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/ReprocessDocumentsRequest"
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ReprocessDocumentsResult"
+								}
+							}
+						},
+						"description": ""
+					}
+				},
+				"security": [
+					{
+						"PaperelessBasicAuthentication": []
+					},
+					{
+						"tokenAuth": []
+					},
+					{
+						"cookieAuth": []
+					}
+				],
+				"tags": [
+					"documents"
+				]
+			}
+		},
+		"/api/documents/rotate/": {
+			"post": {
+				"description": "Rotate one or more documents",
+				"operationId": "documents_rotate",
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/RotateDocumentsRequest"
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/RotateDocumentsResult"
 								}
 							}
 						},
@@ -10789,11 +11763,71 @@
 				]
 			}
 		},
+		"/api/documents/{id}/ai_suggestions/": {
+			"get": {
+				"description": "View AI suggestions for the document",
+				"operationId": "documents_ai_suggestions_retrieve",
+				"parameters": [
+					{
+						"description": "A unique integer value identifying this document.",
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "integer"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/AISuggestions"
+								}
+							}
+						},
+						"description": ""
+					},
+					"400": {
+						"description": "No response body"
+					},
+					"403": {
+						"description": "No response body"
+					},
+					"404": {
+						"description": "No response body"
+					}
+				},
+				"security": [
+					{
+						"PaperelessBasicAuthentication": []
+					},
+					{
+						"tokenAuth": []
+					},
+					{
+						"cookieAuth": []
+					}
+				],
+				"tags": [
+					"documents"
+				]
+			}
+		},
 		"/api/documents/{id}/download/": {
 			"get": {
 				"description": "Download the document",
 				"operationId": "documents_download_retrieve",
 				"parameters": [
+					{
+						"description": "Whether or not to use the filename on disk",
+						"in": "query",
+						"name": "follow_formatting",
+						"schema": {
+							"type": "boolean"
+						}
+					},
 					{
 						"description": "A unique integer value identifying this document.",
 						"in": "path",
@@ -10844,7 +11878,7 @@
 			"post": {
 				"deprecated": true,
 				"description": "Email the document to one or more recipients as an attachment.",
-				"operationId": "documents_email_create",
+				"operationId": "documents_email_document",
 				"parameters": [
 					{
 						"description": "A unique integer value identifying this document.",
@@ -11059,24 +12093,6 @@
 						"schema": {
 							"type": "integer"
 						}
-					},
-					{
-						"description": "A page number within the paginated result set.",
-						"in": "query",
-						"name": "page",
-						"required": false,
-						"schema": {
-							"type": "integer"
-						}
-					},
-					{
-						"description": "Number of results to return per page.",
-						"in": "query",
-						"name": "page_size",
-						"required": false,
-						"schema": {
-							"type": "integer"
-						}
 					}
 				],
 				"responses": {
@@ -11084,7 +12100,10 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/PaginatedNotesList"
+									"items": {
+										"$ref": "#/components/schemas/Notes"
+									},
+									"type": "array"
 								}
 							}
 						},
@@ -11135,24 +12154,6 @@
 						"schema": {
 							"type": "integer"
 						}
-					},
-					{
-						"description": "A page number within the paginated result set.",
-						"in": "query",
-						"name": "page",
-						"required": false,
-						"schema": {
-							"type": "integer"
-						}
-					},
-					{
-						"description": "Number of results to return per page.",
-						"in": "query",
-						"name": "page_size",
-						"required": false,
-						"schema": {
-							"type": "integer"
-						}
 					}
 				],
 				"responses": {
@@ -11160,7 +12161,10 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/PaginatedNotesList"
+									"items": {
+										"$ref": "#/components/schemas/Notes"
+									},
+									"type": "array"
 								}
 							}
 						},
@@ -11211,24 +12215,6 @@
 						"schema": {
 							"type": "integer"
 						}
-					},
-					{
-						"description": "A page number within the paginated result set.",
-						"in": "query",
-						"name": "page",
-						"required": false,
-						"schema": {
-							"type": "integer"
-						}
-					},
-					{
-						"description": "Number of results to return per page.",
-						"in": "query",
-						"name": "page_size",
-						"required": false,
-						"schema": {
-							"type": "integer"
-						}
 					}
 				],
 				"requestBody": {
@@ -11256,7 +12242,10 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/PaginatedNotesList"
+									"items": {
+										"$ref": "#/components/schemas/Notes"
+									},
+									"type": "array"
 								}
 							}
 						},
@@ -11310,6 +12299,49 @@
 								"schema": {
 									"format": "binary",
 									"type": "string"
+								}
+							}
+						},
+						"description": ""
+					}
+				},
+				"security": [
+					{
+						"PaperelessBasicAuthentication": []
+					},
+					{
+						"tokenAuth": []
+					},
+					{
+						"cookieAuth": []
+					}
+				],
+				"tags": [
+					"documents"
+				]
+			}
+		},
+		"/api/documents/{id}/root/": {
+			"get": {
+				"description": "Pass a user object to serializer",
+				"operationId": "documents_root",
+				"parameters": [
+					{
+						"description": "A unique integer value identifying this document.",
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "integer"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/DocumentRootResponse"
 								}
 							}
 						},
@@ -11476,6 +12508,171 @@
 								"schema": {
 									"format": "binary",
 									"type": "string"
+								}
+							}
+						},
+						"description": ""
+					}
+				},
+				"security": [
+					{
+						"PaperelessBasicAuthentication": []
+					},
+					{
+						"tokenAuth": []
+					},
+					{
+						"cookieAuth": []
+					}
+				],
+				"tags": [
+					"documents"
+				]
+			}
+		},
+		"/api/documents/{id}/update_version/": {
+			"post": {
+				"description": "Pass a user object to serializer",
+				"operationId": "documents_update_version",
+				"parameters": [
+					{
+						"description": "A unique integer value identifying this document.",
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "integer"
+						}
+					}
+				],
+				"requestBody": {
+					"content": {
+						"multipart/form-data": {
+							"schema": {
+								"$ref": "#/components/schemas/DocumentVersionRequest"
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string"
+								}
+							}
+						},
+						"description": ""
+					}
+				},
+				"security": [
+					{
+						"PaperelessBasicAuthentication": []
+					},
+					{
+						"tokenAuth": []
+					},
+					{
+						"cookieAuth": []
+					}
+				],
+				"tags": [
+					"documents"
+				]
+			}
+		},
+		"/api/documents/{id}/versions/{version_id}/": {
+			"delete": {
+				"description": "Pass a user object to serializer",
+				"operationId": "documents_delete_version",
+				"parameters": [
+					{
+						"description": "A unique integer value identifying this document.",
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "integer"
+						}
+					},
+					{
+						"in": "path",
+						"name": "version_id",
+						"required": true,
+						"schema": {
+							"type": "integer"
+						}
+					}
+				],
+				"responses": {
+					"204": {
+						"description": "No response body"
+					}
+				},
+				"security": [
+					{
+						"PaperelessBasicAuthentication": []
+					},
+					{
+						"tokenAuth": []
+					},
+					{
+						"cookieAuth": []
+					}
+				],
+				"tags": [
+					"documents"
+				]
+			},
+			"patch": {
+				"description": "Pass a user object to serializer",
+				"operationId": "documents_update_version_label",
+				"parameters": [
+					{
+						"description": "A unique integer value identifying this document.",
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "integer"
+						}
+					},
+					{
+						"in": "path",
+						"name": "version_id",
+						"required": true,
+						"schema": {
+							"type": "integer"
+						}
+					}
+				],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/PatchedDocumentVersionLabelRequest"
+							}
+						},
+						"application/x-www-form-urlencoded": {
+							"schema": {
+								"$ref": "#/components/schemas/PatchedDocumentVersionLabelRequest"
+							}
+						},
+						"multipart/form-data": {
+							"schema": {
+								"$ref": "#/components/schemas/PatchedDocumentVersionLabelRequest"
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/UpdateDocumentVersionLabelResult"
 								}
 							}
 						},
@@ -11922,6 +13119,7 @@
 		},
 		"/api/mail_accounts/": {
 			"get": {
+				"description": "Pass a user object to serializer",
 				"operationId": "mail_accounts_list",
 				"parameters": [
 					{
@@ -11971,6 +13169,7 @@
 				]
 			},
 			"post": {
+				"description": "Pass a user object to serializer",
 				"operationId": "mail_accounts_create",
 				"requestBody": {
 					"content": {
@@ -12084,6 +13283,7 @@
 		},
 		"/api/mail_accounts/{id}/": {
 			"delete": {
+				"description": "Pass a user object to serializer",
 				"operationId": "mail_accounts_destroy",
 				"parameters": [
 					{
@@ -12117,6 +13317,7 @@
 				]
 			},
 			"get": {
+				"description": "Pass a user object to serializer",
 				"operationId": "mail_accounts_retrieve",
 				"parameters": [
 					{
@@ -12157,6 +13358,7 @@
 				]
 			},
 			"patch": {
+				"description": "Pass a user object to serializer",
 				"operationId": "mail_accounts_partial_update",
 				"parameters": [
 					{
@@ -12216,6 +13418,7 @@
 				]
 			},
 			"put": {
+				"description": "Pass a user object to serializer",
 				"operationId": "mail_accounts_update",
 				"parameters": [
 					{
@@ -12344,6 +13547,7 @@
 		},
 		"/api/mail_rules/": {
 			"get": {
+				"description": "Pass a user object to serializer",
 				"operationId": "mail_rules_list",
 				"parameters": [
 					{
@@ -12393,6 +13597,7 @@
 				]
 			},
 			"post": {
+				"description": "Pass a user object to serializer",
 				"operationId": "mail_rules_create",
 				"requestBody": {
 					"content": {
@@ -12444,6 +13649,7 @@
 		},
 		"/api/mail_rules/{id}/": {
 			"delete": {
+				"description": "Pass a user object to serializer",
 				"operationId": "mail_rules_destroy",
 				"parameters": [
 					{
@@ -12477,6 +13683,7 @@
 				]
 			},
 			"get": {
+				"description": "Pass a user object to serializer",
 				"operationId": "mail_rules_retrieve",
 				"parameters": [
 					{
@@ -12517,6 +13724,7 @@
 				]
 			},
 			"patch": {
+				"description": "Pass a user object to serializer",
 				"operationId": "mail_rules_partial_update",
 				"parameters": [
 					{
@@ -12576,6 +13784,7 @@
 				]
 			},
 			"put": {
+				"description": "Pass a user object to serializer",
 				"operationId": "mail_rules_update",
 				"parameters": [
 					{
@@ -12663,6 +13872,7 @@
 		},
 		"/api/processed_mail/": {
 			"get": {
+				"description": "Pass a user object to serializer",
 				"operationId": "processed_mail_list",
 				"parameters": [
 					{
@@ -12737,36 +13947,44 @@
 		},
 		"/api/processed_mail/bulk_delete/": {
 			"post": {
-				"operationId": "processed_mail_bulk_delete_create",
+				"description": "Delete multiple processed mail records by ID.",
+				"operationId": "processed_mail_bulk_delete",
 				"requestBody": {
 					"content": {
 						"application/json": {
 							"schema": {
-								"$ref": "#/components/schemas/ProcessedMailRequest"
+								"$ref": "#/components/schemas/BulkDeleteMailRequestRequest"
 							}
 						},
 						"application/x-www-form-urlencoded": {
 							"schema": {
-								"$ref": "#/components/schemas/ProcessedMailRequest"
+								"$ref": "#/components/schemas/BulkDeleteMailRequestRequest"
 							}
 						},
 						"multipart/form-data": {
 							"schema": {
-								"$ref": "#/components/schemas/ProcessedMailRequest"
+								"$ref": "#/components/schemas/BulkDeleteMailRequestRequest"
 							}
 						}
-					}
+					},
+					"required": true
 				},
 				"responses": {
 					"200": {
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/ProcessedMail"
+									"$ref": "#/components/schemas/BulkDeleteMailResponse"
 								}
 							}
 						},
 						"description": ""
+					},
+					"400": {
+						"description": "No response body"
+					},
+					"403": {
+						"description": "No response body"
 					}
 				},
 				"security": [
@@ -12787,6 +14005,7 @@
 		},
 		"/api/processed_mail/{id}/": {
 			"get": {
+				"description": "Pass a user object to serializer",
 				"operationId": "processed_mail_retrieve",
 				"parameters": [
 					{
@@ -13159,7 +14378,7 @@
 		},
 		"/api/remote_version/": {
 			"get": {
-				"description": "Get the current version of the Paperless-ngx server",
+				"description": "Get the current version of the Paperless-NGX server",
 				"operationId": "remote_version_retrieve",
 				"responses": {
 					"200": {
@@ -13193,8 +14412,25 @@
 		},
 		"/api/saved_views/": {
 			"get": {
+				"description": "Prefetch Django-Guardian permissions for a list before serialization, to avoid N+1 queries.",
 				"operationId": "saved_views_list",
 				"parameters": [
+					{
+						"in": "query",
+						"name": "full_perms",
+						"schema": {
+							"type": "boolean"
+						}
+					},
+					{
+						"description": "Which field to use when ordering the results.",
+						"in": "query",
+						"name": "ordering",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					},
 					{
 						"description": "A page number within the paginated result set.",
 						"in": "query",
@@ -13242,6 +14478,7 @@
 				]
 			},
 			"post": {
+				"description": "Prefetch Django-Guardian permissions for a list before serialization, to avoid N+1 queries.",
 				"operationId": "saved_views_create",
 				"requestBody": {
 					"content": {
@@ -13293,6 +14530,7 @@
 		},
 		"/api/saved_views/{id}/": {
 			"delete": {
+				"description": "Prefetch Django-Guardian permissions for a list before serialization, to avoid N+1 queries.",
 				"operationId": "saved_views_destroy",
 				"parameters": [
 					{
@@ -13326,8 +14564,16 @@
 				]
 			},
 			"get": {
+				"description": "Prefetch Django-Guardian permissions for a list before serialization, to avoid N+1 queries.",
 				"operationId": "saved_views_retrieve",
 				"parameters": [
+					{
+						"in": "query",
+						"name": "full_perms",
+						"schema": {
+							"type": "boolean"
+						}
+					},
 					{
 						"description": "A unique integer value identifying this saved view.",
 						"in": "path",
@@ -13366,6 +14612,7 @@
 				]
 			},
 			"patch": {
+				"description": "Prefetch Django-Guardian permissions for a list before serialization, to avoid N+1 queries.",
 				"operationId": "saved_views_partial_update",
 				"parameters": [
 					{
@@ -13425,6 +14672,7 @@
 				]
 			},
 			"put": {
+				"description": "Prefetch Django-Guardian permissions for a list before serialization, to avoid N+1 queries.",
 				"operationId": "saved_views_update",
 				"parameters": [
 					{
@@ -13591,6 +14839,7 @@
 		},
 		"/api/share_link_bundles/": {
 			"get": {
+				"description": "Pass a user object to serializer",
 				"operationId": "share_link_bundles_list",
 				"parameters": [
 					{
@@ -13840,6 +15089,7 @@
 				]
 			},
 			"post": {
+				"description": "Pass a user object to serializer",
 				"operationId": "share_link_bundles_create",
 				"requestBody": {
 					"content": {
@@ -13891,6 +15141,7 @@
 		},
 		"/api/share_link_bundles/{id}/": {
 			"delete": {
+				"description": "Pass a user object to serializer",
 				"operationId": "share_link_bundles_destroy",
 				"parameters": [
 					{
@@ -13924,6 +15175,7 @@
 				]
 			},
 			"get": {
+				"description": "Pass a user object to serializer",
 				"operationId": "share_link_bundles_retrieve",
 				"parameters": [
 					{
@@ -13964,6 +15216,7 @@
 				]
 			},
 			"patch": {
+				"description": "Pass a user object to serializer",
 				"operationId": "share_link_bundles_partial_update",
 				"parameters": [
 					{
@@ -14023,6 +15276,7 @@
 				]
 			},
 			"put": {
+				"description": "Pass a user object to serializer",
 				"operationId": "share_link_bundles_update",
 				"parameters": [
 					{
@@ -14085,7 +15339,8 @@
 		},
 		"/api/share_link_bundles/{id}/rebuild/": {
 			"post": {
-				"operationId": "share_link_bundles_rebuild_create",
+				"description": "Reset and re-queue a share link bundle for processing.",
+				"operationId": "share_link_bundles_rebuild",
 				"parameters": [
 					{
 						"description": "A unique integer value identifying this share link bundle.",
@@ -14127,6 +15382,16 @@
 							}
 						},
 						"description": ""
+					},
+					"400": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/RebuildBundleError"
+								}
+							}
+						},
+						"description": ""
 					}
 				},
 				"security": [
@@ -14147,6 +15412,7 @@
 		},
 		"/api/share_links/": {
 			"get": {
+				"description": "Pass a user object to serializer",
 				"operationId": "share_links_list",
 				"parameters": [
 					{
@@ -14375,6 +15641,7 @@
 				]
 			},
 			"post": {
+				"description": "Pass a user object to serializer",
 				"operationId": "share_links_create",
 				"requestBody": {
 					"content": {
@@ -14425,6 +15692,7 @@
 		},
 		"/api/share_links/{id}/": {
 			"delete": {
+				"description": "Pass a user object to serializer",
 				"operationId": "share_links_destroy",
 				"parameters": [
 					{
@@ -14458,6 +15726,7 @@
 				]
 			},
 			"get": {
+				"description": "Pass a user object to serializer",
 				"operationId": "share_links_retrieve",
 				"parameters": [
 					{
@@ -14470,124 +15739,6 @@
 						}
 					}
 				],
-				"responses": {
-					"200": {
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/ShareLink"
-								}
-							}
-						},
-						"description": ""
-					}
-				},
-				"security": [
-					{
-						"PaperelessBasicAuthentication": []
-					},
-					{
-						"tokenAuth": []
-					},
-					{
-						"cookieAuth": []
-					}
-				],
-				"tags": [
-					"share_links"
-				]
-			},
-			"patch": {
-				"operationId": "share_links_partial_update",
-				"parameters": [
-					{
-						"description": "A unique integer value identifying this share link.",
-						"in": "path",
-						"name": "id",
-						"required": true,
-						"schema": {
-							"type": "integer"
-						}
-					}
-				],
-				"requestBody": {
-					"content": {
-						"application/json": {
-							"schema": {
-								"$ref": "#/components/schemas/PatchedShareLinkRequest"
-							}
-						},
-						"application/x-www-form-urlencoded": {
-							"schema": {
-								"$ref": "#/components/schemas/PatchedShareLinkRequest"
-							}
-						},
-						"multipart/form-data": {
-							"schema": {
-								"$ref": "#/components/schemas/PatchedShareLinkRequest"
-							}
-						}
-					}
-				},
-				"responses": {
-					"200": {
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/ShareLink"
-								}
-							}
-						},
-						"description": ""
-					}
-				},
-				"security": [
-					{
-						"PaperelessBasicAuthentication": []
-					},
-					{
-						"tokenAuth": []
-					},
-					{
-						"cookieAuth": []
-					}
-				],
-				"tags": [
-					"share_links"
-				]
-			},
-			"put": {
-				"operationId": "share_links_update",
-				"parameters": [
-					{
-						"description": "A unique integer value identifying this share link.",
-						"in": "path",
-						"name": "id",
-						"required": true,
-						"schema": {
-							"type": "integer"
-						}
-					}
-				],
-				"requestBody": {
-					"content": {
-						"application/json": {
-							"schema": {
-								"$ref": "#/components/schemas/ShareLinkRequest"
-							}
-						},
-						"application/x-www-form-urlencoded": {
-							"schema": {
-								"$ref": "#/components/schemas/ShareLinkRequest"
-							}
-						},
-						"multipart/form-data": {
-							"schema": {
-								"$ref": "#/components/schemas/ShareLinkRequest"
-							}
-						}
-					}
-				},
 				"responses": {
 					"200": {
 						"content": {
@@ -14651,7 +15802,7 @@
 		},
 		"/api/status/": {
 			"get": {
-				"description": "Get the current system status of the Paperless-ngx server",
+				"description": "Get the current system status of the Paperless-NGX server",
 				"operationId": "status_retrieve",
 				"responses": {
 					"200": {
@@ -14877,23 +16028,23 @@
 		},
 		"/api/storage_paths/test/": {
 			"post": {
-				"description": "Test storage path against a document",
-				"operationId": "storage_paths_test_create",
+				"description": "Test a storage path template against a document.",
+				"operationId": "storage_paths_test",
 				"requestBody": {
 					"content": {
 						"application/json": {
 							"schema": {
-								"$ref": "#/components/schemas/StoragePathRequest"
+								"$ref": "#/components/schemas/StoragePathTestRequest"
 							}
 						},
 						"application/x-www-form-urlencoded": {
 							"schema": {
-								"$ref": "#/components/schemas/StoragePathRequest"
+								"$ref": "#/components/schemas/StoragePathTestRequest"
 							}
 						},
 						"multipart/form-data": {
 							"schema": {
-								"$ref": "#/components/schemas/StoragePathRequest"
+								"$ref": "#/components/schemas/StoragePathTestRequest"
 							}
 						}
 					},
@@ -14904,7 +16055,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/StoragePath"
+									"type": "string"
 								}
 							}
 						},
@@ -15524,6 +16675,32 @@
 						}
 					},
 					{
+						"description": "Created After",
+						"in": "query",
+						"name": "date_created_after",
+						"schema": {
+							"format": "date-time",
+							"type": "string"
+						}
+					},
+					{
+						"description": "Created Before",
+						"in": "query",
+						"name": "date_created_before",
+						"schema": {
+							"format": "date-time",
+							"type": "string"
+						}
+					},
+					{
+						"description": "Is Complete",
+						"in": "query",
+						"name": "is_complete",
+						"schema": {
+							"type": "boolean"
+						}
+					},
+					{
 						"description": "Which field to use when ordering the results.",
 						"in": "query",
 						"name": "ordering",
@@ -15533,22 +16710,49 @@
 						}
 					},
 					{
-						"description": "Current state of the task being run\n\n* `FAILURE` - FAILURE\n* `PENDING` - PENDING\n* `RECEIVED` - RECEIVED\n* `RETRY` - RETRY\n* `REVOKED` - REVOKED\n* `STARTED` - STARTED\n* `SUCCESS` - SUCCESS",
+						"in": "query",
+						"name": "owner",
+						"schema": {
+							"type": "integer"
+						}
+					},
+					{
+						"description": "A page number within the paginated result set.",
+						"in": "query",
+						"name": "page",
+						"required": false,
+						"schema": {
+							"type": "integer"
+						}
+					},
+					{
+						"description": "Number of results to return per page.",
+						"in": "query",
+						"name": "page_size",
+						"required": false,
+						"schema": {
+							"type": "integer"
+						}
+					},
+					{
+						"description": "Status\n\n* `pending` - Pending\n* `started` - Started\n* `success` - Success\n* `failure` - Failure\n* `revoked` - Revoked",
+						"explode": true,
 						"in": "query",
 						"name": "status",
 						"schema": {
-							"enum": [
-								"FAILURE",
-								"PENDING",
-								"RECEIVED",
-								"RETRY",
-								"REVOKED",
-								"STARTED",
-								"SUCCESS"
-							],
-							"title": "Task State",
-							"type": "string"
-						}
+							"items": {
+								"enum": [
+									"failure",
+									"pending",
+									"revoked",
+									"started",
+									"success"
+								],
+								"type": "string"
+							},
+							"type": "array"
+						},
+						"style": "form"
 					},
 					{
 						"description": "Filter tasks by Celery UUID",
@@ -15559,34 +16763,53 @@
 						}
 					},
 					{
-						"description": "Name of the task that was run\n\n* `consume_file` - Consume File\n* `train_classifier` - Train Classifier\n* `check_sanity` - Check Sanity\n* `index_optimize` - Index Optimize\n* `llmindex_update` - LLM Index Update",
+						"description": "Task Type\n\n* `consume_file` - Consume File\n* `train_classifier` - Train Classifier\n* `sanity_check` - Sanity Check\n* `index_optimize` - Index Optimize\n* `mail_fetch` - Mail Fetch\n* `llm_index` - LLM Index\n* `empty_trash` - Empty Trash\n* `check_workflows` - Check Workflows\n* `bulk_update` - Bulk Update\n* `reprocess_document` - Reprocess Document\n* `build_share_link` - Build Share Link\n* `bulk_delete` - Bulk Delete",
+						"explode": true,
 						"in": "query",
-						"name": "task_name",
+						"name": "task_type",
 						"schema": {
-							"enum": [
-								"check_sanity",
-								"consume_file",
-								"index_optimize",
-								"llmindex_update",
-								"train_classifier"
-							],
-							"nullable": true,
-							"type": "string"
-						}
+							"items": {
+								"enum": [
+									"build_share_link",
+									"bulk_delete",
+									"bulk_update",
+									"check_workflows",
+									"consume_file",
+									"empty_trash",
+									"index_optimize",
+									"llm_index",
+									"mail_fetch",
+									"reprocess_document",
+									"sanity_check",
+									"train_classifier"
+								],
+								"type": "string"
+							},
+							"type": "array"
+						},
+						"style": "form"
 					},
 					{
-						"description": "The type of task that was run\n\n* `auto_task` - Auto Task\n* `scheduled_task` - Scheduled Task\n* `manual_task` - Manual Task",
+						"description": "Trigger Source\n\n* `scheduled` - Scheduled\n* `web_ui` - Web UI\n* `api_upload` - API Upload\n* `folder_consume` - Folder Consume\n* `email_consume` - Email Consume\n* `system` - System\n* `manual` - Manual",
+						"explode": true,
 						"in": "query",
-						"name": "type",
+						"name": "trigger_source",
 						"schema": {
-							"enum": [
-								"auto_task",
-								"manual_task",
-								"scheduled_task"
-							],
-							"title": "Task Type",
-							"type": "string"
-						}
+							"items": {
+								"enum": [
+									"api_upload",
+									"email_consume",
+									"folder_consume",
+									"manual",
+									"scheduled",
+									"system",
+									"web_ui"
+								],
+								"type": "string"
+							},
+							"type": "array"
+						},
+						"style": "form"
 					}
 				],
 				"responses": {
@@ -15594,10 +16817,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"items": {
-										"$ref": "#/components/schemas/TasksView"
-									},
-									"type": "array"
+									"$ref": "#/components/schemas/PaginatedTaskSerializerV10List"
 								}
 							}
 						},
@@ -15624,35 +16844,25 @@
 			"post": {
 				"description": "Acknowledge a list of tasks",
 				"operationId": "acknowledge_tasks",
-				"parameters": [
-					{
-						"description": "Filter tasks by Celery UUID",
-						"in": "query",
-						"name": "task_id",
-						"schema": {
-							"type": "string"
-						}
-					}
-				],
 				"requestBody": {
 					"content": {
 						"application/json": {
 							"schema": {
-								"properties": {
-									"tasks": {
-										"items": {
-											"type": "integer"
-										},
-										"type": "array"
-									}
-								},
-								"required": [
-									"tasks"
-								],
-								"type": "object"
+								"$ref": "#/components/schemas/AcknowledgeTasksViewRequest"
+							}
+						},
+						"application/x-www-form-urlencoded": {
+							"schema": {
+								"$ref": "#/components/schemas/AcknowledgeTasksViewRequest"
+							}
+						},
+						"multipart/form-data": {
+							"schema": {
+								"$ref": "#/components/schemas/AcknowledgeTasksViewRequest"
 							}
 						}
-					}
+					},
+					"required": true
 				},
 				"responses": {
 					"200": {
@@ -15664,9 +16874,162 @@
 							}
 						},
 						"description": ""
+					}
+				},
+				"security": [
+					{
+						"PaperelessBasicAuthentication": []
 					},
-					"400": {
-						"description": "No response body"
+					{
+						"tokenAuth": []
+					},
+					{
+						"cookieAuth": []
+					}
+				],
+				"tags": [
+					"tasks"
+				]
+			}
+		},
+		"/api/tasks/active/": {
+			"get": {
+				"description": "Currently pending and running tasks (capped at 50).",
+				"operationId": "tasks_active_list",
+				"parameters": [
+					{
+						"description": "Acknowledged",
+						"in": "query",
+						"name": "acknowledged",
+						"schema": {
+							"type": "boolean"
+						}
+					},
+					{
+						"description": "Created After",
+						"in": "query",
+						"name": "date_created_after",
+						"schema": {
+							"format": "date-time",
+							"type": "string"
+						}
+					},
+					{
+						"description": "Created Before",
+						"in": "query",
+						"name": "date_created_before",
+						"schema": {
+							"format": "date-time",
+							"type": "string"
+						}
+					},
+					{
+						"description": "Is Complete",
+						"in": "query",
+						"name": "is_complete",
+						"schema": {
+							"type": "boolean"
+						}
+					},
+					{
+						"description": "Which field to use when ordering the results.",
+						"in": "query",
+						"name": "ordering",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "owner",
+						"schema": {
+							"type": "integer"
+						}
+					},
+					{
+						"description": "Status\n\n* `pending` - Pending\n* `started` - Started\n* `success` - Success\n* `failure` - Failure\n* `revoked` - Revoked",
+						"explode": true,
+						"in": "query",
+						"name": "status",
+						"schema": {
+							"items": {
+								"enum": [
+									"failure",
+									"pending",
+									"revoked",
+									"started",
+									"success"
+								],
+								"type": "string"
+							},
+							"type": "array"
+						},
+						"style": "form"
+					},
+					{
+						"description": "Task Type\n\n* `consume_file` - Consume File\n* `train_classifier` - Train Classifier\n* `sanity_check` - Sanity Check\n* `index_optimize` - Index Optimize\n* `mail_fetch` - Mail Fetch\n* `llm_index` - LLM Index\n* `empty_trash` - Empty Trash\n* `check_workflows` - Check Workflows\n* `bulk_update` - Bulk Update\n* `reprocess_document` - Reprocess Document\n* `build_share_link` - Build Share Link\n* `bulk_delete` - Bulk Delete",
+						"explode": true,
+						"in": "query",
+						"name": "task_type",
+						"schema": {
+							"items": {
+								"enum": [
+									"build_share_link",
+									"bulk_delete",
+									"bulk_update",
+									"check_workflows",
+									"consume_file",
+									"empty_trash",
+									"index_optimize",
+									"llm_index",
+									"mail_fetch",
+									"reprocess_document",
+									"sanity_check",
+									"train_classifier"
+								],
+								"type": "string"
+							},
+							"type": "array"
+						},
+						"style": "form"
+					},
+					{
+						"description": "Trigger Source\n\n* `scheduled` - Scheduled\n* `web_ui` - Web UI\n* `api_upload` - API Upload\n* `folder_consume` - Folder Consume\n* `email_consume` - Email Consume\n* `system` - System\n* `manual` - Manual",
+						"explode": true,
+						"in": "query",
+						"name": "trigger_source",
+						"schema": {
+							"items": {
+								"enum": [
+									"api_upload",
+									"email_consume",
+									"folder_consume",
+									"manual",
+									"scheduled",
+									"system",
+									"web_ui"
+								],
+								"type": "string"
+							},
+							"type": "array"
+						},
+						"style": "form"
+					}
+				],
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"items": {
+										"$ref": "#/components/schemas/TaskSerializerV10"
+									},
+									"type": "array"
+								}
+							}
+						},
+						"description": ""
 					}
 				},
 				"security": [
@@ -15687,32 +17050,23 @@
 		},
 		"/api/tasks/run/": {
 			"post": {
-				"operationId": "tasks_run_create",
-				"parameters": [
-					{
-						"description": "Filter tasks by Celery UUID",
-						"in": "query",
-						"name": "task_id",
-						"schema": {
-							"type": "string"
-						}
-					}
-				],
+				"description": "Manually dispatch a background task. Superuser only.",
+				"operationId": "run_task",
 				"requestBody": {
 					"content": {
 						"application/json": {
 							"schema": {
-								"$ref": "#/components/schemas/TasksViewRequest"
+								"$ref": "#/components/schemas/RunTaskRequest"
 							}
 						},
 						"application/x-www-form-urlencoded": {
 							"schema": {
-								"$ref": "#/components/schemas/TasksViewRequest"
+								"$ref": "#/components/schemas/RunTaskRequest"
 							}
 						},
 						"multipart/form-data": {
 							"schema": {
-								"$ref": "#/components/schemas/TasksViewRequest"
+								"$ref": "#/components/schemas/RunTaskRequest"
 							}
 						}
 					},
@@ -15723,7 +17077,184 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/TasksView"
+									"$ref": "#/components/schemas/RunTask"
+								}
+							}
+						},
+						"description": ""
+					},
+					"400": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/RunTaskError"
+								}
+							}
+						},
+						"description": ""
+					}
+				},
+				"security": [
+					{
+						"PaperelessBasicAuthentication": []
+					},
+					{
+						"tokenAuth": []
+					},
+					{
+						"cookieAuth": []
+					}
+				],
+				"tags": [
+					"tasks"
+				]
+			}
+		},
+		"/api/tasks/summary/": {
+			"get": {
+				"description": "Aggregated task statistics per task_type over the last N days (default 30).",
+				"operationId": "tasks_summary_list",
+				"parameters": [
+					{
+						"description": "Acknowledged",
+						"in": "query",
+						"name": "acknowledged",
+						"schema": {
+							"type": "boolean"
+						}
+					},
+					{
+						"description": "Created After",
+						"in": "query",
+						"name": "date_created_after",
+						"schema": {
+							"format": "date-time",
+							"type": "string"
+						}
+					},
+					{
+						"description": "Created Before",
+						"in": "query",
+						"name": "date_created_before",
+						"schema": {
+							"format": "date-time",
+							"type": "string"
+						}
+					},
+					{
+						"description": "Number of days to include in aggregation (default 30, min 1, max 365)",
+						"in": "query",
+						"name": "days",
+						"schema": {
+							"default": 30,
+							"maximum": 365,
+							"minimum": 1,
+							"type": "integer"
+						}
+					},
+					{
+						"description": "Is Complete",
+						"in": "query",
+						"name": "is_complete",
+						"schema": {
+							"type": "boolean"
+						}
+					},
+					{
+						"description": "Which field to use when ordering the results.",
+						"in": "query",
+						"name": "ordering",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "owner",
+						"schema": {
+							"type": "integer"
+						}
+					},
+					{
+						"description": "Status\n\n* `pending` - Pending\n* `started` - Started\n* `success` - Success\n* `failure` - Failure\n* `revoked` - Revoked",
+						"explode": true,
+						"in": "query",
+						"name": "status",
+						"schema": {
+							"items": {
+								"enum": [
+									"failure",
+									"pending",
+									"revoked",
+									"started",
+									"success"
+								],
+								"type": "string"
+							},
+							"type": "array"
+						},
+						"style": "form"
+					},
+					{
+						"description": "Task Type\n\n* `consume_file` - Consume File\n* `train_classifier` - Train Classifier\n* `sanity_check` - Sanity Check\n* `index_optimize` - Index Optimize\n* `mail_fetch` - Mail Fetch\n* `llm_index` - LLM Index\n* `empty_trash` - Empty Trash\n* `check_workflows` - Check Workflows\n* `bulk_update` - Bulk Update\n* `reprocess_document` - Reprocess Document\n* `build_share_link` - Build Share Link\n* `bulk_delete` - Bulk Delete",
+						"explode": true,
+						"in": "query",
+						"name": "task_type",
+						"schema": {
+							"items": {
+								"enum": [
+									"build_share_link",
+									"bulk_delete",
+									"bulk_update",
+									"check_workflows",
+									"consume_file",
+									"empty_trash",
+									"index_optimize",
+									"llm_index",
+									"mail_fetch",
+									"reprocess_document",
+									"sanity_check",
+									"train_classifier"
+								],
+								"type": "string"
+							},
+							"type": "array"
+						},
+						"style": "form"
+					},
+					{
+						"description": "Trigger Source\n\n* `scheduled` - Scheduled\n* `web_ui` - Web UI\n* `api_upload` - API Upload\n* `folder_consume` - Folder Consume\n* `email_consume` - Email Consume\n* `system` - System\n* `manual` - Manual",
+						"explode": true,
+						"in": "query",
+						"name": "trigger_source",
+						"schema": {
+							"items": {
+								"enum": [
+									"api_upload",
+									"email_consume",
+									"folder_consume",
+									"manual",
+									"scheduled",
+									"system",
+									"web_ui"
+								],
+								"type": "string"
+							},
+							"type": "array"
+						},
+						"style": "form"
+					}
+				],
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"items": {
+										"$ref": "#/components/schemas/TaskSummary"
+									},
+									"type": "array"
 								}
 							}
 						},
@@ -15751,20 +17282,12 @@
 				"operationId": "tasks_retrieve",
 				"parameters": [
 					{
-						"description": "A unique integer value identifying this paperless task.",
+						"description": "A unique integer value identifying this Task.",
 						"in": "path",
 						"name": "id",
 						"required": true,
 						"schema": {
 							"type": "integer"
-						}
-					},
-					{
-						"description": "Filter tasks by Celery UUID",
-						"in": "query",
-						"name": "task_id",
-						"schema": {
-							"type": "string"
 						}
 					}
 				],
@@ -15773,7 +17296,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/TasksView"
+									"$ref": "#/components/schemas/TaskSerializerV10"
 								}
 							}
 						},

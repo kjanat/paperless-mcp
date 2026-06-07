@@ -27,4 +27,4 @@ jobs:
       - uses: kjanat/runner@master
       - id: meta
         run: runner install --frozen meta
-      - run: bunx -p=npm@$NPM_VERSION npm publish --provenance --tag latest
+      - run: bunx -p=npm@"$NPM_VERSION" npm publish --provenance --tag latest
