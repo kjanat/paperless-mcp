@@ -53,32 +53,44 @@ Returns `{ blob: string, filename: string }`.
 
 ### bulk_edit_documents
 
-| Param                  | Type     | Required | Notes                           |
-| ---------------------- | -------- | -------- | ------------------------------- |
-| `documents`            | number[] | yes      | Document IDs                    |
-| `method`               | enum     | yes      | See method table below          |
-| `correspondent`        | number   | no       | For `set_correspondent`         |
-| `document_type`        | number   | no       | For `set_document_type`         |
-| `storage_path`         | number   | no       | For `set_storage_path`          |
-| `tag`                  | number   | no       | For `add_tag` / `remove_tag`    |
-| `add_tags`             | number[] | no       | For `modify_tags`               |
-| `remove_tags`          | number[] | no       | For `modify_tags`               |
-| `permissions`          | object   | no       | For `set_permissions`           |
-| `metadata_document_id` | number   | no       | For `merge` -- source metadata  |
-| `delete_originals`     | boolean  | no       | For `merge`/`split`             |
-| `degrees`              | number   | no       | For `rotate`: 90, 180, 270      |
-| `pages`                | string   | no       | For `delete_pages`: `"1,3,5-7"` |
+| Param                  | Type            | Required | Notes                                               |
+| ---------------------- | --------------- | -------- | --------------------------------------------------- |
+| `documents`            | number[]        | yes      | Document IDs                                        |
+| `method`               | enum            | yes      | See method table below                              |
+| `correspondent`        | number          | no       | For `set_correspondent`                             |
+| `document_type`        | number          | no       | For `set_document_type`                             |
+| `storage_path`         | number          | no       | For `set_storage_path`                              |
+| `tag`                  | number          | no       | For `add_tag` / `remove_tag`                        |
+| `add_tags`             | number[]        | no       | For `modify_tags`                                   |
+| `remove_tags`          | number[]        | no       | For `modify_tags`                                   |
+| `add_custom_fields`    | array/object    | no       | For `modify_custom_fields`                          |
+| `remove_custom_fields` | number[]        | no       | For `modify_custom_fields`                          |
+| `permissions`          | object          | no       | For `set_permissions`                               |
+| `metadata_document_id` | number          | no       | For `merge` -- source metadata                      |
+| `delete_originals`     | boolean         | no       | For `merge`/`split`                                 |
+| `degrees`              | number          | no       | For `rotate`: 90, 180, 270                          |
+| `pages`                | string/number[] | no       | String for `split`; number array for `delete_pages` |
+| `operations`           | object[]        | no       | For `edit_pdf`                                      |
+| `password`             | string          | no       | For `remove_password`                               |
+| `update_document`      | boolean         | no       | For `edit_pdf`/`remove_password`                    |
+| `delete_original`      | boolean         | no       | For `edit_pdf`/`remove_password`                    |
+| `include_metadata`     | boolean         | no       | For `edit_pdf`/`remove_password`                    |
 
 **Method enum:**
 `set_correspondent`, `set_document_type`, `set_storage_path`, `add_tag`,
-`remove_tag`, `modify_tags`, `delete`, `reprocess`, `set_permissions`,
-`merge`, `split`, `rotate`, `delete_pages`
+`remove_tag`, `modify_tags`, `modify_custom_fields`, `delete`, `reprocess`,
+`set_permissions`, `merge`, `split`, `rotate`, `delete_pages`, `edit_pdf`,
+`remove_password`
+
+The MCP tool accepts method-specific parameters as top-level arguments and sends
+only the relevant fields to Paperless' nested `parameters` payload.
 
 ## Tag Tools
 
 ### list_tags
 
-No parameters. Returns all tags with name, color, matching rules.
+No parameters. Returns all tags with name, color, matching rules. The MCP client
+fetches all pages and combines `results`.
 
 ### create_tag
 
@@ -119,7 +131,7 @@ No parameters. Returns all tags with name, color, matching rules.
 
 ### list_correspondents
 
-No parameters.
+No parameters. The MCP client fetches all pages and combines `results`.
 
 ### create_correspondent
 
@@ -143,7 +155,7 @@ No parameters.
 
 ### list_document_types
 
-No parameters.
+No parameters. The MCP client fetches all pages and combines `results`.
 
 ### create_document_type
 

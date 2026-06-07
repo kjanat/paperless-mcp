@@ -116,17 +116,17 @@ describe('PaperlessAPI.bulkEditDocuments', () => {
 		stubFetch({ result: 'ok' });
 		await api.bulkEditDocuments([1, 2], 'delete', {});
 
-		expect(lastRequestBody()).toEqual({ documents: [1, 2], method: 'delete' });
+		expect(lastRequestBody()).toEqual({ documents: [1, 2], method: 'delete', parameters: {} });
 	});
 
-	test('sends operation parameters at the top level', async () => {
+	test('sends operation parameters nested under parameters', async () => {
 		stubFetch({ result: 'ok' });
 		await api.bulkEditDocuments([3], 'set_correspondent', { correspondent: 5 });
 
 		expect(lastRequestBody()).toEqual({
 			documents: [3],
 			method: 'set_correspondent',
-			correspondent: 5,
+			parameters: { correspondent: 5 },
 		});
 	});
 
@@ -140,7 +140,7 @@ describe('PaperlessAPI.bulkEditDocuments', () => {
 		expect(lastRequestBody()).toEqual({
 			documents: [4],
 			method: 'set_correspondent',
-			document_type: 2,
+			parameters: { document_type: 2 },
 		});
 	});
 });

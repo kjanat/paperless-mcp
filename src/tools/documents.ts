@@ -1,6 +1,7 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
 
+import { zMethodEnum } from '@/api/generated/zod.gen';
 import type { PaperlessAPI } from '@/api/paperless-api';
 import type { PostDocumentMetadata } from '@/types';
 import { jsonResult } from './utils';
@@ -16,24 +17,7 @@ export function registerDocumentTools(server: McpServer, api: PaperlessAPI): voi
 					'Array of document IDs to perform bulk operations on. Get document IDs from search_documents first.',
 				),
 
-				method: z.enum([
-					'set_correspondent',
-					'set_document_type',
-					'set_storage_path',
-					'add_tag',
-					'remove_tag',
-					'modify_tags',
-					'modify_custom_fields',
-					'delete',
-					'reprocess',
-					'set_permissions',
-					'merge',
-					'split',
-					'rotate',
-					'delete_pages',
-					'edit_pdf',
-					'remove_password',
-				]).describe(
+				method: zMethodEnum.describe(
 					'The bulk operation to perform.',
 				),
 
@@ -59,6 +43,16 @@ export function registerDocumentTools(server: McpServer, api: PaperlessAPI): voi
 
 				remove_tags: z.array(z.number()).optional().describe(
 					"Array of tag IDs to remove when method is 'modify_tags'. Use list_tags to get valid IDs.",
+				),
+
+				add_custom_fields: z
+					.union([z.array(z.number()), z.record(z.string(), z.unknown())])
+					.optional().describe(
+						"Custom field IDs or id:value pairs to add when method is 'modify_custom_fields'.",
+					),
+
+				remove_custom_fields: z.array(z.number()).optional().describe(
+					"Custom field IDs to remove when method is 'modify_custom_fields'.",
 				),
 
 				permissions: z
@@ -97,12 +91,40 @@ export function registerDocumentTools(server: McpServer, api: PaperlessAPI): voi
 					'Whether to delete original documents after merge/split operations. Use with caution.',
 				),
 
-				pages: z.string().optional().describe(
-					"Page specification for delete_pages method. Format: '1,3,5-7' to delete pages 1, 3, and 5 through 7.",
-				),
+				pages: z
+					.union([z.string(), z.array(z.number())])
+					.optional().describe(
+						"Page specification. For split, use a string like '1-2,3-4,5'. For delete_pages, use a number array like [1, 3, 5].",
+					),
 
 				degrees: z.number().optional().describe(
 					"Rotation angle in degrees when method is 'rotate'. Use 90, 180, or 270 for standard rotations.",
+				),
+
+				operations: z
+					.array(z.object({
+						page: z.number(),
+						rotate: z.number().optional(),
+						doc: z.number().optional(),
+					}))
+					.optional().describe(
+						"PDF edit operations when method is 'edit_pdf'. Each operation needs a source page and may include rotate/doc.",
+					),
+
+				password: z.string().optional().describe(
+					"Password to remove when method is 'remove_password'.",
+				),
+
+				update_document: z.boolean().optional().describe(
+					'Whether edit_pdf/remove_password should update the existing document instead of creating a new one.',
+				),
+
+				delete_original: z.boolean().optional().describe(
+					'Whether edit_pdf/remove_password should delete the original after creating the replacement.',
+				),
+
+				include_metadata: z.boolean().optional().describe(
+					'Whether edit_pdf/remove_password should carry existing metadata to the new document. Default true.',
 				),
 			},
 		},
@@ -265,15 +287,32 @@ function documentBulkParameters(
 			return pickDefined(parameters, ['tag']);
 		case 'modify_tags':
 			return pickDefined(parameters, ['add_tags', 'remove_tags']);
+		case 'modify_custom_fields':
+			return pickDefined(parameters, ['add_custom_fields', 'remove_custom_fields']);
 		case 'set_permissions':
 			return pickDefined(parameters, ['permissions']);
 		case 'merge':
-		case 'split':
 			return pickDefined(parameters, ['metadata_document_id', 'delete_originals']);
+		case 'split':
+			return pickDefined(parameters, ['pages', 'delete_originals']);
 		case 'rotate':
 			return pickDefined(parameters, ['degrees']);
 		case 'delete_pages':
 			return pickDefined(parameters, ['pages']);
+		case 'edit_pdf':
+			return pickDefined(parameters, [
+				'operations',
+				'update_document',
+				'delete_original',
+				'include_metadata',
+			]);
+		case 'remove_password':
+			return pickDefined(parameters, [
+				'password',
+				'update_document',
+				'delete_original',
+				'include_metadata',
+			]);
 		default:
 			return {};
 	}

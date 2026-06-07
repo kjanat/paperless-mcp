@@ -1,8 +1,9 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
 
+import { zMatchingAlgorithm, zOperationEnum } from '@/api/generated/zod.gen';
 import type { PaperlessAPI } from '@/api/paperless-api';
-import { jsonResult } from './utils';
+import { jsonResult, permissionsInput } from './utils';
 
 export function registerCorrespondentTools(server: McpServer, api: PaperlessAPI): void {
 	server.registerTool(
@@ -30,9 +31,7 @@ export function registerCorrespondentTools(server: McpServer, api: PaperlessAPI)
 					'Text pattern to automatically assign this correspondent to matching documents. Use names, email addresses, or keywords that appear in documents from this correspondent.',
 				),
 
-				matching_algorithm: z.number().int().min(0).max(6).optional().describe(
-					'How to match text patterns: 0=none, 1=any word, 2=all words, 3=exact match, 4=regular expression, 5=fuzzy word, 6=automatic. Default is 0.',
-				),
+				matching_algorithm: zMatchingAlgorithm.optional(),
 
 				is_insensitive: z.boolean().optional().describe(
 					'Whether matching is case-insensitive. Default is true.',
@@ -54,7 +53,7 @@ export function registerCorrespondentTools(server: McpServer, api: PaperlessAPI)
 					'Array of correspondent IDs to perform bulk operations on. Use list_correspondents to get valid correspondent IDs.',
 				),
 
-				operation: z.enum(['set_permissions', 'delete']).describe(
+				operation: zOperationEnum.describe(
 					"Bulk operation: 'set_permissions' to control who can assign these correspondents to documents, 'delete' to permanently remove correspondents from the system. Warning: Deleting correspondents will remove them from all associated documents.",
 				),
 
@@ -62,29 +61,16 @@ export function registerCorrespondentTools(server: McpServer, api: PaperlessAPI)
 					"User ID to set as owner when operation is 'set_permissions'. The owner has full control over these correspondents.",
 				),
 
-				permissions: z
-					.object({
-						view: z.object({
-							users: z.array(z.number()).optional().describe(
-								'User IDs who can see and assign these correspondents to documents',
-							),
-
-							groups: z.array(z.number()).optional().describe(
-								'Group IDs who can see and assign these correspondents to documents',
-							),
-						}).describe('Users and groups with permission to view and use these correspondents'),
-
-						change: z.object({
-							users: z.array(z.number()).optional().describe(
-								'User IDs who can modify correspondent details (name, matching rules)',
-							),
-
-							groups: z.array(z.number()).optional().describe('Group IDs who can modify correspondent details'),
-						}).describe('Users and groups with permission to edit these correspondent settings'),
-					})
-					.optional().describe(
+				permissions: permissionsInput({
+					root:
 						"Permission settings when operation is 'set_permissions'. Defines who can view/assign and modify these correspondents.",
-					),
+					view: 'Users and groups with permission to view and use these correspondents',
+					viewUsers: 'User IDs who can see and assign these correspondents to documents',
+					viewGroups: 'Group IDs who can see and assign these correspondents to documents',
+					change: 'Users and groups with permission to edit these correspondent settings',
+					changeUsers: 'User IDs who can modify correspondent details (name, matching rules)',
+					changeGroups: 'Group IDs who can modify correspondent details',
+				}),
 
 				merge: z.boolean().optional().describe(
 					'Whether to merge with existing permissions (true) or replace them entirely (false). Default is false.',

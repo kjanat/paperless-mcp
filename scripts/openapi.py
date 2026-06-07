@@ -275,7 +275,39 @@ def extract_paths(
     }
     if kept_components:
         subset["components"] = kept_components
+    _normalize_safe_int64(subset)
     return subset
+
+
+#: Largest integer JavaScript represents exactly (Number.MAX_SAFE_INTEGER).
+_JS_MAX_SAFE_INT = 2**53 - 1
+
+
+def _normalize_safe_int64(obj: Any) -> None:
+    """Drop ``format: int64`` from integers that fit in a JS safe integer.
+
+    paperless-mcp's client returns raw ``fetch`` JSON, where every number is a
+    JS ``number`` — never a ``BigInt``. Upstream sometimes declares ``int64``
+    on fields whose ``maximum`` is well within the safe range (e.g.
+    ``archive_serial_number``, a uint32). Left as-is, codegen emits ``bigint``
+    schemas/types that misrepresent the runtime value, forcing hand overrides.
+    Stripping the format for safe-range fields lets the types be inferred
+    faithfully. ``int64`` without a safe ``maximum`` is left untouched.
+    """
+    if isinstance(obj, dict):
+        maximum = obj.get("maximum")
+        if (
+            obj.get("type") == "integer"
+            and obj.get("format") == "int64"
+            and isinstance(maximum, int)
+            and maximum <= _JS_MAX_SAFE_INT
+        ):
+            del obj["format"]
+        for value in obj.values():
+            _normalize_safe_int64(value)
+    elif isinstance(obj, list):
+        for item in obj:
+            _normalize_safe_int64(item)
 
 
 def _collect_refs(obj: Any, refs: set[str]) -> None:

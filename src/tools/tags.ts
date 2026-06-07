@@ -1,8 +1,9 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
 
+import { zMatchingAlgorithm, zOperationEnum } from '@/api/generated/zod.gen';
 import type { PaperlessAPI } from '@/api/paperless-api';
-import { jsonResult } from './utils';
+import { jsonResult, permissionsInput } from './utils';
 
 export function registerTagTools(server: McpServer, api: PaperlessAPI): void {
 	server.registerTool(
@@ -37,9 +38,7 @@ export function registerTagTools(server: McpServer, api: PaperlessAPI): void {
 					'Text pattern to automatically assign this tag to matching documents. Use keywords, phrases, or regular expressions depending on matching_algorithm.',
 				),
 
-				matching_algorithm: z.number().int().min(0).max(6).optional().describe(
-					'How to match text patterns: 0=none, 1=any word, 2=all words, 3=exact match, 4=regular expression, 5=fuzzy word, 6=automatic. Default is 0.',
-				),
+				matching_algorithm: zMatchingAlgorithm.optional(),
 
 				is_insensitive: z.boolean().optional().describe(
 					'Whether matching is case-insensitive. Default is true.',
@@ -80,9 +79,7 @@ export function registerTagTools(server: McpServer, api: PaperlessAPI): void {
 					'Text pattern for automatic tag assignment. Empty string removes auto-matching. Use keywords, phrases, or regex depending on matching_algorithm.',
 				),
 
-				matching_algorithm: z.number().int().min(0).max(6).optional().describe(
-					'Algorithm for pattern matching: 0=none, 1=any word, 2=all words, 3=exact match, 4=regular expression, 5=fuzzy word, 6=automatic.',
-				),
+				matching_algorithm: zMatchingAlgorithm.optional(),
 
 				is_insensitive: z.boolean().optional().describe(
 					'Whether matching is case-insensitive.',
@@ -128,7 +125,7 @@ export function registerTagTools(server: McpServer, api: PaperlessAPI): void {
 					'Array of tag IDs to perform bulk operations on. Use list_tags to get valid tag IDs.',
 				),
 
-				operation: z.enum(['set_permissions', 'delete']).describe(
+				operation: zOperationEnum.describe(
 					"Bulk operation: 'set_permissions' to control who can use these tags, 'delete' to permanently remove all specified tags from the system.",
 				),
 
@@ -136,24 +133,16 @@ export function registerTagTools(server: McpServer, api: PaperlessAPI): void {
 					"User ID to set as owner when operation is 'set_permissions'. Owner has full control over the tags.",
 				),
 
-				permissions: z
-					.object({
-						view: z.object({
-							users: z.array(z.number()).optional().describe('User IDs who can see and use these tags'),
-							groups: z.array(z.number()).optional().describe('Group IDs who can see and use these tags'),
-						}).describe('Users and groups with view/use permissions for these tags'),
-
-						change: z.object({
-							users: z.array(z.number()).optional().describe(
-								'User IDs who can modify these tags (name, color, matching rules)',
-							),
-
-							groups: z.array(z.number()).optional().describe('Group IDs who can modify these tags'),
-						}).describe('Users and groups with edit permissions for these tags'),
-					})
-					.optional().describe(
+				permissions: permissionsInput({
+					root:
 						"Permission settings when operation is 'set_permissions'. Defines who can view/use and modify these tags.",
-					),
+					view: 'Users and groups with view/use permissions for these tags',
+					viewUsers: 'User IDs who can see and use these tags',
+					viewGroups: 'Group IDs who can see and use these tags',
+					change: 'Users and groups with edit permissions for these tags',
+					changeUsers: 'User IDs who can modify these tags (name, color, matching rules)',
+					changeGroups: 'Group IDs who can modify these tags',
+				}),
 
 				merge: z.boolean().optional().describe(
 					'Whether to merge with existing permissions (true) or replace them entirely (false). Default is false.',

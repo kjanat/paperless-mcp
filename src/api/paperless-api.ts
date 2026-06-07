@@ -65,7 +65,7 @@ export class PaperlessAPI {
 			body: JSON.stringify({
 				documents,
 				method,
-				...omitUndefined(parameters),
+				parameters: omitUndefined(parameters),
 			}),
 		});
 	}

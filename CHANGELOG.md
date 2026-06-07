@@ -7,6 +7,45 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.2.0] - 2026-06-07
+
+### Changed
+
+- Derive API model types in `src/types.ts` from generated Zod schemas
+  (`src/api/generated/zod.gen.ts`) instead of hand-maintaining them, so models
+  can no longer silently drift from the Paperless-ngx OpenAPI schema. Generate
+  with `bun run gen` (extracts the endpoint subset, then runs
+  `@hey-api/openapi-ts` with the Zod v4 plugin). Almost every type is now
+  inferred; only the `PaginatedList<T>` generic, `PaginatedDocumentList.results`
+  (deliberately stripped), and `bulk_edit_objects` request body remain
+  hand-written.
+- Validate `matching_algorithm` in the tag/correspondent/document-type tools
+  against the generated `zMatchingAlgorithm` schema instead of repeating an
+  inline `z.number().int().min(0).max(6)` in four places. Its MCP field
+  description is now sourced from the schema's metadata (enabled via the Zod
+  plugin's `metadata` option), removing four duplicated hand-written
+  descriptions — the generated `.register()` metadata reaches the LLM through
+  the MCP SDK's Zod v4 JSON-schema conversion.
+- Normalize safe-range `int64` integer fields to plain integers in the schema
+  extract step, so fields like `archive_serial_number` are typed as `number`
+  (matching the client's raw-JSON responses) rather than `bigint`.
+- Use the generated `zMethodEnum` / `zOperationEnum` schemas for the bulk-edit
+  `method` and `operation` tool inputs instead of hand-listing the 16
+  document-method values and the `set_permissions`/`delete` operation in four
+  places.
+- Factor the repeated `view`/`change` permissions input shared by the
+  tag/correspondent/document-type bulk-edit tools into a single
+  `permissionsInput()` helper, keeping the per-resource descriptions.
+
+### Fixed
+
+- Restore Paperless-ngx document bulk-edit payloads to the documented nested
+  `parameters` shape while still filtering irrelevant method arguments.
+- Forward `split`, `delete_pages`, `modify_custom_fields`, `edit_pdf`, and
+  `remove_password` method parameters correctly.
+- Update the bundled Paperless-ngx skill and README bulk-edit docs for complete
+  list pagination and all supported document bulk-edit methods.
+
 ## [2.1.2] - 2026-06-07
 
 ### Fixed
@@ -166,7 +205,8 @@ Major rewrite of internals while preserving the same MCP tool surface.
 - Smithery configuration (broken `smithery.yaml`).
 - Obsolete Cursor rules.
 
-[Unreleased]: https://github.com/kjanat/paperless-mcp/compare/v2.1.2...HEAD
+[Unreleased]: https://github.com/kjanat/paperless-mcp/compare/v2.2.0...HEAD
+[2.2.0]: https://github.com/kjanat/paperless-mcp/compare/v2.1.2...v2.2.0
 [2.1.2]: https://github.com/kjanat/paperless-mcp/compare/v2.1.1...v2.1.2
 [2.1.1]: https://github.com/kjanat/paperless-mcp/compare/v2.1.0...v2.1.1
 [2.1.0]: https://github.com/kjanat/paperless-mcp/compare/v2.0.1...v2.1.0

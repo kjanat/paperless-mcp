@@ -144,6 +144,7 @@ Parameters:
   - `add_tag`: Add a tag to documents
   - `remove_tag`: Remove a tag from documents
   - `modify_tags`: Add and/or remove multiple tags
+  - `modify_custom_fields`: Add and/or remove custom fields
   - `delete`: Delete documents
   - `reprocess`: Reprocess documents
   - `set_permissions`: Set document permissions
@@ -151,6 +152,8 @@ Parameters:
   - `split`: Split a document into multiple documents
   - `rotate`: Rotate document pages
   - `delete_pages`: Delete specific pages from a document
+  - `edit_pdf`: Reorder, rotate, split, or discard PDF pages
+  - `remove_password`: Remove PDF password protection
 - Additional parameters based on `method`:
   - `correspondent`: ID for set_correspondent
   - `document_type`: ID for set_document_type
@@ -158,11 +161,16 @@ Parameters:
   - `tag`: ID for add_tag/remove_tag
   - `add_tags`: Array of tag IDs for modify_tags
   - `remove_tags`: Array of tag IDs for modify_tags
+  - `add_custom_fields`: Custom field IDs or id:value pairs for modify_custom_fields
+  - `remove_custom_fields`: Array of custom field IDs for modify_custom_fields
   - `permissions`: Object for set_permissions with owner, permissions, merge flag
   - `metadata_document_id`: ID for merge to specify metadata source
   - `delete_originals`: Boolean for merge/split
-  - `pages`: String for split "[1,2-3,4,5-7]" or `delete_pages` "[2,3,4]"
+  - `pages`: String for split (`"1-2,3-4,5"`) or number array for delete_pages (`[2, 3, 4]`)
   - `degrees`: Number for rotate (90, 180, or 270)
+  - `operations`: Array of PDF edit operations for edit_pdf
+  - `password`: Password for remove_password
+  - `update_document`, `delete_original`, `include_metadata`: PDF edit/remove-password flags
 
 Examples:
 

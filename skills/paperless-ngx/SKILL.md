@@ -5,7 +5,7 @@ license: MIT
 compatibility: Requires a running Paperless-ngx instance with API token. MCP server must be connected with mcp_paperless_* tools available.
 metadata:
   author: kjanat
-  version: "2.0.1"
+  version: "2.2.0"
 ---
 
 # Paperless-ngx Document Management
@@ -76,7 +76,7 @@ What operation?
 ├─ Set sender      → bulk_edit_documents(method="set_correspondent", correspondent=ID)
 ├─ Merge PDFs      → bulk_edit_documents(method="merge", metadata_document_id=ID)
 ├─ Rotate pages    → bulk_edit_documents(method="rotate", degrees=90|180|270)
-├─ Delete pages    → bulk_edit_documents(method="delete_pages", pages="1,3,5-7")
+├─ Delete pages    → bulk_edit_documents(method="delete_pages", pages=[1, 3, 5])
 ├─ Reprocess OCR   → bulk_edit_documents(method="reprocess")
 └─ Delete          → bulk_edit_documents(method="delete")  !! PERMANENT !!
 ```
@@ -112,6 +112,12 @@ Need to change metadata objects?
   `4`=regex, `5`=fuzzy, `6`=auto. See [tools.md](references/tools.md).
 - **Bulk delete is permanent and irreversible.**
 - **download_document** returns base64 blob + filename from content-disposition.
+- **list_tags**, **list_correspondents**, and **list_document_types** return
+  complete paginated result sets; use IDs from `results`, not the bare `all` ID
+  list alone.
+- **bulk_edit_documents** accepts top-level MCP fields, but Paperless receives a
+  nested `parameters` object internally. The MCP tool forwards only the fields
+  relevant to the selected `method`.
 
 ## References
 

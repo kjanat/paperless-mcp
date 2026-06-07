@@ -23,8 +23,9 @@ server.registerTool(
 - **`_extra` parameter required** — SDK's `ToolCallback` signature demands it.
   Zero-arg tools: `async (_extra) => ...`. With-args tools: `async (args, _extra) => ...`.
 - **Return `CallToolResult`** — via shared `jsonResult()` from `./utils.ts`.
-- **`matching_algorithm` is integer (0-6)** — validated via
-  `z.number().int().min(0).max(6)` across all endpoints.
+- **`matching_algorithm` is integer (0-6)** — validated via the generated
+  `zMatchingAlgorithm` schema (`@/api/generated/zod.gen`) across all endpoints,
+  not a repeated inline `z.number()`.
 
 ## FILES
 

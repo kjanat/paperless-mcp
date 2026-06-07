@@ -1,6 +1,6 @@
 {
 	"name": "@kjanat/paperless-mcp",
-	"version": "2.1.2",
+	"version": "2.2.0",
 	"description": "MCP server for interacting with Paperless-ngx document management system.",
 	"keywords": [
 		"paperless-ngx",
@@ -32,6 +32,9 @@
 		"meta": "bash scripts/meta.sh",
 		"fmt": "dprint fmt",
 		"fmt:check": "dprint check",
+		"gen": "run -s gen:schema gen:zod fmt",
+		"gen:schema": "python3 scripts/openapi.py extract schemas/openapi.json -o schemas/subset.json",
+		"gen:zod": "openapi-ts",
 		"mcp": "bun src/index.ts",
 		"inspect": "bunx @modelcontextprotocol/inspector run mcp",
 		"prepack": "bun bd",
@@ -39,6 +42,7 @@
 		"typecheck": "tsgo --noEmit"
 	},
 	"devDependencies": {
+		"@hey-api/openapi-ts": "^0.98.1",
 		"@modelcontextprotocol/sdk": "^1.29.0",
 		"@types/bun": "^1.3.14",
 		"@types/express": "^5.0.6",

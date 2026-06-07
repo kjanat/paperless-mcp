@@ -1,12 +1,25 @@
 /**
- * Typed interfaces derived from the Paperless-ngx OpenAPI schema (v6.0.0).
- * Source: schemas/openapi.json
+ * API model types for paperless-mcp.
  *
- * Only models types actually used by our API client and MCP tools.
+ * The structural shapes are **derived** from the generated Zod schemas in
+ * `src/api/generated/zod.gen.ts` — the single source of truth, regenerated
+ * from the Paperless-ngx OpenAPI schema (`schemas/openapi.json` → subset →
+ * Zod) via `bun run gen`. Deriving via `z.infer` means model fields can never
+ * silently drift from the upstream schema when Paperless adds/renames/removes
+ * a field.
+ *
+ * This file adds only the deliberate, documented divergences the client and
+ * tooling rely on (see each section). Everything else is generated.
  */
 
+import * as schemas from '@/api/generated/zod.gen';
+import type { z } from 'zod';
+
+/** Replace the keys of `T` present in `O` with the variants declared in `O`. */
+type Override<T, O> = Omit<T, keyof O> & O;
+
 // ---------------------------------------------------------------------------
-// Shared enums
+// Shared enums (derived)
 // ---------------------------------------------------------------------------
 
 /**
@@ -14,84 +27,47 @@
  * 0=None, 1=Any word, 2=All words, 3=Exact match, 4=Regular expression,
  * 5=Fuzzy word, 6=Automatic.
  *
- * Using `number` (not a literal union) because Zod's `z.number()` outputs
- * `number` and narrowing to a literal union at the Zod boundary would require
- * unsafe casts. Runtime validation (min/max) is sufficient.
+ * Single source: the generated `zMatchingAlgorithm` union. The MCP tool inputs
+ * validate against that same schema, so no override or cast is needed anywhere.
  */
-export type MatchingAlgorithm = number;
+export type MatchingAlgorithm = z.infer<typeof schemas.zMatchingAlgorithm>;
 
 /** Bulk edit methods for documents. */
-export type BulkEditMethod =
-	| 'set_correspondent'
-	| 'set_document_type'
-	| 'set_storage_path'
-	| 'add_tag'
-	| 'remove_tag'
-	| 'modify_tags'
-	| 'modify_custom_fields'
-	| 'delete'
-	| 'reprocess'
-	| 'set_permissions'
-	| 'rotate'
-	| 'merge'
-	| 'split'
-	| 'delete_pages'
-	| 'edit_pdf'
-	| 'remove_password';
+export type BulkEditMethod = z.infer<typeof schemas.zMethodEnum>;
 
 /** Object types for bulk_edit_objects. */
-export type BulkEditObjectType = 'tags' | 'correspondents' | 'document_types' | 'storage_paths';
+export type BulkEditObjectType = z.infer<typeof schemas.zObjectTypeEnum>;
 
 /** Operations for bulk_edit_objects. */
-export type BulkEditOperation = 'set_permissions' | 'delete';
+export type BulkEditOperation = z.infer<typeof schemas.zOperationEnum>;
 
 // ---------------------------------------------------------------------------
-// Shared nested types
+// Shared nested types (derived)
 // ---------------------------------------------------------------------------
-
-/** Permission set for view/change on objects. */
-export interface ObjectPermissions {
-	readonly view: {
-		readonly users: readonly number[];
-		readonly groups: readonly number[];
-	};
-	readonly change: {
-		readonly users: readonly number[];
-		readonly groups: readonly number[];
-	};
-}
 
 /** Custom field instance attached to a document. */
-export interface CustomFieldInstance {
-	readonly field: number;
-	readonly value: string | number | boolean | Record<string, unknown> | null;
-}
+export type CustomFieldInstance = z.infer<typeof schemas.zCustomFieldInstance>;
 
 /** Note attached to a document. */
-export interface Note {
-	readonly id: number;
-	readonly note: string;
-	readonly created: string;
-	readonly user: {
-		readonly id: number;
-		readonly username: string;
-		readonly first_name: string;
-		readonly last_name: string;
-	};
-}
+export type Note = z.infer<typeof schemas.zNotes>;
 
 /** Summary of a duplicate document. */
-export interface DuplicateDocumentSummary {
-	readonly id: number;
-	readonly title: string;
-	readonly deleted_at: string | null;
-}
+export type DuplicateDocumentSummary = z.infer<typeof schemas.zDuplicateDocumentSummary>;
+
+/** Permission set for view/change on objects. */
+export type ObjectPermissions = z.infer<typeof schemas.zDocument>['permissions'];
 
 // ---------------------------------------------------------------------------
-// Paginated list (generic shape)
+// Paginated list (generic shape — hand-written)
 // ---------------------------------------------------------------------------
 
-/** Paginated response from Paperless-ngx list endpoints. */
+/**
+ * Generic paginated response from Paperless-ngx list endpoints.
+ *
+ * Hand-written: the generated schemas only describe concrete, per-resource
+ * paginated lists (`PaginatedDocumentList`, …). This generic is the shape the
+ * client uses across every resource and never drifts (it is structural).
+ */
 export interface PaginatedList<T> {
 	readonly count: number;
 	readonly next: string | null;
@@ -105,181 +81,76 @@ export interface PaginatedList<T> {
 // ---------------------------------------------------------------------------
 
 /** Full document as returned by GET /documents/{id}/. */
-export interface Document {
-	readonly id: number;
-	readonly title: string;
-	readonly content: string;
-	readonly tags: readonly number[];
-	readonly correspondent: number | null;
-	readonly document_type: number | null;
-	readonly storage_path: number | null;
-	readonly created: string;
-	readonly created_date: string;
-	readonly modified: string;
-	readonly added: string;
-	readonly deleted_at: string | null;
-	readonly archive_serial_number: number | null;
-	readonly original_file_name: string | null;
-	readonly archived_file_name: string | null;
-	readonly owner: number | null;
-	readonly mime_type: string;
-	readonly page_count: number | null;
-	readonly is_shared_by_requester: boolean;
-	readonly user_can_change: boolean;
-	readonly custom_fields: readonly CustomFieldInstance[];
-	readonly notes: readonly Note[];
-	readonly duplicate_documents: readonly DuplicateDocumentSummary[];
-	readonly permissions: ObjectPermissions;
-}
+export type Document = z.infer<typeof schemas.zDocument>;
 
 /** Search result item — Document without heavy fields (content, URLs). */
 export type DocumentSummary = Omit<Document, 'content'> & {
 	readonly content?: never;
 };
 
-/** Paginated document list from GET /documents/ or search. */
-export interface PaginatedDocumentList {
-	readonly count: number;
-	readonly next: string | null;
-	readonly previous: string | null;
-	readonly all?: readonly number[];
-	/**
-	 * Intentionally `Record<string, unknown>[]` rather than `Document[]` or
-	 * `DocumentSummary[]` because `searchDocuments` dynamically strips fields
-	 * (content, download_url, thumbnail_url), producing objects that don't
-	 * conform to either typed interface.
-	 */
-	readonly results: readonly Record<string, unknown>[];
-}
+/**
+ * Paginated document list from GET /documents/ or search.
+ *
+ * Divergence: `results` is `Record<string, unknown>[]`, not `Document[]`,
+ * because `searchDocuments` dynamically strips fields (content, download_url,
+ * thumbnail_url), producing objects that conform to neither typed interface.
+ * Everything else is inferred.
+ */
+export type PaginatedDocumentList = Override<
+	z.infer<typeof schemas.zPaginatedDocumentList>,
+	{ results: readonly Record<string, unknown>[] }
+>;
 
-/** Metadata for document upload via FormData. */
-export interface PostDocumentMetadata {
-	readonly title?: string;
-	readonly created?: string;
-	readonly correspondent?: number;
-	readonly document_type?: number;
-	readonly storage_path?: number;
-	readonly tags?: readonly number[];
-	readonly archive_serial_number?: number;
-	readonly custom_fields?: readonly number[];
-}
+/**
+ * Metadata for document upload via FormData.
+ *
+ * Derived from the multipart upload schema, minus the `document` file field and
+ * `from_webui` flag the client never sends. `custom_fields` is narrowed to an
+ * ID array (the generated schema types it as `unknown`).
+ */
+export type PostDocumentMetadata = Override<
+	Omit<z.infer<typeof schemas.zPostDocumentRequest>, 'document' | 'from_webui' | 'custom_fields'>,
+	{ custom_fields?: readonly number[] }
+>;
 
 // ---------------------------------------------------------------------------
-// Tag
+// Tag / Correspondent / Document Type (derived, no divergences)
 // ---------------------------------------------------------------------------
 
 /** Tag as returned by GET /tags/ or GET /tags/{id}/. */
-export interface Tag {
-	readonly id: number;
-	readonly name: string;
-	readonly slug: string;
-	readonly color: string;
-	readonly text_color: string;
-	readonly match: string;
-	readonly matching_algorithm: MatchingAlgorithm;
-	readonly is_insensitive: boolean;
-	readonly is_inbox_tag: boolean;
-	readonly document_count: number;
-	readonly owner: number | null;
-	readonly parent: number | null;
-	readonly children: readonly number[];
-	readonly user_can_change: boolean;
-}
+export type Tag = z.infer<typeof schemas.zTag>;
 
 /** Request body for POST /tags/ or PUT /tags/{id}/. */
-export interface TagRequest {
-	readonly name: string;
-	readonly color?: string;
-	readonly match?: string;
-	readonly matching_algorithm?: MatchingAlgorithm;
-	readonly is_insensitive?: boolean;
-	readonly is_inbox_tag?: boolean;
-	readonly owner?: number | null;
-	readonly parent?: number | null;
-}
-
-// ---------------------------------------------------------------------------
-// Correspondent
-// ---------------------------------------------------------------------------
+export type TagRequest = z.infer<typeof schemas.zTagRequest>;
 
 /** Correspondent as returned by GET /correspondents/. */
-export interface Correspondent {
-	readonly id: number;
-	readonly name: string;
-	readonly slug: string;
-	readonly match: string;
-	readonly matching_algorithm: MatchingAlgorithm;
-	readonly is_insensitive: boolean;
-	readonly document_count: number;
-	readonly last_correspondence: string;
-	readonly owner: number | null;
-	readonly user_can_change: boolean;
-	readonly permissions: ObjectPermissions;
-}
+export type Correspondent = z.infer<typeof schemas.zCorrespondent>;
 
 /** Request body for POST /correspondents/. */
-export interface CorrespondentRequest {
-	readonly name: string;
-	readonly match?: string;
-	readonly matching_algorithm?: MatchingAlgorithm;
-	readonly is_insensitive?: boolean;
-	readonly owner?: number | null;
-}
-
-// ---------------------------------------------------------------------------
-// Document Type
-// ---------------------------------------------------------------------------
+export type CorrespondentRequest = z.infer<typeof schemas.zCorrespondentRequest>;
 
 /** Document type as returned by GET /document_types/. */
-export interface DocumentType {
-	readonly id: number;
-	readonly name: string;
-	readonly slug: string;
-	readonly match: string;
-	readonly matching_algorithm: MatchingAlgorithm;
-	readonly is_insensitive: boolean;
-	readonly document_count: number;
-	readonly owner: number | null;
-	readonly user_can_change: boolean;
-	readonly permissions: ObjectPermissions;
-}
+export type DocumentType = z.infer<typeof schemas.zDocumentType>;
 
 /** Request body for POST /document_types/. */
-export interface DocumentTypeRequest {
-	readonly name: string;
-	readonly match?: string;
-	readonly matching_algorithm?: MatchingAlgorithm;
-	readonly is_insensitive?: boolean;
-	readonly owner?: number | null;
-}
+export type DocumentTypeRequest = z.infer<typeof schemas.zDocumentTypeRequest>;
 
 // ---------------------------------------------------------------------------
 // Bulk operations
 // ---------------------------------------------------------------------------
 
-/** Request body for POST /documents/bulk_edit/. */
-export interface BulkEditDocumentsRequest {
-	readonly documents: readonly number[];
-	readonly method: BulkEditMethod;
-	readonly correspondent?: number;
-	readonly document_type?: number;
-	readonly storage_path?: number;
-	readonly tag?: number;
-	readonly add_tags?: readonly number[];
-	readonly remove_tags?: readonly number[];
-	readonly permissions?: Record<string, unknown>;
-	readonly metadata_document_id?: number;
-	readonly delete_originals?: boolean;
-	readonly pages?: string;
-	readonly degrees?: number;
-}
+/** Request body for POST /documents/bulk_edit/ (nested `parameters` shape). */
+export type BulkEditDocumentsRequest = z.infer<typeof schemas.zBulkEditRequest>;
 
 /** Response from POST /documents/bulk_edit/. */
-export interface BulkEditResult {
-	readonly result: string;
-}
+export type BulkEditResult = z.infer<typeof schemas.zBulkEditResult>;
 
-/** Request body for POST /bulk_edit_objects/. */
+/**
+ * Request body for POST /bulk_edit_objects/.
+ *
+ * Hand-written: the client spreads method parameters at the top level, so this
+ * stays a curated client-facing shape rather than the generated schema.
+ */
 export interface BulkEditObjectsRequest {
 	readonly objects: readonly number[];
 	readonly object_type: BulkEditObjectType;
