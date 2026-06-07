@@ -19,6 +19,10 @@ export const zBulkEditObjectsRequest = z.object({
 	owner: z.int().nullish(),
 });
 
+export const zBulkEditRequest = z.object({
+	from_webui: z.boolean().optional().default(false),
+});
+
 export const zBulkEditResult = z.object({
 	result: z.string(),
 });
@@ -63,6 +67,14 @@ export const zDocumentRequest = z.object({
 	title: z.string().max(128).optional(),
 }).register(z.globalRegistry, {
 	description: 'Adds update nested feature',
+});
+
+export const zDocumentVersionInfo = z.object({
+	added: z.iso.datetime(),
+	checksum: z.string().nullish(),
+	id: z.int(),
+	is_root: z.boolean(),
+	version_label: z.string().nullish(),
 });
 
 export const zDuplicateDocumentSummary = z.object({
@@ -162,15 +174,15 @@ export const zDocumentTypeRequest = z.object({
  * * `remove_tag` - remove_tag
  * * `modify_tags` - modify_tags
  * * `modify_custom_fields` - modify_custom_fields
+ * * `set_permissions` - set_permissions
  * * `delete` - delete
  * * `reprocess` - reprocess
- * * `set_permissions` - set_permissions
  * * `rotate` - rotate
  * * `merge` - merge
- * * `split` - split
- * * `delete_pages` - delete_pages
  * * `edit_pdf` - edit_pdf
  * * `remove_password` - remove_password
+ * * `split` - split
+ * * `delete_pages` - delete_pages
  */
 export const zMethodEnum = z.enum([
 	'set_correspondent',
@@ -180,24 +192,18 @@ export const zMethodEnum = z.enum([
 	'remove_tag',
 	'modify_tags',
 	'modify_custom_fields',
+	'set_permissions',
 	'delete',
 	'reprocess',
-	'set_permissions',
 	'rotate',
 	'merge',
-	'split',
-	'delete_pages',
 	'edit_pdf',
 	'remove_password',
+	'split',
+	'delete_pages',
 ]).register(z.globalRegistry, {
 	description:
-		'* `set_correspondent` - set_correspondent\n* `set_document_type` - set_document_type\n* `set_storage_path` - set_storage_path\n* `add_tag` - add_tag\n* `remove_tag` - remove_tag\n* `modify_tags` - modify_tags\n* `modify_custom_fields` - modify_custom_fields\n* `delete` - delete\n* `reprocess` - reprocess\n* `set_permissions` - set_permissions\n* `rotate` - rotate\n* `merge` - merge\n* `split` - split\n* `delete_pages` - delete_pages\n* `edit_pdf` - edit_pdf\n* `remove_password` - remove_password',
-});
-
-export const zBulkEditRequest = z.object({
-	documents: z.array(z.int()),
-	method: zMethodEnum,
-	parameters: z.record(z.string(), z.unknown()).optional().default({}),
+		'* `set_correspondent` - set_correspondent\n* `set_document_type` - set_document_type\n* `set_storage_path` - set_storage_path\n* `add_tag` - add_tag\n* `remove_tag` - remove_tag\n* `modify_tags` - modify_tags\n* `modify_custom_fields` - modify_custom_fields\n* `set_permissions` - set_permissions\n* `delete` - delete\n* `reprocess` - reprocess\n* `rotate` - rotate\n* `merge` - merge\n* `edit_pdf` - edit_pdf\n* `remove_password` - remove_password\n* `split` - split\n* `delete_pages` - delete_pages',
 });
 
 export const zNotes = z.object({
@@ -244,10 +250,12 @@ export const zDocument = z.object({
 			users: z.array(z.int()).optional(),
 		}).optional(),
 	}).readonly(),
+	root_document: z.int().readonly(),
 	storage_path: z.int().nullable(),
 	tags: z.array(z.int()),
 	title: z.string().max(128).optional(),
 	user_can_change: z.boolean().readonly(),
+	versions: z.array(zDocumentVersionInfo).readonly(),
 }).register(z.globalRegistry, {
 	description: 'Adds update nested feature',
 });
@@ -277,7 +285,6 @@ export const zOperationEnum = z.enum(['set_permissions', 'delete']).register(z.g
 });
 
 export const zPaginatedCorrespondentList = z.object({
-	all: z.array(z.int()).optional(),
 	count: z.int(),
 	next: z.url().nullish(),
 	previous: z.url().nullish(),
@@ -285,7 +292,6 @@ export const zPaginatedCorrespondentList = z.object({
 });
 
 export const zPaginatedDocumentList = z.object({
-	all: z.array(z.int()).optional(),
 	count: z.int(),
 	next: z.url().nullish(),
 	previous: z.url().nullish(),
@@ -293,7 +299,6 @@ export const zPaginatedDocumentList = z.object({
 });
 
 export const zPaginatedDocumentTypeList = z.object({
-	all: z.array(z.int()).optional(),
 	count: z.int(),
 	next: z.url().nullish(),
 	previous: z.url().nullish(),
@@ -384,7 +389,6 @@ export const zTag = z.object({
 });
 
 export const zPaginatedTagList = z.object({
-	all: z.array(z.int()).optional(),
 	count: z.int(),
 	next: z.url().nullish(),
 	previous: z.url().nullish(),
@@ -413,12 +417,23 @@ export const zBasicUserWritable = z.object({
 });
 
 export const zBulkEditObjectsRequestWritable = z.object({
+	all: z.boolean().optional().default(false),
+	filters: z.record(z.string(), z.unknown()).optional(),
 	merge: z.boolean().optional().default(false),
 	object_type: zObjectTypeEnum,
-	objects: z.array(z.int()),
+	objects: z.array(z.int()).optional(),
 	operation: zOperationEnum,
 	owner: z.int().nullish(),
 	permissions: z.record(z.string(), z.unknown()).optional(),
+});
+
+export const zBulkEditRequestWritable = z.object({
+	all: z.boolean().optional().default(false),
+	documents: z.array(z.int()).optional(),
+	filters: z.record(z.string(), z.unknown()).optional(),
+	from_webui: z.boolean().optional().default(false),
+	method: zMethodEnum,
+	parameters: z.record(z.string(), z.unknown()).optional().default({}),
 });
 
 export const zCorrespondentWritable = z.object({
@@ -536,7 +551,6 @@ export const zNotesWritable = z.object({
 });
 
 export const zPaginatedCorrespondentListWritable = z.object({
-	all: z.array(z.int()).optional(),
 	count: z.int(),
 	next: z.url().nullish(),
 	previous: z.url().nullish(),
@@ -544,7 +558,6 @@ export const zPaginatedCorrespondentListWritable = z.object({
 });
 
 export const zPaginatedDocumentListWritable = z.object({
-	all: z.array(z.int()).optional(),
 	count: z.int(),
 	next: z.url().nullish(),
 	previous: z.url().nullish(),
@@ -552,7 +565,6 @@ export const zPaginatedDocumentListWritable = z.object({
 });
 
 export const zPaginatedDocumentTypeListWritable = z.object({
-	all: z.array(z.int()).optional(),
 	count: z.int(),
 	next: z.url().nullish(),
 	previous: z.url().nullish(),
@@ -665,7 +677,6 @@ export const zTagWritable = z.object({
 });
 
 export const zPaginatedTagListWritable = z.object({
-	all: z.array(z.int()).optional(),
 	count: z.int(),
 	next: z.url().nullish(),
 	previous: z.url().nullish(),
@@ -865,10 +876,10 @@ export const zDocumentsListQuery = z.object({
 	checksum__iendswith: z.string().optional(),
 	checksum__iexact: z.string().optional(),
 	checksum__istartswith: z.string().optional(),
-	content__icontains: z.string().optional(),
-	content__iendswith: z.string().optional(),
-	content__iexact: z.string().optional(),
-	content__istartswith: z.string().optional(),
+	content__icontains: z.string().min(1).optional(),
+	content__iendswith: z.string().min(1).optional(),
+	content__iexact: z.string().min(1).optional(),
+	content__istartswith: z.string().min(1).optional(),
 	correspondent__id: z.int().optional(),
 	correspondent__id__in: z.array(z.int()).register(z.globalRegistry, {
 		description: 'Multiple values may be separated by commas.',
@@ -950,7 +961,7 @@ export const zDocumentsListQuery = z.object({
 		description: 'Number of results to return per page.',
 	}).optional(),
 	query: z.string().register(z.globalRegistry, {
-		description: 'Advanced search query string',
+		description: 'Advanced Tantivy search query string',
 	}).optional(),
 	search: z.string().register(z.globalRegistry, {
 		description: 'A search term.',
@@ -974,16 +985,22 @@ export const zDocumentsListQuery = z.object({
 	tags__name__iendswith: z.string().optional(),
 	tags__name__iexact: z.string().optional(),
 	tags__name__istartswith: z.string().optional(),
+	text: z.string().register(z.globalRegistry, {
+		description: 'Simple Tantivy-backed text search query string',
+	}).optional(),
 	title__icontains: z.string().optional(),
 	title__iendswith: z.string().optional(),
 	title__iexact: z.string().optional(),
 	title__istartswith: z.string().optional(),
 	title_content: z.string().min(1).optional(),
+	title_search: z.string().register(z.globalRegistry, {
+		description: 'Simple Tantivy-backed title-only search query string',
+	}).optional(),
 });
 
 export const zDocumentsListResponse = zPaginatedDocumentList;
 
-export const zBulkEditBody = zBulkEditRequest;
+export const zBulkEditBody = zBulkEditRequestWritable;
 
 export const zBulkEditResponse = zBulkEditDocumentsResult;
 
@@ -1044,6 +1061,9 @@ export const zDocumentsDownloadRetrievePath = z.object({
 });
 
 export const zDocumentsDownloadRetrieveQuery = z.object({
+	follow_formatting: z.boolean().register(z.globalRegistry, {
+		description: 'Whether or not to use the filename on disk',
+	}).optional(),
 	original: z.boolean().optional(),
 });
 

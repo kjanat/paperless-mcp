@@ -41,6 +41,16 @@
 			},
 			"BulkEditObjectsRequest": {
 				"properties": {
+					"all": {
+						"default": false,
+						"type": "boolean",
+						"writeOnly": true
+					},
+					"filters": {
+						"additionalProperties": {},
+						"type": "object",
+						"writeOnly": true
+					},
 					"merge": {
 						"default": false,
 						"type": "boolean",
@@ -82,19 +92,32 @@
 				},
 				"required": [
 					"object_type",
-					"objects",
 					"operation"
 				],
 				"type": "object"
 			},
 			"BulkEditRequest": {
 				"properties": {
+					"all": {
+						"default": false,
+						"type": "boolean",
+						"writeOnly": true
+					},
 					"documents": {
 						"items": {
 							"type": "integer"
 						},
 						"type": "array",
 						"writeOnly": true
+					},
+					"filters": {
+						"additionalProperties": {},
+						"type": "object",
+						"writeOnly": true
+					},
+					"from_webui": {
+						"default": false,
+						"type": "boolean"
 					},
 					"method": {
 						"allOf": [
@@ -112,7 +135,6 @@
 					}
 				},
 				"required": [
-					"documents",
 					"method"
 				],
 				"type": "object"
@@ -501,6 +523,10 @@
 						"readOnly": true,
 						"type": "object"
 					},
+					"root_document": {
+						"readOnly": true,
+						"type": "integer"
+					},
 					"storage_path": {
 						"nullable": true,
 						"type": "integer"
@@ -518,6 +544,13 @@
 					"user_can_change": {
 						"readOnly": true,
 						"type": "boolean"
+					},
+					"versions": {
+						"items": {
+							"$ref": "#/components/schemas/DocumentVersionInfo"
+						},
+						"readOnly": true,
+						"type": "array"
 					}
 				},
 				"required": [
@@ -534,9 +567,11 @@
 					"original_file_name",
 					"page_count",
 					"permissions",
+					"root_document",
 					"storage_path",
 					"tags",
-					"user_can_change"
+					"user_can_change",
+					"versions"
 				],
 				"type": "object"
 			},
@@ -821,6 +856,34 @@
 				],
 				"type": "object"
 			},
+			"DocumentVersionInfo": {
+				"properties": {
+					"added": {
+						"format": "date-time",
+						"type": "string"
+					},
+					"checksum": {
+						"nullable": true,
+						"type": "string"
+					},
+					"id": {
+						"type": "integer"
+					},
+					"is_root": {
+						"type": "boolean"
+					},
+					"version_label": {
+						"nullable": true,
+						"type": "string"
+					}
+				},
+				"required": [
+					"added",
+					"id",
+					"is_root"
+				],
+				"type": "object"
+			},
 			"DuplicateDocumentSummary": {
 				"properties": {
 					"deleted_at": {
@@ -856,7 +919,7 @@
 				"type": "integer"
 			},
 			"MethodEnum": {
-				"description": "* `set_correspondent` - set_correspondent\n* `set_document_type` - set_document_type\n* `set_storage_path` - set_storage_path\n* `add_tag` - add_tag\n* `remove_tag` - remove_tag\n* `modify_tags` - modify_tags\n* `modify_custom_fields` - modify_custom_fields\n* `delete` - delete\n* `reprocess` - reprocess\n* `set_permissions` - set_permissions\n* `rotate` - rotate\n* `merge` - merge\n* `split` - split\n* `delete_pages` - delete_pages\n* `edit_pdf` - edit_pdf\n* `remove_password` - remove_password",
+				"description": "* `set_correspondent` - set_correspondent\n* `set_document_type` - set_document_type\n* `set_storage_path` - set_storage_path\n* `add_tag` - add_tag\n* `remove_tag` - remove_tag\n* `modify_tags` - modify_tags\n* `modify_custom_fields` - modify_custom_fields\n* `set_permissions` - set_permissions\n* `delete` - delete\n* `reprocess` - reprocess\n* `rotate` - rotate\n* `merge` - merge\n* `edit_pdf` - edit_pdf\n* `remove_password` - remove_password\n* `split` - split\n* `delete_pages` - delete_pages",
 				"enum": [
 					"set_correspondent",
 					"set_document_type",
@@ -865,15 +928,15 @@
 					"remove_tag",
 					"modify_tags",
 					"modify_custom_fields",
+					"set_permissions",
 					"delete",
 					"reprocess",
-					"set_permissions",
 					"rotate",
 					"merge",
-					"split",
-					"delete_pages",
 					"edit_pdf",
-					"remove_password"
+					"remove_password",
+					"split",
+					"delete_pages"
 				],
 				"type": "string"
 			},
@@ -927,13 +990,6 @@
 			},
 			"PaginatedCorrespondentList": {
 				"properties": {
-					"all": {
-						"example": "[1, 2, 3]",
-						"items": {
-							"type": "integer"
-						},
-						"type": "array"
-					},
 					"count": {
 						"example": 123,
 						"type": "integer"
@@ -965,13 +1021,6 @@
 			},
 			"PaginatedDocumentList": {
 				"properties": {
-					"all": {
-						"example": "[1, 2, 3]",
-						"items": {
-							"type": "integer"
-						},
-						"type": "array"
-					},
 					"count": {
 						"example": 123,
 						"type": "integer"
@@ -1003,13 +1052,6 @@
 			},
 			"PaginatedDocumentTypeList": {
 				"properties": {
-					"all": {
-						"example": "[1, 2, 3]",
-						"items": {
-							"type": "integer"
-						},
-						"type": "array"
-					},
 					"count": {
 						"example": 123,
 						"type": "integer"
@@ -1041,13 +1083,6 @@
 			},
 			"PaginatedTagList": {
 				"properties": {
-					"all": {
-						"example": "[1, 2, 3]",
-						"items": {
-							"type": "integer"
-						},
-						"type": "array"
-					},
 					"count": {
 						"example": 123,
 						"type": "integer"
@@ -2596,6 +2631,7 @@
 						"in": "query",
 						"name": "content__icontains",
 						"schema": {
+							"minLength": 1,
 							"type": "string"
 						}
 					},
@@ -2603,6 +2639,7 @@
 						"in": "query",
 						"name": "content__iendswith",
 						"schema": {
+							"minLength": 1,
 							"type": "string"
 						}
 					},
@@ -2610,6 +2647,7 @@
 						"in": "query",
 						"name": "content__iexact",
 						"schema": {
+							"minLength": 1,
 							"type": "string"
 						}
 					},
@@ -2617,6 +2655,7 @@
 						"in": "query",
 						"name": "content__istartswith",
 						"schema": {
+							"minLength": 1,
 							"type": "string"
 						}
 					},
@@ -3108,7 +3147,7 @@
 						}
 					},
 					{
-						"description": "Advanced search query string",
+						"description": "Advanced Tantivy search query string",
 						"in": "query",
 						"name": "query",
 						"schema": {
@@ -3250,6 +3289,14 @@
 						}
 					},
 					{
+						"description": "Simple Tantivy-backed text search query string",
+						"in": "query",
+						"name": "text",
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
 						"in": "query",
 						"name": "title__icontains",
 						"schema": {
@@ -3282,6 +3329,14 @@
 						"name": "title_content",
 						"schema": {
 							"minLength": 1,
+							"type": "string"
+						}
+					},
+					{
+						"description": "Simple Tantivy-backed title-only search query string",
+						"in": "query",
+						"name": "title_search",
+						"schema": {
 							"type": "string"
 						}
 					}
@@ -3629,6 +3684,14 @@
 				"description": "Download the document",
 				"operationId": "documents_download_retrieve",
 				"parameters": [
+					{
+						"description": "Whether or not to use the filename on disk",
+						"in": "query",
+						"name": "follow_formatting",
+						"schema": {
+							"type": "boolean"
+						}
+					},
 					{
 						"description": "A unique integer value identifying this document.",
 						"in": "path",
