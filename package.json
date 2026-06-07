@@ -1,6 +1,6 @@
 {
 	"name": "@kjanat/paperless-mcp",
-	"version": "2.3.0",
+	"version": "2.3.1",
 	"description": "MCP server for interacting with Paperless-ngx document management system.",
 	"keywords": [
 		"paperless-ngx",
@@ -18,7 +18,8 @@
 	"author": "Kaj Kowalski",
 	"type": "module",
 	"imports": {
-		"#*": "./src/*.ts"
+		"#*": "./src/*.ts",
+		"#pkg": "./package.json"
 	},
 	"bin": {
 		"paperless-mcp": "dist/index.js"
@@ -29,7 +30,6 @@
 	],
 	"scripts": {
 		"bd": "bun build src/index.ts --minify --outdir=dist --target=node --banner='#!/usr/bin/env node'",
-		"meta": "bash scripts/meta.sh",
 		"fmt": "dprint fmt",
 		"fmt:check": "dprint check",
 		"gen": "run -s gen:subset gen:zod fmt",
@@ -37,13 +37,15 @@
 		"gen:schema": "uv run --script scripts/openapi.py generate -o schemas/openapi.json",
 		"gen:subset": "uv run --script scripts/openapi.py extract schemas/openapi.json -o schemas/subset.json",
 		"gen:zod": "openapi-ts",
-		"mcp": "bun src/index.ts",
 		"inspect": "bunx @modelcontextprotocol/inspector run mcp",
+		"mcp": "bun src/index.ts",
+		"meta": "bash scripts/meta.sh",
 		"prepack": "bun bd",
 		"start": "run mcp",
 		"typecheck": "tsgo --noEmit"
 	},
 	"devDependencies": {
+		"@actions/github-script": "github:actions/github-script",
 		"@hey-api/openapi-ts": "^0.98.1",
 		"@modelcontextprotocol/sdk": "^1.29.0",
 		"@types/bun": "^1.3.14",
@@ -59,12 +61,12 @@
 	"engines": {
 		"node": ">=22"
 	},
-	"publishConfig": {
-		"access": "public",
-		"tag": "dev"
-	},
 	"volta": {
 		"node": "26.3.0",
 		"npm": "11.16.0"
+	},
+	"publishConfig": {
+		"access": "public",
+		"tag": "dev"
 	}
 }
