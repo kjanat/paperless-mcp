@@ -37,7 +37,7 @@ No barrel files. No cross-imports between leaf modules.
 | Change transport/startup | `src/index.ts`                            | stdio vs HTTP decided by `--http` CLI flag                                                                                                                                                                        |
 | Zod input schemas        | `src/tools/*.ts`                          | Inline in `server.registerTool()` calls                                                                                                                                                                           |
 | CI/CD                    | `.github/workflows/`                      | `npm-publish` (test + `npm publish --provenance` on release), <br> `release-notes` (set release body from CHANGELOG), <br> `schema-check` (codegen drift guard), <br> `schema-update` (weekly upstream-schema PR) |
-| OpenAPI schema           | `schemas/openapi.json`                    | Snapshot via `scripts/openapi.py`                                                                                                                                                                                 |
+| OpenAPI schema           | `schemas/openapi.json`                    | Snapshot via `scripts/openapi/`                                                                                                                                                                                   |
 
 ## CODE MAP
 
@@ -149,4 +149,7 @@ bun run inspect              # Launch MCP inspector
 - `updateTag` uses PATCH (not PUT) — per OpenAPI schema's `PatchedTagRequest`.
 - All dependencies (`@modelcontextprotocol/sdk`, `zod`, `express`) are
   `devDependencies` — the bundle is fully self-contained.
-- `scripts/openapi.py` is a Python (3.14+) tool using `uv` — separate toolchain.
+- `scripts/openapi/` is a Python (3.14+) `uv` project — separate toolchain. Its
+  `pyproject.toml` `[project.scripts].openapi` entry is invoked as `run openapi`
+  in the `gen:*` scripts; `run` (runner) resolves a console script to
+  `uv run openapi`, so no extra wiring is needed.

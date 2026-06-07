@@ -1,19 +1,9 @@
 {
 	"name": "@kjanat/paperless-mcp",
-	"version": "2.3.1",
+	"version": "2.3.2",
 	"description": "MCP server for interacting with Paperless-ngx document management system.",
-	"keywords": [
-		"paperless-ngx",
-		"paperless",
-		"ai",
-		"mcp",
-		"model-context-protocol",
-		"document-management"
-	],
-	"repository": {
-		"type": "git",
-		"url": "git+https://github.com/kjanat/paperless-mcp.git"
-	},
+	"keywords": ["paperless-ngx", "paperless", "ai", "mcp", "model-context-protocol", "document-management"],
+	"repository": "kjanat/paperless-mcp",
 	"license": "MIT",
 	"author": "Kaj Kowalski",
 	"type": "module",
@@ -24,25 +14,24 @@
 	"bin": {
 		"paperless-mcp": "dist/index.js"
 	},
-	"files": [
-		"dist",
-		"skills"
-	],
+	"files": ["CHANGELOG.md", "LICENSE", "README.md", "dist", "skills"],
 	"scripts": {
 		"bd": "bun build src/index.ts --minify --outdir=dist --target=node --banner='#!/usr/bin/env node'",
 		"fmt": "dprint fmt",
 		"fmt:check": "dprint check",
-		"gen": "run -s gen:subset gen:zod fmt",
+		"gen": "run -s gen:subset gen:zod",
 		"gen:full": "run -s gen:schema gen",
-		"gen:schema": "uv run --script scripts/openapi.py generate -o schemas/openapi.json",
-		"gen:subset": "uv run --script scripts/openapi.py extract schemas/openapi.json -o schemas/subset.json",
-		"gen:zod": "openapi-ts",
+		"gen:schema": "export OUT=\"${PWD}/schemas/openapi.json\"; run openapi generate -o \"${OUT}\" && run fmt \"${OUT}\"",
+		"gen:subset": "export OUT=\"${PWD}/schemas/subset.json\"; run openapi extract \"${PWD}/schemas/openapi.json\" -o \"${OUT}\" && run fmt \"${OUT}\"",
+		"gen:zod": "openapi-ts && run fmt src/api/generated/** --allow-no-files",
 		"inspect": "bunx @modelcontextprotocol/inspector run mcp",
 		"mcp": "bun src/index.ts",
 		"meta": "bash scripts/meta.sh",
 		"prepack": "bun bd",
 		"start": "run mcp",
-		"typecheck": "tsgo --noEmit"
+		"typecheck": "tsgo --noEmit",
+		"uv:sync:frozen": "uv sync --frozen",
+		"uv:sync:upgrade:paperless": "uv sync --upgrade-package paperless-ngx"
 	},
 	"devDependencies": {
 		"@actions/github-script": "github:actions/github-script",
@@ -54,6 +43,7 @@
 		"dprint": "0.51.1",
 		"express": "^5.2.1",
 		"runner-run": "^0.12.1",
+		"tombi": "^1.1.2",
 		"typescript": "^6.0.3",
 		"zod": "^4.4.3"
 	},
