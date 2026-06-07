@@ -1,6 +1,6 @@
 import type { IncomingMessage, ServerResponse } from 'node:http';
 
-import { arg, cli, command, flag } from '@kjanat/dreamcli';
+import { arg, cli, command, flag, ParseError } from '@kjanat/dreamcli';
 import { createMcpExpressApp } from '@modelcontextprotocol/sdk/server/express.js';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
@@ -42,7 +42,11 @@ const portFlag = flag
 		const port = Number(raw);
 
 		if (!Number.isInteger(port) || port < 1 || port > 65535) {
-			throw new Error(`Invalid --port value "${String(raw)}". Expected an integer 1-65535.`);
+			throw new ParseError(`Invalid --port value "${String(raw)}".`, {
+				code: 'INVALID_VALUE',
+				suggest: 'Expected an integer between 1 and 65535.',
+				details: { flag: 'port', value: raw },
+			});
 		}
 
 		return port;
