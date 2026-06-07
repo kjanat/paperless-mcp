@@ -7,8 +7,8 @@ Four tool files + shared `utils.ts`. Each tool file exports
 ## PATTERN
 
 ```typescript
+import { jsonResult } from '#tools/utils';
 import { z } from 'zod';
-import { jsonResult } from './utils';
 
 server.registerTool(
 	'tool_name',
@@ -39,6 +39,7 @@ server.registerTool(
 
 ## GOTCHAS
 
-- **No cross-imports** between tool files. Each imports from `../api/paperless`
-  and `./utils` only.
+- **No cross-imports** between tool files. Import shared modules via subpath
+  aliases — `#api/paperless` (the API client) and `#tools/utils` — plus the
+  generated/type aliases (`#api/generated/zod.gen`, `#types`) where needed.
 - **No tests** for tool registration or callback logic. Only the API client is tested.
