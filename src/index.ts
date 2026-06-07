@@ -36,15 +36,19 @@ function sendJsonRpcError(
 	res.end(JSON.stringify(jsonRpcError(rpcCode, message)));
 }
 
-function parsePort(raw: unknown): number {
-	const port = Number(raw);
+/** HTTP transport port flag: coerces and validates an integer in 1-65535. */
+const portFlag = flag
+	.custom((raw: unknown): number => {
+		const port = Number(raw);
 
-	if (!Number.isInteger(port) || port < 1 || port > 65535) {
-		throw new Error(`Invalid --port value "${String(raw)}". Expected an integer 1-65535.`);
-	}
+		if (!Number.isInteger(port) || port < 1 || port > 65535) {
+			throw new Error(`Invalid --port value "${String(raw)}". Expected an integer 1-65535.`);
+		}
 
-	return port;
-}
+		return port;
+	})
+	.default(DEFAULT_PORT)
+	.describe('Port for the HTTP transport (1-65535).');
 
 function normalizeBaseUrl(input: string): string {
 	const url = new URL(input);
@@ -110,13 +114,7 @@ const serve = command('paperless-mcp')
 			.boolean()
 			.describe('Serve over Streamable HTTP instead of stdio (the default).'),
 	)
-	.flag(
-		'port',
-		flag
-			.custom(parsePort)
-			.default(DEFAULT_PORT)
-			.describe('Port for the HTTP transport (1-65535).'),
-	)
+	.flag('port', portFlag)
 	.example('paperless-mcp http://localhost:8000 your-api-token', 'Serve over stdio')
 	.example('paperless-mcp --http --port 8080', 'Serve over HTTP using env credentials')
 	.action(async ({ args, flags, out }) => {
