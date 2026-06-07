@@ -17,6 +17,8 @@ import { registerTagTools } from './tools/tags';
 const DEFAULT_PORT = 3000;
 const DEFAULT_HOST = '0.0.0.0';
 const SERVER_NAME = 'paperless-ngx';
+/** Grace period to let in-flight HTTP requests drain before force-closing sockets. */
+const SHUTDOWN_GRACE_MS = 10_000;
 
 /** Express request with parsed body attached by express.json() middleware. */
 interface ParsedRequest extends IncomingMessage {
@@ -74,15 +76,27 @@ const allowedHostsFlag = flag
 /** Paperless-ngx base URL: validates the input and strips any trailing slash. */
 const baseUrlArg = arg
 	.custom((raw: string): string => {
+		let url: URL;
+
 		try {
-			return new URL(raw).href.replace(/\/+$/, '');
+			url = new URL(raw);
 		} catch {
 			throw new ParseError(`Invalid Paperless-ngx base URL "${raw}".`, {
 				code: 'INVALID_VALUE',
-				suggest: 'Provide an absolute URL, e.g. http://localhost:8000.',
+				suggest: 'Provide an absolute http(s) URL, e.g. http://localhost:8000.',
 				details: { arg: 'baseUrl', value: raw },
 			});
 		}
+
+		if (url.protocol !== 'http:' && url.protocol !== 'https:') {
+			throw new ParseError(`Unsupported scheme "${url.protocol}" in Paperless-ngx base URL.`, {
+				code: 'INVALID_VALUE',
+				suggest: 'Use an http:// or https:// URL, e.g. http://localhost:8000.',
+				details: { arg: 'baseUrl', value: raw, protocol: url.protocol },
+			});
+		}
+
+		return url.href.replace(/\/+$/, '');
 	})
 	.env('PAPERLESS_URL')
 	.describe('Paperless-ngx base URL, e.g. http://localhost:8000');
@@ -206,8 +220,12 @@ const serve = command('paperless-mcp')
 			});
 
 			await runUntilShutdown(async () => {
-				httpServer.closeAllConnections();
+				// Stop accepting connections and let in-flight requests drain; only
+				// force any still-open sockets if draining exceeds the grace period.
+				const forceClose = setTimeout(() => httpServer.closeAllConnections(), SHUTDOWN_GRACE_MS);
+				forceClose.unref();
 				await new Promise<void>((resolve) => httpServer.close(() => resolve()));
+				clearTimeout(forceClose);
 			});
 		} else {
 			const server = createServer(api);
