@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.2.2] - 2026-06-07
+
+### Changed
+
+- Sync the generated API schema with the upstream Paperless-ngx OpenAPI spec.
+  Regenerating `src/api/generated/zod.gen.ts` updates the bulk-edit `method`
+  enum and request shapes and picks up new optional fields (`title_search`,
+  `follow_formatting`). The MCP tool set is unchanged.
+
+### Added
+
+- Schema-drift CI: `schema-check` fails a PR when the committed generated
+  artifacts are out of sync with the OpenAPI schema, and a weekly
+  `schema-update` job opens a PR when the upstream Paperless-ngx schema changes.
+
 ## [2.2.1] - 2026-06-07
 
 ### Fixed
