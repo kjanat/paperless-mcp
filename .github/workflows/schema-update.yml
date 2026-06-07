@@ -19,7 +19,7 @@ jobs:
       - { uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b, with: { python-version: 3.14 } } # v8.1.0
       - uses: kjanat/runner@2d2f9eb9825b2d4c9a87cac8a760a69bb80622a1
 
-      - run: runner install --frozen gen:schema:generate gen
+      - run: runner install --frozen gen:full
 
       - name: Detect changes
         id: diff
