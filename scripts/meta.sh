@@ -10,6 +10,6 @@ version=$(bun pm pkg get version | tr -d '"')
 
 npm_version=$(tr -d '[:space:]' <.npm-version)
 
-printf 'name=%s\n' "${name}" >>"${GITHUB_OUTPUT}"
-printf 'version=%s\n' "${version}" >>"${GITHUB_OUTPUT}"
+printf 'name=%s\n' "${name}" | tee -a "${GITHUB_OUTPUT}"
+printf 'version=%s\n' "${version}" | tee -a "${GITHUB_OUTPUT}"
 printf 'NPM_VERSION=%s\n' "${npm_version}" >>"${GITHUB_ENV}"
