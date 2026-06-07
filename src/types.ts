@@ -12,7 +12,7 @@
  * tooling rely on (see each section). Everything else is generated.
  */
 
-import * as schemas from '@/api/generated/zod.gen';
+import * as schemas from '#api/generated/zod.gen';
 import type { z } from 'zod';
 
 /** Replace the keys of `T` present in `O` with the variants declared in `O`. */

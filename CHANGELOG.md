@@ -7,6 +7,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.4.0] - 2026-06-08
+
+### Changed
+
+- Migrate CLI argument parsing from Node's `util.parseArgs` to the schema-first
+  [`@kjanat/dreamcli`](https://dreamcli.kjanat.com) framework. Flag/arg types,
+  environment fallbacks, `-V`/`--version`, and `-h`/`--help` are now derived from
+  the command schema, with structured validation errors (including `--json`).
+- **HTTP transport now binds to loopback (`127.0.0.1`) by default** instead of
+  `0.0.0.0`. The MCP SDK auto-enables DNS-rebinding protection on loopback; to
+  expose the server on another interface, set `--host` and pair it with
+  `--allowed-hosts`.
+- The base URL is validated at parse time — non-`http(s)` schemes and malformed
+  URLs are rejected with a clear error, and any trailing slash is stripped.
+
+### Added
+
+- `--host` / `PAPERLESS_MCP_HOST` to choose the HTTP bind interface.
+- `--allowed-hosts` / `PAPERLESS_MCP_ALLOWED_HOSTS` to set a Host-header
+  allowlist (DNS-rebinding protection) when binding a non-loopback interface.
+- Graceful shutdown: `SIGINT`/`SIGTERM` drain in-flight HTTP requests (force-close
+  after a 10s grace period) and close the stdio server before exiting.
+
 ## [2.3.2] - 2026-06-07
 
 ### Changed
@@ -237,7 +260,7 @@ Major rewrite of internals while preserving the same MCP tool surface.
 - Migrated runtime, bundler, and test runner from npm to **Bun**.
 - Reformatted entire codebase with dprint (tab indentation, single quotes).
 - Strictened tsconfig: ESNext target/module, strict mode enabled.
-- Renamed `PaperlessAPI.ts` to `paperless-api.ts` (kebab-case convention).
+- Renamed `PaperlessAPI.ts` to `paperless.ts` (kebab-case convention).
 - Moved `express` to `optionalDependencies` (only needed for HTTP transport).
 - Stateless HTTP transport: fresh `McpServer` created per request.
 
@@ -256,7 +279,8 @@ Major rewrite of internals while preserving the same MCP tool surface.
 - Smithery configuration (broken `smithery.yaml`).
 - Obsolete Cursor rules.
 
-[Unreleased]: https://github.com/kjanat/paperless-mcp/compare/v2.3.2...HEAD
+[Unreleased]: https://github.com/kjanat/paperless-mcp/compare/v2.4.0...HEAD
+[2.4.0]: https://github.com/kjanat/paperless-mcp/compare/v2.3.2...v2.4.0
 [2.3.2]: https://github.com/kjanat/paperless-mcp/compare/v2.3.1...v2.3.2
 [2.3.1]: https://github.com/kjanat/paperless-mcp/compare/v2.3.0...v2.3.1
 [2.3.0]: https://github.com/kjanat/paperless-mcp/compare/v2.2.2...v2.3.0

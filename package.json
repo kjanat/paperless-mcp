@@ -1,6 +1,6 @@
 {
 	"name": "@kjanat/paperless-mcp",
-	"version": "2.3.2",
+	"version": "2.4.0",
 	"description": "MCP server for interacting with Paperless-ngx document management system.",
 	"keywords": ["paperless-ngx", "paperless", "ai", "mcp", "model-context-protocol", "document-management"],
 	"repository": "kjanat/paperless-mcp",
@@ -36,6 +36,7 @@
 	"devDependencies": {
 		"@actions/github-script": "github:actions/github-script",
 		"@hey-api/openapi-ts": "^0.98.1",
+		"@kjanat/dreamcli": "^2.1.0",
 		"@modelcontextprotocol/sdk": "^1.29.0",
 		"@types/bun": "^1.3.14",
 		"@types/express": "^5.0.6",

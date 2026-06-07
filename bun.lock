@@ -7,6 +7,7 @@
       "devDependencies": {
         "@actions/github-script": "github:actions/github-script",
         "@hey-api/openapi-ts": "^0.98.1",
+        "@kjanat/dreamcli": "^2.1.0",
         "@modelcontextprotocol/sdk": "^1.29.0",
         "@types/bun": "^1.3.14",
         "@types/express": "^5.0.6",
@@ -74,6 +75,8 @@
     "@hono/node-server": ["@hono/node-server@1.19.9", "", { "peerDependencies": { "hono": "^4" } }, "sha512-vHL6w3ecZsky+8P5MD+eFfaGTyCeOHUIFYMGpQGbrBTSmNNoxv0if69rEZ5giu36weC5saFuznL411gRX7bJDw=="],
 
     "@jsdevtools/ono": ["@jsdevtools/ono@7.1.3", "", {}, "sha512-4JQNk+3mVzK3xh2rqd6RB4J46qUR19azEHBneZyTZM+c456qOrbbM/5xcR8huNCCcbVt7+UmizG6GuUvPvKUYg=="],
+
+    "@kjanat/dreamcli": ["@kjanat/dreamcli@2.1.0", "", {}, "sha512-dcE11SlCidTKy3RcDlfBEGgA2Wfq3P0WQ7srW4ikk0vYm/Kb6PzFHzUHRKCwpfQXuQkpcQzyCML9v6K+0PtWuQ=="],
 
     "@lukeed/ms": ["@lukeed/ms@2.0.2", "", {}, "sha512-9I2Zn6+NJLfaGoz9jN3lpwDgAYvfGeNYdbAIjJOqzs4Tpc+VU3Jqq4IofSUBKajiDS8k9fZIg18/z13mpk1bsA=="],
 

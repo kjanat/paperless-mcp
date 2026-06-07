@@ -1,10 +1,10 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
 
-import { zMethodEnum } from '@/api/generated/zod.gen';
-import type { PaperlessAPI } from '@/api/paperless-api';
-import type { PostDocumentMetadata } from '@/types';
-import { jsonResult } from './utils';
+import { zMethodEnum } from '#api/generated/zod.gen';
+import type { PaperlessAPI } from '#api/paperless';
+import { jsonResult } from '#tools/utils';
+import type { PostDocumentMetadata } from '#types';
 
 export function registerDocumentTools(server: McpServer, api: PaperlessAPI): void {
 	server.registerTool(

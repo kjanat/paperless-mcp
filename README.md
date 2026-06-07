@@ -511,4 +511,22 @@ With a `.env` file, this simplifies to `bun start --http`.
 - Each request is handled statelessly, following the [StreamableHTTPServerTransport](https://github.com/modelcontextprotocol/typescript-sdk) pattern.
 - GET and DELETE requests to `/mcp` will return 405 Method Not Allowed.
 
+#### Bind host and DNS-rebinding protection
+
+By default the HTTP server binds to loopback (`127.0.0.1`), for which the MCP SDK
+automatically enables Host-header validation (DNS-rebinding protection). To expose
+it on another interface, set `--host` (or `PAPERLESS_MCP_HOST`):
+
+```bash
+# Bind all interfaces — pass an allowlist so protection stays on
+bun start --http --host 0.0.0.0 --allowed-hosts paperless.example.com,localhost
+```
+
+- `--host` / `PAPERLESS_MCP_HOST` — interface to bind (default `127.0.0.1`).
+- `--allowed-hosts` / `PAPERLESS_MCP_ALLOWED_HOSTS` — comma-separated Host-header
+  allowlist. **Set this whenever you bind a non-loopback host** (e.g. `0.0.0.0`);
+  otherwise the SDK applies no DNS-rebinding protection and logs a warning.
+- The server shuts down gracefully on `SIGINT`/`SIGTERM`, draining in-flight
+  requests before exiting.
+
 <!--markdownlint-disable-file no-hard-tabs no-inline-html no-bare-urls-->
