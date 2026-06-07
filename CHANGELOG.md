@@ -7,6 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Migrate CLI argument parsing from Node's `util.parseArgs` to the schema-first
+  [`@kjanat/dreamcli`](https://dreamcli.kjanat.com) framework. Flag/arg types,
+  environment fallbacks, `-V`/`--version`, and `-h`/`--help` are now derived from
+  the command schema, with structured validation errors (including `--json`).
+- **HTTP transport now binds to loopback (`127.0.0.1`) by default** instead of
+  `0.0.0.0`. The MCP SDK auto-enables DNS-rebinding protection on loopback; to
+  expose the server on another interface, set `--host` and pair it with
+  `--allowed-hosts`.
+- The base URL is validated at parse time — non-`http(s)` schemes and malformed
+  URLs are rejected with a clear error, and any trailing slash is stripped.
+
+### Added
+
+- `--host` / `PAPERLESS_MCP_HOST` to choose the HTTP bind interface.
+- `--allowed-hosts` / `PAPERLESS_MCP_ALLOWED_HOSTS` to set a Host-header
+  allowlist (DNS-rebinding protection) when binding a non-loopback interface.
+- Graceful shutdown: `SIGINT`/`SIGTERM` drain in-flight HTTP requests (force-close
+  after a 10s grace period) and close the stdio server before exiting.
+
 ## [2.3.1] - 2026-06-07
 
 ### Added

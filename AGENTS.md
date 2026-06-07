@@ -12,7 +12,7 @@ API types derived from OpenAPI schema v6.0.0.
 
 ```tree
 src/
-├── index.ts                 # Entry: CLI parsing, server factory, dual transport
+├── index.ts                 # Entry: dreamcli CLI, server factory, dual transport
 ├── types.ts                 # Typed interfaces from OpenAPI schema (v6.0.0)
 ├── api/
 │   ├── paperless-api.ts     # HTTP client wrapping Paperless-ngx REST API
@@ -87,11 +87,22 @@ All callbacks accept `_extra` parameter (SDK requirement).
 
 ### Entry Point (src/index.ts)
 
-`main()` → parse CLI args → `PaperlessAPI` → `createServer()` factory → transport:
+CLI defined with [`@kjanat/dreamcli`](https://dreamcli.kjanat.com) (schema-first,
+typed): the `serve` command resolves args/flags → `PaperlessAPI` →
+`createServer()` factory → transport. `cli().run()` owns help/version/errors and
+exits the process, so the action awaits `runUntilShutdown()` (SIGINT/SIGTERM) to
+keep the server alive and shut it down gracefully.
 
-- **stdio**: single `McpServer` + `StdioServerTransport` (args: `<baseUrl> <token>`)
-- **HTTP**: `createMcpExpressApp()` from SDK on `0.0.0.0:port`; fresh `McpServer`
-  per request (stateless `StreamableHTTPServerTransport`)
+- **args**: `<baseUrl>` (validated http(s), trailing slash stripped) `<token>`
+- **flags**: `--http`, `--port` (1-65535), `--host` (default loopback
+  `127.0.0.1`), `--allowed-hosts` (Host-header allowlist)
+- **env**: `PAPERLESS_URL`, `PAPERLESS_API_KEY` (+ legacy `API_KEY`),
+  `PAPERLESS_MCP_HOST`, `PAPERLESS_MCP_ALLOWED_HOSTS`
+- **stdio** (default): single `McpServer` + `StdioServerTransport`
+- **HTTP** (`--http`): `createMcpExpressApp()` on `host:port`; fresh `McpServer`
+  per request (stateless `StreamableHTTPServerTransport`). DNS-rebinding
+  protection is automatic on loopback; pass `--allowed-hosts` when binding
+  `0.0.0.0`
 
 ## CONVENTIONS
 
@@ -142,7 +153,9 @@ bun run inspect              # Launch MCP inspector
   to reduce token usage. `get_document` returns full content.
 - Config: `PAPERLESS_URL` + `PAPERLESS_API_KEY` env vars (both modes), or
   positional CLI args. CLI args take precedence. Legacy `API_KEY` env var
-  supported as fallback.
+  supported as fallback. HTTP bind is configurable via `--host` /
+  `PAPERLESS_MCP_HOST` (default loopback) and `--allowed-hosts` /
+  `PAPERLESS_MCP_ALLOWED_HOSTS`.
 - Console logging is unstructured — error messages could leak sensitive data.
 - `skills/` directory ships in npm package (`"files": ["dist", "skills"]`) —
   contains Paperless-ngx reference docs, not runtime code.

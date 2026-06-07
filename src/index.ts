@@ -15,7 +15,7 @@ import { registerDocumentTypeTools } from './tools/documentTypes';
 import { registerTagTools } from './tools/tags';
 
 const DEFAULT_PORT = 3000;
-const DEFAULT_HOST = '0.0.0.0';
+const DEFAULT_HOST = '127.0.0.1';
 const SERVER_NAME = 'paperless-ngx';
 /** Grace period to let in-flight HTTP requests drain before force-closing sockets. */
 const SHUTDOWN_GRACE_MS = 10_000;
@@ -25,10 +25,12 @@ interface ParsedRequest extends IncomingMessage {
 	body?: unknown;
 }
 
+/** Build a JSON-RPC 2.0 error response envelope with the given code and message. */
 function jsonRpcError(code: number, message: string): JSONRPCErrorResponse {
 	return { jsonrpc: '2.0', error: { code, message } };
 }
 
+/** Write a JSON-RPC error to the HTTP response with the matching status code. */
 function sendJsonRpcError(
 	res: ServerResponse,
 	httpStatus: number,
@@ -57,12 +59,16 @@ const portFlag = flag
 	.default(DEFAULT_PORT)
 	.describe('Port for the HTTP transport (1-65535).');
 
-/** Host/interface the HTTP transport binds to. */
+/**
+ * Host/interface the HTTP transport binds to. Defaults to loopback
+ * (`127.0.0.1`), which the MCP SDK auto-protects against DNS rebinding. Bind a
+ * wider interface (e.g. `0.0.0.0`) only with `--allowed-hosts` set.
+ */
 const hostFlag = flag
 	.string()
 	.env('PAPERLESS_MCP_HOST')
 	.default(DEFAULT_HOST)
-	.describe('Host the HTTP transport binds to.');
+	.describe('Host the HTTP transport binds to (default loopback).');
 
 /**
  * Comma-separated hostnames allowed in the Host header, enabling DNS-rebinding
@@ -88,7 +94,7 @@ const baseUrlArg = arg
 			});
 		}
 
-		if (url.protocol !== 'http:' && url.protocol !== 'https:') {
+		if (!/^https?:$/.test(url.protocol)) {
 			throw new ParseError(`Unsupported scheme "${url.protocol}" in Paperless-ngx base URL.`, {
 				code: 'INVALID_VALUE',
 				suggest: 'Use an http:// or https:// URL, e.g. http://localhost:8000.',
@@ -118,6 +124,7 @@ function tokenArg() {
 	return legacyApiKey == null ? token : token.default(legacyApiKey);
 }
 
+/** Build a fresh MCP server with every Paperless-ngx tool group registered. */
 function createServer(api: PaperlessAPI): McpServer {
 	const server = new McpServer({ name: SERVER_NAME, version: pkg.version });
 
@@ -129,6 +136,7 @@ function createServer(api: PaperlessAPI): McpServer {
 	return server;
 }
 
+/** Handle one POST /mcp request with a fresh per-request server and transport. */
 async function handleMcpHttpRequest(
 	req: ParsedRequest,
 	res: ServerResponse,
