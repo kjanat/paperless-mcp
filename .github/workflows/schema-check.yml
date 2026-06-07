@@ -1,0 +1,48 @@
+---
+# Guard: committed generated artifacts must match what `bun run gen` produces.
+# Catches edits to the schema / codegen config / tools that weren't regenerated.
+name: Schema drift check
+on:
+  pull_request:
+    paths:
+      - schemas/**
+      - src/api/generated/**
+      - src/tools/**
+      - openapi-ts.config.ts
+      - scripts/openapi.py
+      - package.json
+      - bun.lock
+  push:
+    branches: [master]
+    paths:
+      - schemas/**
+      - src/api/generated/**
+      - src/tools/**
+      - openapi-ts.config.ts
+      - scripts/openapi.py
+      - package.json
+      - bun.lock
+  workflow_dispatch: {}
+
+concurrency: { group: "schema-check-${{ github.ref }}", cancel-in-progress: true }
+
+jobs:
+  drift:
+    runs-on: ubuntu-latest
+    permissions: read-all
+    steps:
+      - { uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 } # v6
+      - { uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 } # v2
+      - uses: kjanat/runner@2d2f9eb9825b2d4c9a87cac8a760a69bb80622a1
+      # Re-derive subset.json + zod.gen.ts from the committed schemas/openapi.json.
+      # `extract` is stdlib-only, so the runner's python3 suffices (no uv needed).
+      - run: runner install --frozen gen
+      - name: Verify no drift
+        run: |
+          if ! git diff --quiet -- schemas/subset.json src/api/generated; then
+            echo "::error::Generated files are stale. Run 'bun run gen' and commit the result."
+            git --no-pager diff --stat -- schemas/subset.json src/api/generated
+            git --no-pager diff -- schemas/subset.json src/api/generated
+            exit 1
+          fi
+          echo "Generated artifacts are in sync."
