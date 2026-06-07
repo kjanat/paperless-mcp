@@ -54,10 +54,21 @@ const portFlag = flag
 	.default(DEFAULT_PORT)
 	.describe('Port for the HTTP transport (1-65535).');
 
-function normalizeBaseUrl(input: string): string {
-	const url = new URL(input);
-	return url.href.replace(/\/+$/, '');
-}
+/** Paperless-ngx base URL: validates the input and strips any trailing slash. */
+const baseUrlArg = arg
+	.custom((raw: string): string => {
+		try {
+			return new URL(raw).href.replace(/\/+$/, '');
+		} catch {
+			throw new ParseError(`Invalid Paperless-ngx base URL "${raw}".`, {
+				code: 'INVALID_VALUE',
+				suggest: 'Provide an absolute URL, e.g. http://localhost:8000.',
+				details: { arg: 'baseUrl', value: raw },
+			});
+		}
+	})
+	.env('PAPERLESS_URL')
+	.describe('Paperless-ngx base URL, e.g. http://localhost:8000');
 
 function createServer(api: PaperlessAPI): McpServer {
 	const server = new McpServer({ name: SERVER_NAME, version: pkg.version });
@@ -98,13 +109,7 @@ async function handleMcpHttpRequest(
 
 const serve = command('paperless-mcp')
 	.description('MCP server for the Paperless-ngx document management system.')
-	.arg(
-		'baseUrl',
-		arg
-			.string()
-			.env('PAPERLESS_URL')
-			.describe('Paperless-ngx base URL, e.g. http://localhost:8000'),
-	)
+	.arg('baseUrl', baseUrlArg)
 	.arg(
 		'token',
 		arg
@@ -122,8 +127,7 @@ const serve = command('paperless-mcp')
 	.example('paperless-mcp http://localhost:8000 your-api-token', 'Serve over stdio')
 	.example('paperless-mcp --http --port 8080', 'Serve over HTTP using env credentials')
 	.action(async ({ args, flags, out }) => {
-		const baseUrl = normalizeBaseUrl(args.baseUrl);
-		const api = new PaperlessAPI(baseUrl, args.token);
+		const api = new PaperlessAPI(args.baseUrl, args.token);
 
 		if (flags.http) {
 			const app = createMcpExpressApp({ host: '0.0.0.0' });
