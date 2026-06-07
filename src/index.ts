@@ -15,6 +15,7 @@ import { registerDocumentTypeTools } from './tools/documentTypes';
 import { registerTagTools } from './tools/tags';
 
 const DEFAULT_PORT = 3000;
+const DEFAULT_HOST = '0.0.0.0';
 const SERVER_NAME = 'paperless-ngx';
 
 /** Express request with parsed body attached by express.json() middleware. */
@@ -53,6 +54,22 @@ const portFlag = flag
 	})
 	.default(DEFAULT_PORT)
 	.describe('Port for the HTTP transport (1-65535).');
+
+/** Host/interface the HTTP transport binds to. */
+const hostFlag = flag
+	.string()
+	.env('PAPERLESS_MCP_HOST')
+	.default(DEFAULT_HOST)
+	.describe('Host the HTTP transport binds to.');
+
+/**
+ * Comma-separated hostnames allowed in the Host header, enabling DNS-rebinding
+ * protection when binding to a non-localhost interface such as 0.0.0.0.
+ */
+const allowedHostsFlag = flag
+	.string()
+	.env('PAPERLESS_MCP_ALLOWED_HOSTS')
+	.describe('Comma-separated Host header allowlist for DNS-rebinding protection.');
 
 /** Paperless-ngx base URL: validates the input and strips any trailing slash. */
 const baseUrlArg = arg
@@ -107,6 +124,31 @@ async function handleMcpHttpRequest(
 	}
 }
 
+/** Split a comma-separated allowlist into trimmed, non-empty hostnames. */
+function parseAllowedHosts(raw: string | undefined): string[] {
+	return (raw ?? '')
+		.split(',')
+		.map((host) => host.trim())
+		.filter((host) => host.length > 0);
+}
+
+/**
+ * Block until the process receives SIGINT/SIGTERM, then run `cleanup`.
+ *
+ * dreamcli's run() exits the process once the action resolves, so awaiting
+ * this keeps the long-lived server up until a termination signal arrives and
+ * lets it shut down gracefully before the process exits.
+ */
+async function runUntilShutdown(cleanup: () => Promise<void> | void): Promise<void> {
+	await new Promise<void>((resolve) => {
+		const stop = (): void => resolve();
+		process.once('SIGINT', stop);
+		process.once('SIGTERM', stop);
+	});
+
+	await cleanup();
+}
+
 const serve = command('paperless-mcp')
 	.description('MCP server for the Paperless-ngx document management system.')
 	.arg('baseUrl', baseUrlArg)
@@ -124,13 +166,19 @@ const serve = command('paperless-mcp')
 			.describe('Serve over Streamable HTTP instead of stdio (the default).'),
 	)
 	.flag('port', portFlag)
+	.flag('host', hostFlag)
+	.flag('allowed-hosts', allowedHostsFlag)
 	.example('paperless-mcp http://localhost:8000 your-api-token', 'Serve over stdio')
 	.example('paperless-mcp --http --port 8080', 'Serve over HTTP using env credentials')
 	.action(async ({ args, flags, out }) => {
 		const api = new PaperlessAPI(args.baseUrl, args.token);
 
 		if (flags.http) {
-			const app = createMcpExpressApp({ host: '0.0.0.0' });
+			const allowedHosts = parseAllowedHosts(flags['allowed-hosts']);
+			const app = createMcpExpressApp({
+				host: flags.host,
+				...(allowedHosts.length > 0 ? { allowedHosts } : {}),
+			});
 
 			app.post('/mcp', (req: ParsedRequest, res: ServerResponse) => {
 				void handleMcpHttpRequest(req, res, api);
@@ -140,18 +188,23 @@ const serve = command('paperless-mcp')
 				sendJsonRpcError(res, 405, -32000, 'Method not allowed.');
 			});
 
-			app.listen(flags.port, () => {
-				out.log(`MCP Stateless Streamable HTTP Server listening on port ${flags.port}`);
+			const httpServer = app.listen(flags.port, flags.host, () => {
+				out.log(
+					`MCP Stateless Streamable HTTP Server listening on http://${flags.host}:${flags.port}/mcp`,
+				);
+			});
+
+			await runUntilShutdown(async () => {
+				httpServer.closeAllConnections();
+				await new Promise<void>((resolve) => httpServer.close(() => resolve()));
 			});
 		} else {
 			const server = createServer(api);
 			const transport = new StdioServerTransport();
 			await server.connect(transport);
-		}
 
-		// dreamcli's run() exits the process once the action resolves; keep it
-		// pending so the long-lived stdio/HTTP server stays up until terminated.
-		await new Promise<never>(() => {});
+			await runUntilShutdown(() => server.close());
+		}
 	});
 
 // Honor the legacy API_KEY env var by mapping it onto the name dreamcli resolves.
@@ -161,6 +214,5 @@ if (process.env['PAPERLESS_API_KEY'] == null && process.env['API_KEY'] != null) 
 
 void cli('paperless-mcp')
 	.version(pkg.version)
-	.description(pkg.description)
 	.default(serve)
 	.run();
