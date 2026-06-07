@@ -31,3 +31,5 @@ Thumbs.db
 *.sln
 *.sw?
 package-lock.json
+
+*cache*/

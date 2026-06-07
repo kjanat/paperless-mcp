@@ -1,15 +1,4 @@
-#!/usr/bin/env -S uv run --script
-# /// script
-# requires-python = ">=3.14"
-# dependencies = [
-#     "django>=5.2.11",
-#     "paperless-ngx",
-#     "pyyaml>=6.0.3",
-# ]
-#
-# [tool.uv.sources]
-# paperless-ngx = { git = "https://github.com/paperless-ngx/paperless-ngx.git" }
-# ///
+#!/usr/bin/env -S uv run
 """Generate, snapshot, and diff Paperless-ngx OpenAPI schemas.
 
 The primary command is ``generate``, which imports the Paperless-ngx Django
@@ -35,19 +24,19 @@ CLI (via ``uv run``)
 ::
 
     # Generate schema from the paperless-ngx source dep and save
-    uv run scripts/openapi.py generate -o schemas/openapi.json
+    uv run openapi generate -o schemas/openapi.json
 
     # Generate only the endpoints we use
-    uv run scripts/openapi.py generate -o schemas/subset.json --extract
+    uv run openapi generate -o schemas/subset.json --extract
 
     # Extract a subset from an existing full snapshot
-    uv run scripts/openapi.py extract schemas/openapi.json -o schemas/subset.json
+    uv run openapi extract schemas/openapi.json -o schemas/subset.json
 
     # Diff two snapshots
-    uv run scripts/openapi.py diff schemas/old.json schemas/new.json
+    uv run openapi diff schemas/old.json schemas/new.json
 
     # Fetch schema from a live instance instead (optional)
-    uv run scripts/openapi.py fetch -u http://localhost:8000 -t <token> -o schemas/openapi.json
+    uv run openapi fetch -u http://localhost:8000 -t <token> -o schemas/openapi.json
 
 Environment variables ``PAPERLESS_URL`` and ``API_KEY`` are used as
 defaults when ``--url`` / ``--token`` are omitted for the ``fetch`` command.
@@ -55,6 +44,7 @@ defaults when ``--url`` / ``--token`` are omitted for the ``fetch`` command.
 
 import argparse
 import atexit
+import io
 import json
 import os
 import shutil
@@ -64,8 +54,41 @@ import traceback
 import urllib.error
 import urllib.parse
 import urllib.request
+from collections.abc import Callable
+from dataclasses import dataclass
+from http.client import HTTPResponse
 from pathlib import Path
-from typing import Any
+from typing import cast
+
+# ---------------------------------------------------------------------------
+# Types
+# ---------------------------------------------------------------------------
+
+#: Any value that can appear in parsed JSON. OpenAPI schemas are arbitrary
+#: nested JSON, so the walkers below operate on this recursive union and narrow
+#: with ``isinstance`` rather than reaching for ``Any``.
+type JSONValue = (
+    dict[str, JSONValue] | list[JSONValue] | str | int | float | bool | None
+)
+
+#: A parsed OpenAPI document — always a JSON object at the top level.
+type Schema = dict[str, JSONValue]
+
+
+def _as_dict(value: JSONValue | None) -> dict[str, JSONValue]:
+    """Narrow *value* to a JSON object, or ``{}`` when it isn't one."""
+    return value if isinstance(value, dict) else {}
+
+
+def _as_list(value: JSONValue | None) -> list[JSONValue]:
+    """Narrow *value* to a JSON array, or ``[]`` when it isn't one."""
+    return value if isinstance(value, list) else []
+
+
+def _path_count(schema: Schema) -> int:
+    """Number of entries under the schema's ``paths`` object."""
+    return len(_as_dict(schema.get("paths")))
+
 
 # ---------------------------------------------------------------------------
 # Constants
@@ -101,7 +124,7 @@ def fetch_schema(
     token: str | None = None,
     format: str = "json",
     timeout: int = 30,
-) -> dict[str, Any]:
+) -> Schema:
     """Fetch the OpenAPI schema from a live Paperless-ngx instance.
 
     Parameters
@@ -143,9 +166,12 @@ def fetch_schema(
         headers["Authorization"] = f"Token {token}"
 
     req = urllib.request.Request(url, headers=headers)
-    with urllib.request.urlopen(req, timeout=timeout) as resp:
+    # urlopen is typed as returning Any by the stdlib stubs; pin the concrete
+    # response type so the body decode below stays typed.
+    with cast(HTTPResponse, urllib.request.urlopen(req, timeout=timeout)) as resp:
         body = resp.read().decode("utf-8")
 
+    schema: Schema
     if format == "yaml":
         try:
             import yaml
@@ -153,21 +179,20 @@ def fetch_schema(
             raise ImportError(
                 "PyYAML is required to parse YAML responses; add 'pyyaml' to script dependencies"
             ) from exc
-        schema: dict[str, Any] = yaml.safe_load(body)
+        schema = cast(Schema, yaml.safe_load(body))
     else:
-        schema: dict[str, Any] = json.loads(body)
+        schema = cast(Schema, json.loads(body))
     return schema
 
 
-def load_schema(path: Path) -> dict[str, Any]:
+def load_schema(path: Path) -> Schema:
     """Load a previously-saved OpenAPI schema snapshot from *path*."""
     with path.open("r", encoding="utf-8") as fh:
-        schema: dict[str, Any] = json.load(fh)
-    return schema
+        return cast(Schema, json.load(fh))
 
 
 def save_schema(
-    schema: dict[str, Any],
+    schema: Schema,
     path: Path,
     *,
     sort_keys: bool = True,
@@ -180,7 +205,7 @@ def save_schema(
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", encoding="utf-8") as fh:
         json.dump(schema, fh, indent=2, sort_keys=sort_keys)
-        fh.write("\n")
+        _ = fh.write("\n")
 
 
 # ---------------------------------------------------------------------------
@@ -188,7 +213,7 @@ def save_schema(
 # ---------------------------------------------------------------------------
 
 
-def generate_schema() -> dict[str, Any]:
+def generate_schema() -> Schema:
     """Generate the OpenAPI schema from the installed ``paperless-ngx`` package.
 
     Bootstraps Django with minimal config (temp dirs, SQLite in-memory),
@@ -205,31 +230,33 @@ def generate_schema() -> dict[str, Any]:
         Parsed OpenAPI 3.0 schema.
     """
     tmpdir = tempfile.mkdtemp(prefix="paperless_schema_")
-    atexit.register(shutil.rmtree, tmpdir, ignore_errors=True)
+    _ = atexit.register(shutil.rmtree, tmpdir, ignore_errors=True)
     data_dir = Path(tmpdir) / "data"
     data_dir.mkdir()
     (data_dir / "log").mkdir()
 
     # Minimal env — settings.py reads these at import time.
-    os.environ.setdefault("PAPERLESS_SECRET_KEY", "schema-generation-only")
-    os.environ.setdefault("PAPERLESS_DATA_DIR", str(data_dir))
-    os.environ.setdefault("PAPERLESS_LOGGING_DIR", str(data_dir / "log"))
-    os.environ.setdefault("PAPERLESS_STATICDIR", str(Path(tmpdir) / "static"))
-    os.environ.setdefault("PAPERLESS_MEDIA_ROOT", str(Path(tmpdir) / "media"))
-    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "paperless.settings")
+    _ = os.environ.setdefault("PAPERLESS_SECRET_KEY", "schema-generation-only")
+    _ = os.environ.setdefault("PAPERLESS_DATA_DIR", str(data_dir))
+    _ = os.environ.setdefault("PAPERLESS_LOGGING_DIR", str(data_dir / "log"))
+    _ = os.environ.setdefault("PAPERLESS_STATICDIR", str(Path(tmpdir) / "static"))
+    _ = os.environ.setdefault("PAPERLESS_MEDIA_ROOT", str(Path(tmpdir) / "media"))
+    _ = os.environ.setdefault("DJANGO_SETTINGS_MODULE", "paperless.settings")
 
-    import django  # noqa: E402
+    # paperless-ngx ships no type stubs; its bootstrap API is untypeable here.
+    import django
 
     django.setup()
 
-    import io  # noqa: E402
-
-    from django.core.management import call_command  # noqa: E402
+    from django.core.management import (
+        call_command,
+    )
 
     out = io.StringIO()
-    call_command("spectacular", "--format", "openapi-json", "--validate", stdout=out)
-    result: dict[str, Any] = json.loads(out.getvalue())
-    return result
+    _ = call_command(
+        "spectacular", "--format", "openapi-json", "--validate", stdout=out
+    )
+    return cast(Schema, json.loads(out.getvalue()))
 
 
 # ---------------------------------------------------------------------------
@@ -238,23 +265,23 @@ def generate_schema() -> dict[str, Any]:
 
 
 def extract_paths(
-    schema: dict[str, Any],
+    schema: Schema,
     paths: tuple[str, ...] = PATHS_WE_USE,
-) -> dict[str, Any]:
+) -> Schema:
     """Return a copy of *schema* containing only *paths* and referenced components.
 
     The returned schema is self-contained: any ``$ref`` targets reachable from
     the kept paths are resolved and included in ``components``.
     """
-    all_paths: dict[str, Any] = schema.get("paths", {})
-    kept_paths: dict[str, Any] = {}
+    all_paths = _as_dict(schema.get("paths"))
+    kept_paths: dict[str, JSONValue] = {}
 
     for pattern in paths:
         if pattern in all_paths:
             kept_paths[pattern] = all_paths[pattern]
 
     # Collect referenced components transitively.
-    components = schema.get("components", {})
+    components = _as_dict(schema.get("components"))
     needed_refs: set[str] = set()
     _collect_refs(kept_paths, needed_refs)
     # Iterate until stable (handles refs-to-refs).
@@ -268,7 +295,7 @@ def extract_paths(
 
     kept_components = _prune_components(components, needed_refs)
 
-    subset = {
+    subset: Schema = {
         "openapi": schema.get("openapi", "3.0.0"),
         "info": schema.get("info", {}),
         "paths": kept_paths,
@@ -283,7 +310,7 @@ def extract_paths(
 _JS_MAX_SAFE_INT = 2**53 - 1
 
 
-def _normalize_safe_int64(obj: Any) -> None:
+def _normalize_safe_int64(obj: JSONValue) -> None:
     """Drop ``format: int64`` from integers that fit in a JS safe integer.
 
     paperless-mcp's client returns raw ``fetch`` JSON, where every number is a
@@ -310,13 +337,12 @@ def _normalize_safe_int64(obj: Any) -> None:
             _normalize_safe_int64(item)
 
 
-def _collect_refs(obj: Any, refs: set[str]) -> None:
+def _collect_refs(obj: JSONValue, refs: set[str]) -> None:
     """Walk *obj* recursively and add every ``$ref`` value to *refs*."""
     if isinstance(obj, dict):
-        if "$ref" in obj:
-            ref = obj["$ref"]
-            if isinstance(ref, str):
-                refs.add(ref)
+        ref = obj.get("$ref")
+        if isinstance(ref, str):
+            refs.add(ref)
         for v in obj.values():
             _collect_refs(v, refs)
     elif isinstance(obj, list):
@@ -324,12 +350,12 @@ def _collect_refs(obj: Any, refs: set[str]) -> None:
             _collect_refs(item, refs)
 
 
-def _resolve_ref(ref: str, schema: dict[str, Any]) -> Any | None:
+def _resolve_ref(ref: str, schema: Schema) -> JSONValue | None:
     """Resolve a JSON ``$ref`` pointer like ``#/components/schemas/Tag``."""
     if not ref.startswith("#/"):
         return None
     parts = ref[2:].split("/")
-    current: Any = schema
+    current: JSONValue = schema
     for part in parts:
         if isinstance(current, dict) and part in current:
             current = current[part]
@@ -339,20 +365,25 @@ def _resolve_ref(ref: str, schema: dict[str, Any]) -> Any | None:
 
 
 def _prune_components(
-    components: dict[str, Any],
+    components: dict[str, JSONValue],
     needed_refs: set[str],
-) -> dict[str, Any]:
+) -> dict[str, JSONValue]:
     """Keep only component entries referenced by *needed_refs*."""
-    pruned: dict[str, Any] = {}
+    pruned: dict[str, JSONValue] = {}
     for ref in needed_refs:
         if not ref.startswith("#/components/"):
             continue
         parts = ref.removeprefix("#/components/").split("/")
-        if len(parts) != 2:  # noqa: PLR2004
+        if len(parts) != 2:
             continue
         category, name = parts
-        if category in components and name in components[category]:
-            pruned.setdefault(category, {})[name] = components[category][name]
+        cat_obj = components.get(category)
+        if not (isinstance(cat_obj, dict) and name in cat_obj):
+            continue
+        existing = pruned.get(category)
+        bucket: dict[str, JSONValue] = existing if isinstance(existing, dict) else {}
+        bucket[name] = cat_obj[name]
+        pruned[category] = bucket
     return pruned
 
 
@@ -361,21 +392,13 @@ def _prune_components(
 # ---------------------------------------------------------------------------
 
 
+@dataclass(slots=True)
 class SchemaDiff:
     """Result of comparing two OpenAPI schemas."""
 
-    __slots__ = ("added_paths", "removed_paths", "changed_paths")
-
-    def __init__(
-        self,
-        *,
-        added_paths: list[str],
-        removed_paths: list[str],
-        changed_paths: dict[str, list[str]],
-    ) -> None:
-        self.added_paths = added_paths
-        self.removed_paths = removed_paths
-        self.changed_paths = changed_paths
+    added_paths: list[str]
+    removed_paths: list[str]
+    changed_paths: dict[str, list[str]]
 
     @property
     def has_changes(self) -> bool:
@@ -401,8 +424,8 @@ class SchemaDiff:
 
 
 def diff_schemas(
-    old: dict[str, Any],
-    new: dict[str, Any],
+    old: Schema,
+    new: Schema,
     *,
     paths_filter: tuple[str, ...] | None = None,
 ) -> SchemaDiff:
@@ -420,8 +443,8 @@ def diff_schemas(
     SchemaDiff
         Object describing added, removed, and changed paths.
     """
-    old_paths: dict[str, Any] = old.get("paths", {})
-    new_paths: dict[str, Any] = new.get("paths", {})
+    old_paths = _as_dict(old.get("paths"))
+    new_paths = _as_dict(new.get("paths"))
 
     if paths_filter is not None:
         old_paths = {k: v for k, v in old_paths.items() if k in paths_filter}
@@ -447,39 +470,42 @@ def diff_schemas(
 
 
 def _diff_path_item(
-    old: dict[str, Any],
-    new: dict[str, Any],
+    old: JSONValue,
+    new: JSONValue,
 ) -> list[str]:
     """Compare a single path item and return a list of human-readable diffs."""
+    old_item = _as_dict(old)
+    new_item = _as_dict(new)
     diffs: list[str] = []
-    all_methods = sorted(set(old) | set(new))
+    all_methods = sorted(set(old_item) | set(new_item))
 
     for method in all_methods:
         if method.startswith("x-") or method == "parameters":
             continue
-        if method in new and method not in old:
+        if method in new_item and method not in old_item:
             diffs.append(f"method added: {method.upper()}")
-        elif method in old and method not in new:
+        elif method in old_item and method not in new_item:
             diffs.append(f"method removed: {method.upper()}")
-        elif method in old and method in new:
-            method_diffs = _diff_operation(method, old[method], new[method])
-            diffs.extend(method_diffs)
+        elif method in old_item and method in new_item:
+            diffs.extend(_diff_operation(method, old_item[method], new_item[method]))
 
     return diffs
 
 
 def _diff_operation(
     method: str,
-    old: dict[str, Any],
-    new: dict[str, Any],
+    old: JSONValue,
+    new: JSONValue,
 ) -> list[str]:
     """Compare a single operation (method) within a path."""
+    old_op = _as_dict(old)
+    new_op = _as_dict(new)
     diffs: list[str] = []
     tag = method.upper()
 
     # Parameters
-    old_params = {_param_key(p): p for p in old.get("parameters", [])}
-    new_params = {_param_key(p): p for p in new.get("parameters", [])}
+    old_params = {_param_key(p): p for p in _as_list(old_op.get("parameters"))}
+    new_params = {_param_key(p): p for p in _as_list(new_op.get("parameters"))}
     for key in sorted(set(old_params) | set(new_params)):
         if key not in old_params:
             diffs.append(f"{tag} param added: {key}")
@@ -492,14 +518,14 @@ def _diff_operation(
             diffs.append(f"{tag} param changed: {key}")
 
     # Request body schema
-    old_body = _extract_body_schema(old)
-    new_body = _extract_body_schema(new)
+    old_body = _extract_body_schema(old_op)
+    new_body = _extract_body_schema(new_op)
     if json.dumps(old_body, sort_keys=True) != json.dumps(new_body, sort_keys=True):
         diffs.append(f"{tag} request body changed")
 
     # Response codes
-    old_responses = set(old.get("responses", {}))
-    new_responses = set(new.get("responses", {}))
+    old_responses = set(_as_dict(old_op.get("responses")))
+    new_responses = set(_as_dict(new_op.get("responses")))
     for code in sorted(new_responses - old_responses):
         diffs.append(f"{tag} response added: {code}")
     for code in sorted(old_responses - new_responses):
@@ -508,17 +534,22 @@ def _diff_operation(
     return diffs
 
 
-def _param_key(param: dict[str, Any]) -> str:
-    return f"{param.get('in', '?')}:{param.get('name', '?')}"
+def _param_key(param: JSONValue) -> str:
+    p = _as_dict(param)
+    in_ = p.get("in")
+    name = p.get("name")
+    in_str = in_ if isinstance(in_, str) else "?"
+    name_str = name if isinstance(name, str) else "?"
+    return f"{in_str}:{name_str}"
 
 
-def _extract_body_schema(operation: dict[str, Any]) -> Any:
-    body = operation.get("requestBody", {})
-    content = body.get("content", {})
-    json_content = content.get(
-        "application/json", content.get("multipart/form-data", {})
-    )
-    return json_content.get("schema")
+def _extract_body_schema(operation: JSONValue) -> JSONValue | None:
+    op = _as_dict(operation)
+    content = _as_dict(_as_dict(op.get("requestBody")).get("content"))
+    json_content = content.get("application/json")
+    if json_content is None:
+        json_content = content.get("multipart/form-data")
+    return _as_dict(json_content).get("schema")
 
 
 # ---------------------------------------------------------------------------
@@ -546,14 +577,14 @@ def _build_parser() -> argparse.ArgumentParser:
         "generate",
         help="Generate schema from installed paperless-ngx source (no server needed).",
     )
-    gen.add_argument(
+    _ = gen.add_argument(
         "-o",
         "--output",
         type=Path,
         default=Path("schemas/openapi.json"),
         help="Output path (default: schemas/openapi.json)",
     )
-    gen.add_argument(
+    _ = gen.add_argument(
         "--extract",
         action="store_true",
         help="Keep only paths used by paperless-mcp.",
@@ -561,26 +592,26 @@ def _build_parser() -> argparse.ArgumentParser:
 
     # -- fetch ---------------------------------------------------------------
     fetch = sub.add_parser("fetch", help="Fetch schema from a live instance.")
-    fetch.add_argument(
+    _ = fetch.add_argument(
         "-u",
         "--url",
         default=_env_url(),
         help="Paperless-ngx base URL (default: $PAPERLESS_URL)",
     )
-    fetch.add_argument(
+    _ = fetch.add_argument(
         "-t", "--token", default=_env_token(), help="API token (default: $API_KEY)"
     )
-    fetch.add_argument(
+    _ = fetch.add_argument(
         "-o",
         "--output",
         type=Path,
         default=Path("schemas/openapi.json"),
         help="Output path (default: schemas/openapi.json)",
     )
-    fetch.add_argument(
+    _ = fetch.add_argument(
         "--extract", action="store_true", help="Keep only paths used by paperless-mcp."
     )
-    fetch.add_argument(
+    _ = fetch.add_argument(
         "--timeout", type=int, default=30, help="HTTP timeout in seconds."
     )
 
@@ -588,10 +619,10 @@ def _build_parser() -> argparse.ArgumentParser:
     extract = sub.add_parser(
         "extract", help="Extract only paths used by paperless-mcp."
     )
-    extract.add_argument(
+    _ = extract.add_argument(
         "input", type=Path, help="Full schema snapshot to extract from."
     )
-    extract.add_argument(
+    _ = extract.add_argument(
         "-o",
         "--output",
         type=Path,
@@ -601,23 +632,23 @@ def _build_parser() -> argparse.ArgumentParser:
 
     # -- diff ----------------------------------------------------------------
     diff = sub.add_parser("diff", help="Diff two schemas (files or file vs live).")
-    diff.add_argument("file", type=Path, help="First schema file (baseline).")
-    diff.add_argument(
+    _ = diff.add_argument("file", type=Path, help="First schema file (baseline).")
+    _ = diff.add_argument(
         "file2",
         type=Path,
         nargs="?",
         help="Second schema file. Omit to diff against live instance.",
     )
-    diff.add_argument(
+    _ = diff.add_argument(
         "-u",
         "--url",
         default=_env_url(),
         help="Paperless-ngx base URL (for live diff).",
     )
-    diff.add_argument(
+    _ = diff.add_argument(
         "-t", "--token", default=_env_token(), help="API token (for live diff)."
     )
-    diff.add_argument(
+    _ = diff.add_argument(
         "--our-paths",
         action="store_true",
         help="Only diff paths used by paperless-mcp.",
@@ -627,6 +658,8 @@ def _build_parser() -> argparse.ArgumentParser:
 
 
 def _cmd_generate(args: argparse.Namespace) -> int:
+    output = cast(Path, args.output)
+    do_extract = cast(bool, args.extract)
     print("Generating schema from paperless-ngx source ...", file=sys.stderr)
     try:
         schema = generate_schema()
@@ -635,57 +668,68 @@ def _cmd_generate(args: argparse.Namespace) -> int:
         traceback.print_exc(file=sys.stderr)
         return 1
 
-    if args.extract:
+    if do_extract:
         schema = extract_paths(schema)
-        print(f"Extracted {len(schema.get('paths', {}))} paths.", file=sys.stderr)
+        print(f"Extracted {_path_count(schema)} paths.", file=sys.stderr)
 
-    save_schema(schema, args.output)
-    total = len(schema.get("paths", {}))
-    print(f"Saved {total} paths to {args.output}", file=sys.stderr)
+    save_schema(schema, output)
+    print(f"Saved {_path_count(schema)} paths to {output}", file=sys.stderr)
     return 0
 
 
 def _cmd_fetch(args: argparse.Namespace) -> int:
-    if not args.url:
+    url = cast(str | None, args.url)
+    token = cast(str | None, args.token)
+    output = cast(Path, args.output)
+    do_extract = cast(bool, args.extract)
+    timeout = cast(int, args.timeout)
+    if not url:
         print("error: --url or $PAPERLESS_URL required", file=sys.stderr)
         return 1
 
-    print(f"Fetching schema from {args.url} ...", file=sys.stderr)
+    print(f"Fetching schema from {url} ...", file=sys.stderr)
     try:
-        schema = fetch_schema(args.url, token=args.token, timeout=args.timeout)
+        schema = fetch_schema(url, token=token, timeout=timeout)
     except urllib.error.URLError as exc:
         print(f"error: {exc}", file=sys.stderr)
         return 1
 
-    if args.extract:
+    if do_extract:
         schema = extract_paths(schema)
-        print(f"Extracted {len(schema.get('paths', {}))} paths.", file=sys.stderr)
+        print(f"Extracted {_path_count(schema)} paths.", file=sys.stderr)
 
-    save_schema(schema, args.output)
-    total = len(schema.get("paths", {}))
-    print(f"Saved {total} paths to {args.output}", file=sys.stderr)
+    save_schema(schema, output)
+    print(f"Saved {_path_count(schema)} paths to {output}", file=sys.stderr)
     return 0
 
 
 def _cmd_extract(args: argparse.Namespace) -> int:
-    schema = load_schema(args.input)
+    input_path = cast(Path, args.input)
+    output = cast(Path, args.output)
+    schema = load_schema(input_path)
     subset = extract_paths(schema)
-    save_schema(subset, args.output)
-    kept = len(subset.get("paths", {}))
-    total = len(schema.get("paths", {}))
-    print(f"Extracted {kept}/{total} paths to {args.output}", file=sys.stderr)
+    save_schema(subset, output)
+    print(
+        f"Extracted {_path_count(subset)}/{_path_count(schema)} paths to {output}",
+        file=sys.stderr,
+    )
     return 0
 
 
 def _cmd_diff(args: argparse.Namespace) -> int:
-    old = load_schema(args.file)
+    file = cast(Path, args.file)
+    file2 = cast(Path | None, args.file2)
+    url = cast(str | None, args.url)
+    token = cast(str | None, args.token)
+    our_paths = cast(bool, args.our_paths)
+    old = load_schema(file)
 
-    if args.file2 is not None:
-        new = load_schema(args.file2)
-    elif args.url:
-        print(f"Fetching schema from {args.url} ...", file=sys.stderr)
+    if file2 is not None:
+        new = load_schema(file2)
+    elif url:
+        print(f"Fetching schema from {url} ...", file=sys.stderr)
         try:
-            new = fetch_schema(args.url, token=args.token)
+            new = fetch_schema(url, token=token)
         except urllib.error.URLError as exc:
             print(f"error: {exc}", file=sys.stderr)
             return 1
@@ -693,7 +737,7 @@ def _cmd_diff(args: argparse.Namespace) -> int:
         print("error: provide a second file or --url for live diff", file=sys.stderr)
         return 1
 
-    paths_filter = PATHS_WE_USE if args.our_paths else None
+    paths_filter = PATHS_WE_USE if our_paths else None
     result = diff_schemas(old, new, paths_filter=paths_filter)
     print(result.summary())
     return 1 if result.has_changes else 0
@@ -703,18 +747,18 @@ def main(argv: list[str] | None = None) -> int:
     parser = _build_parser()
     args = parser.parse_args(argv)
 
-    dispatch: dict[str, Any] = {
+    command = cast(str, args.command)
+    dispatch: dict[str, Callable[[argparse.Namespace], int]] = {
         "generate": _cmd_generate,
         "fetch": _cmd_fetch,
         "extract": _cmd_extract,
         "diff": _cmd_diff,
     }
-    handler = dispatch.get(args.command)
+    handler = dispatch.get(command)
     if handler is None:
         parser.print_help()
         return 1
-    result: int = handler(args)
-    return result
+    return handler(args)
 
 
 if __name__ == "__main__":

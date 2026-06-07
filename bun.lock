@@ -14,6 +14,7 @@
         "dprint": "0.51.1",
         "express": "^5.2.1",
         "runner-run": "^0.12.1",
+        "tombi": "^1.1.2",
         "typescript": "^6.0.3",
         "zod": "^4.4.3",
       },
@@ -127,6 +128,22 @@
     "@runner-run/win32-ia32-msvc": ["@runner-run/win32-ia32-msvc@0.12.1", "", { "os": "win32", "cpu": "ia32", "bin": { "runner.exe": "bin/runner.exe", "run.exe": "bin/run.exe" } }, "sha512-rVaUMab8FkXAKejKV6ak+Soepm3hd+LUfmrDBtivptY1iXyoogVoPvJzBwOnu6zCx6/ptdUqnyzEkpAeS9AivQ=="],
 
     "@runner-run/win32-x64-msvc": ["@runner-run/win32-x64-msvc@0.12.1", "", { "os": "win32", "cpu": "x64", "bin": { "runner.exe": "bin/runner.exe", "run.exe": "bin/run.exe" } }, "sha512-4nqg6W4CTLyA1Huf7g1WNRxiLOus8F67uLcu28C5HTWmBuS1n8LkgoNbzWJnidHQSTIrAlmOuU4uGuH5sWumdQ=="],
+
+    "@tombi-toml/cli-darwin-arm64": ["@tombi-toml/cli-darwin-arm64@1.1.2", "", { "os": "darwin", "cpu": "arm64" }, "sha512-aaN9jQUxVvmoRelp4+6ECLMgGh74jaUS5ODfuR0lPT9ES9qEN7LzI4IhSN3Y+mqPV6Dog+5GJnq24zBbCImDCg=="],
+
+    "@tombi-toml/cli-darwin-x64": ["@tombi-toml/cli-darwin-x64@1.1.2", "", { "os": "darwin", "cpu": "x64" }, "sha512-W8O8hR+ZhyFX25mYR8jbehaDgqt0BJ7+B2TOQ8aV9+wPa1QwPHEsFd+Qdvz/4uY1GgJO77xBBinRyuHUtey3Xw=="],
+
+    "@tombi-toml/cli-linux-arm64": ["@tombi-toml/cli-linux-arm64@1.1.2", "", { "os": "linux", "cpu": "arm64" }, "sha512-wM0hLGPYs1f3XY7CUfuAGvd+DH/q1FmZXIhpQu3sFYiJ6xHvc9OdDfje4MQ+bnOMGYKNT9vyjpphRnseWoi6lg=="],
+
+    "@tombi-toml/cli-linux-arm64-musl": ["@tombi-toml/cli-linux-arm64-musl@1.1.2", "", { "os": "linux", "cpu": "arm64" }, "sha512-FZvzTl9WcTk1XuJpTvaGRl9GKqDNTPfpajiSBeX6OoQVr0n/KeyeGu9KQfiZbW6umMUfDq5Lx40rGkamDlvBVQ=="],
+
+    "@tombi-toml/cli-linux-x64": ["@tombi-toml/cli-linux-x64@1.1.2", "", { "os": "linux", "cpu": "x64" }, "sha512-UgkDUXdcj92/Rs2zSYe0mSbpT9pKTbi5LHzYhwrikA+7W4FRR7TJRJqtAj4feEU3Yo5R3NdnwTk9yGRv4hX6Ew=="],
+
+    "@tombi-toml/cli-linux-x64-musl": ["@tombi-toml/cli-linux-x64-musl@1.1.2", "", { "os": "linux", "cpu": "x64" }, "sha512-jKCzUx8zpgTZX5yjQzvv5gA40EKYTJixNy3rnicZSgvQzYB1mxIuKRpjEFe+vjjguEuM9VFKK5VIRiJWFAvVGw=="],
+
+    "@tombi-toml/cli-win32-arm64": ["@tombi-toml/cli-win32-arm64@1.1.2", "", { "os": "win32", "cpu": "arm64" }, "sha512-WftKCDXoRM8iuaNQTkwDytNPVPPvES0MZOTRn24eKGGy6QwIENAAl9GBuCayzHHH5Umq+e3MCStA0g0uWo5Rfg=="],
+
+    "@tombi-toml/cli-win32-x64": ["@tombi-toml/cli-win32-x64@1.1.2", "", { "os": "win32", "cpu": "x64" }, "sha512-j04JhyGcjI4ncMxv6yqp/735eNqWCFzm/BJo5+0E/QVza0EGqdtAvMyGGtbci9GBtxkEp8k+slNMAwYhH/ZPXA=="],
 
     "@types/body-parser": ["@types/body-parser@1.19.6", "", { "dependencies": { "@types/connect": "*", "@types/node": "*" } }, "sha512-HLFeCYgz89uk22N5Qg3dvGvsv46B8GLvKKo1zKG4NybA8U2DiEO3w9lqGg29t/tfLRJpJ6iQxnVw4OnB7MoM9g=="],
 
@@ -419,6 +436,8 @@
     "statuses": ["statuses@2.0.2", "", {}, "sha512-DvEy55V3DB7uknRo+4iOGT5fP1slR8wQohVdknigZPMpMstaKJQWhwiYBACJE3Ul2pTnATihhBYnRhZQHGBiRw=="],
 
     "toidentifier": ["toidentifier@1.0.1", "", {}, "sha512-o5sSPKEkg/DIQNmH43V0/uerLrpzVedkUh8tGNvaeXpfpuwjKenlSox/2O/BTlZUtEe+JG7s5YhEz608PlAHRA=="],
+
+    "tombi": ["tombi@1.1.2", "", { "optionalDependencies": { "@tombi-toml/cli-darwin-arm64": "1.1.2", "@tombi-toml/cli-darwin-x64": "1.1.2", "@tombi-toml/cli-linux-arm64": "1.1.2", "@tombi-toml/cli-linux-arm64-musl": "1.1.2", "@tombi-toml/cli-linux-x64": "1.1.2", "@tombi-toml/cli-linux-x64-musl": "1.1.2", "@tombi-toml/cli-win32-arm64": "1.1.2", "@tombi-toml/cli-win32-x64": "1.1.2" }, "bin": { "tombi": "bin/tombi" } }, "sha512-2f9wXy6vbyuJ++ForbHkgHMvOeli8UgrD0Da/gTBKbiKruDB4prgAVuAjwqvWdinXzn/3QVk2CJjmDq03lZCkA=="],
 
     "tunnel": ["tunnel@0.0.6", "", {}, "sha512-1h/Lnq9yajKY2PEbBadPXj3VxsDDu844OnaAo52UVmIzIvwwtBPIuNvkjuzBlTWpfJyUbG3ez0KSBibQkj4ojg=="],
 
