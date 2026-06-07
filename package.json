@@ -1,6 +1,6 @@
 {
 	"name": "@kjanat/paperless-mcp",
-	"version": "2.3.0",
+	"version": "2.3.1",
 	"description": "MCP server for interacting with Paperless-ngx document management system.",
 	"keywords": [
 		"paperless-ngx",
@@ -18,7 +18,8 @@
 	"author": "Kaj Kowalski",
 	"type": "module",
 	"imports": {
-		"#*": "./src/*.ts"
+		"#*": "./src/*.ts",
+		"#pkg": "./package.json"
 	},
 	"bin": {
 		"paperless-mcp": "dist/index.js"
@@ -44,6 +45,7 @@
 		"typecheck": "tsgo --noEmit"
 	},
 	"devDependencies": {
+		"@actions/github-script": "github:actions/github-script",
 		"@hey-api/openapi-ts": "^0.98.1",
 		"@modelcontextprotocol/sdk": "^1.29.0",
 		"@types/bun": "^1.3.14",
