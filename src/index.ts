@@ -87,6 +87,23 @@ const baseUrlArg = arg
 	.env('PAPERLESS_URL')
 	.describe('Paperless-ngx base URL, e.g. http://localhost:8000');
 
+/**
+ * Paperless-ngx API token argument. Resolution order: `--token` →
+ * `$PAPERLESS_API_KEY` → legacy `$API_KEY` (deprecated). The legacy variable is
+ * wired in as the default so it participates in dreamcli's own resolution chain
+ * (CLI → env → default) rather than being patched onto `process.env`. It is only
+ * applied when set, so a wholly missing token still raises the required-arg error.
+ */
+function tokenArg() {
+	const token = arg
+		.string()
+		.env('PAPERLESS_API_KEY')
+		.describe('Paperless-ngx API token (or set $PAPERLESS_API_KEY / legacy $API_KEY)');
+	const legacyApiKey = process.env['API_KEY'];
+
+	return legacyApiKey == null ? token : token.default(legacyApiKey);
+}
+
 function createServer(api: PaperlessAPI): McpServer {
 	const server = new McpServer({ name: SERVER_NAME, version: pkg.version });
 
@@ -152,13 +169,7 @@ async function runUntilShutdown(cleanup: () => Promise<void> | void): Promise<vo
 const serve = command('paperless-mcp')
 	.description('MCP server for the Paperless-ngx document management system.')
 	.arg('baseUrl', baseUrlArg)
-	.arg(
-		'token',
-		arg
-			.string()
-			.env('PAPERLESS_API_KEY')
-			.describe('Paperless-ngx API token'),
-	)
+	.arg('token', tokenArg())
 	.flag(
 		'http',
 		flag
@@ -206,11 +217,6 @@ const serve = command('paperless-mcp')
 			await runUntilShutdown(() => server.close());
 		}
 	});
-
-// Honor the legacy API_KEY env var by mapping it onto the name dreamcli resolves.
-if (process.env['PAPERLESS_API_KEY'] == null && process.env['API_KEY'] != null) {
-	process.env['PAPERLESS_API_KEY'] = process.env['API_KEY'];
-}
 
 void cli('paperless-mcp')
 	.version(pkg.version)
