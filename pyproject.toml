@@ -1,0 +1,38 @@
+[project]
+name            = "openapi"
+version         = "0.1.0"
+description     = "Generate, snapshot, and diff Paperless-ngx OpenAPI schemas"
+readme          = "scripts/openapi/README.md"
+requires-python = ">=3.14"
+dependencies    = [
+  "django>=5.2.11",
+  "paperless-ngx",
+  "pyyaml>=6.0.3",
+]
+
+[project.scripts]
+openapi = "openapi.main:main"
+
+[dependency-groups]
+dev = [
+  "basedpyright>=1.39.7",
+  "django-stubs[compatible-mypy]>=6.0.5",
+  "ruff>=0.15.16",
+  "ty>=0.0.44",
+]
+
+[build-system]
+requires      = ["uv_build>=0.11.19,<0.12"]
+build-backend = "uv_build"
+
+[tool.basedpyright]
+pythonVersion = "3.14"
+venv          = ".venv"
+venvPath      = "."
+
+[tool.uv.sources]
+paperless-ngx = { git = "https://github.com/paperless-ngx/paperless-ngx.git", branch = "dev" }
+
+[tool.uv.build-backend]
+module-name = "openapi"
+module-root = "scripts"

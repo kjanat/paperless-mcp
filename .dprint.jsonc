@@ -4,7 +4,16 @@
 	"excludes": ["**/node_modules", "**/.venv", "**/bun.lock*"],
 	"plugins": [
 		"https://plugins.dprint.dev/prettier-0.71.0.json@a2fb7c6369717c218d1c106764d9d2c8df3d193aa3c16afb5db10751674eeb81",
+		"https://plugins.dprint.dev/exec-0.6.2.json@df98f54ffd3092b8a841aedd6d098a2651f16d0a796a40535774f1a8b4b9d463",
 	],
 	"markdown": { "associations": ["!README.md"] },
 	"prettier": { "associations": ["README.md"], "useTabs": false },
+	"exec": {
+		"cwd": "${configDir}",
+		"commands": [{
+			"command": "bunx tombi format - --stdin-filename {{file_path}}",
+			"exts": ["toml"],
+			"cacheKeyFiles": ["tombi.toml"],
+		}],
+	},
 }
