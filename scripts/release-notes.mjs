@@ -94,6 +94,8 @@ export async function updateReleaseNotes({ github, context, core }) {
 		body,
 	});
 	core.info(`Updated release notes for v${version} from CHANGELOG.md.`);
+
+	await core.summary.addRaw(body).write();
 }
 
 // CLI: `node scripts/release-notes.mjs [version]` prints the rendered notes
