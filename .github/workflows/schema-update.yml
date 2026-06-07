@@ -3,9 +3,8 @@
 # regenerate the subset + zod artifacts, and open a PR if anything changed.
 name: Schema upstream sync
 on:
-  schedule:
-    - cron: "0 6 * * 1" # Mondays 06:00 UTC
-  workflow_dispatch: {}
+  schedule: [cron: "0 6 * * 1"] # Mondays 06:00 UTC
+  workflow_dispatch:
 
 concurrency: { group: schema-update, cancel-in-progress: false }
 
