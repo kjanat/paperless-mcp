@@ -29,15 +29,15 @@ No barrel files. No cross-imports between leaf modules.
 
 ## WHERE TO LOOK
 
-| Task                     | Location                                  | Notes                                            |
-| ------------------------ | ----------------------------------------- | ------------------------------------------------ |
-| Add/change response type | `src/types.ts`                            | Interfaces from OpenAPI schema                   |
-| Add new MCP tool domain  | `src/tools/` + register in `src/index.ts` | Follow `register*Tools(server, api)` pattern     |
-| Add new API endpoint     | `src/api/paperless-api.ts`                | Methods wrap `this.request<T>(path, options)`    |
-| Change transport/startup | `src/index.ts`                            | stdio vs HTTP decided by `--http` CLI flag       |
-| Zod input schemas        | `src/tools/*.ts`                          | Inline in `server.registerTool()` calls          |
-| CI/CD                    | `.github/workflows/npm-publish.yml`       | Bun test + `npm publish --provenance` on release |
-| OpenAPI schema           | `schemas/openapi.json`                    | Snapshot via `scripts/openapi.py`                |
+| Task                     | Location                                  | Notes                                                                                                                                                                                                             |
+| ------------------------ | ----------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Add/change response type | `src/types.ts`                            | Interfaces from OpenAPI schema                                                                                                                                                                                    |
+| Add new MCP tool domain  | `src/tools/` + register in `src/index.ts` | Follow `register*Tools(server, api)` pattern                                                                                                                                                                      |
+| Add new API endpoint     | `src/api/paperless-api.ts`                | Methods wrap `this.request<T>(path, options)`                                                                                                                                                                     |
+| Change transport/startup | `src/index.ts`                            | stdio vs HTTP decided by `--http` CLI flag                                                                                                                                                                        |
+| Zod input schemas        | `src/tools/*.ts`                          | Inline in `server.registerTool()` calls                                                                                                                                                                           |
+| CI/CD                    | `.github/workflows/`                      | `npm-publish` (test + `npm publish --provenance` on release), <br> `release-notes` (set release body from CHANGELOG), <br> `schema-check` (codegen drift guard), <br> `schema-update` (weekly upstream-schema PR) |
+| OpenAPI schema           | `schemas/openapi.json`                    | Snapshot via `scripts/openapi.py`                                                                                                                                                                                 |
 
 ## CODE MAP
 
