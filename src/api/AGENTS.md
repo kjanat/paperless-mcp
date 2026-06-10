@@ -1,6 +1,6 @@
 # src/api/ — Paperless-ngx HTTP Client
 
-Single class `PaperlessAPI` in `paperless.ts`. 16 methods wrapping the
+Single class `PaperlessAPI` in `paperless.ts`. 30 methods wrapping the
 Paperless-ngx REST API via `fetch()`. All methods return typed responses
 (interfaces from `src/types.ts`), not `Promise<unknown>`.
 
@@ -11,6 +11,13 @@ Paperless-ngx REST API via `fetch()`. All methods return typed responses
 - **`matching_algorithm` is integer (0-6)** across all endpoints.
 - **`searchDocuments` returns immutable copy** — strips `content`, `download_url`,
   `thumbnail_url` from results to reduce token usage.
+- **All PATCH methods** (`updateDocument`, `updateTag`, `updateCorrespondent`,
+  `updateDocumentType`, `updateStoragePath`, `updateCustomField`) strip
+  `undefined` fields via `omitUndefined()` before serializing.
+- **`getTask` queries by Celery UUID** — `GET /tasks/?task_id=...` (filter, not
+  path param) and unwraps `.results`. The numeric task `id` is a different field.
+- **Notes are a sub-resource**: `addDocumentNote` (POST) and `deleteDocumentNote`
+  (DELETE with `?id=` query) both return the document's remaining notes array.
 
 ## GOTCHAS
 
@@ -25,7 +32,7 @@ Paperless-ngx REST API via `fetch()`. All methods return typed responses
 
 ## TESTING
 
-`paperless.test.ts` (36 tests) covers all 16 methods via
+`paperless.test.ts` (56 tests) covers all 30 methods via
 `spyOn(globalThis, 'fetch')`. Helpers: `stubFetch()`, `stubFetchRaw()`,
 `lastRequestBody()`, `lastRequestUrl()`, `lastRequestInit()`.
 
