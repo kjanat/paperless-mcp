@@ -562,6 +562,19 @@ export const zTaskTypeEnum = z.enum([
 });
 
 /**
+ * * `restore` - restore
+ * * `empty` - empty
+ */
+export const zTrashActionEnum = z.enum(['restore', 'empty']).register(z.globalRegistry, {
+	description: '* `restore` - restore\n* `empty` - empty',
+});
+
+export const zTrashRequest = z.object({
+	action: zTrashActionEnum,
+	documents: z.array(z.int()).optional(),
+});
+
+/**
  * * `scheduled` - Scheduled
  * * `web_ui` - Web UI
  * * `api_upload` - API Upload
@@ -1689,3 +1702,14 @@ export const zTasksListQuery = z.object({
 });
 
 export const zTasksListResponse = zPaginatedTaskSerializerV10List;
+
+export const zTrashListQuery = z.object({
+	page: z.int().register(z.globalRegistry, {
+		description: 'A page number within the paginated result set.',
+	}).optional(),
+	page_size: z.int().register(z.globalRegistry, {
+		description: 'Number of results to return per page.',
+	}).optional(),
+});
+
+export const zTrashCreateBody = zTrashRequest;

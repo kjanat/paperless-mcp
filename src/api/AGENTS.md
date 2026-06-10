@@ -1,6 +1,6 @@
 # src/api/ — Paperless-ngx HTTP Client
 
-Single class `PaperlessAPI` in `paperless.ts`. 32 methods wrapping the
+Single class `PaperlessAPI` in `paperless.ts`. 35 methods wrapping the
 Paperless-ngx REST API via `fetch()`. All methods return typed responses
 (interfaces from `src/types.ts`), not `Promise<unknown>`.
 
@@ -10,7 +10,8 @@ Paperless-ngx REST API via `fetch()`. All methods return typed responses
 - **`updateTag` uses PATCH** (not PUT) — per `PatchedTagRequest` in schema.
 - **`matching_algorithm` is integer (0-6)** across all endpoints.
 - **`searchDocuments` returns immutable copy** — strips `content`, `download_url`,
-  `thumbnail_url` from results to reduce token usage.
+  `thumbnail_url` from results to reduce token usage. `getTrash` strips
+  `content` the same way.
 - **All PATCH methods** (`updateDocument`, `updateTag`, `updateCorrespondent`,
   `updateDocumentType`, `updateStoragePath`, `updateCustomField`) strip
   `undefined` fields before serializing, via the module-level `omitUndefined()`
@@ -39,7 +40,7 @@ Paperless-ngx REST API via `fetch()`. All methods return typed responses
 
 ## TESTING
 
-`paperless.test.ts` (62 tests) covers all 32 methods via
+`paperless.test.ts` (71 tests) covers all 35 methods via
 `spyOn(globalThis, 'fetch')`. Helpers: `stubFetch()`, `stubFetchRaw()`,
 `lastRequestBody()`, `lastRequestUrl()`, `lastRequestInit()`.
 

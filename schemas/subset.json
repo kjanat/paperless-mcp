@@ -2230,6 +2230,37 @@
 				],
 				"type": "string"
 			},
+			"TrashActionEnum": {
+				"description": "* `restore` - restore\n* `empty` - empty",
+				"enum": [
+					"restore",
+					"empty"
+				],
+				"type": "string"
+			},
+			"TrashRequest": {
+				"properties": {
+					"action": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/TrashActionEnum"
+							}
+						],
+						"writeOnly": true
+					},
+					"documents": {
+						"items": {
+							"type": "integer"
+						},
+						"type": "array",
+						"writeOnly": true
+					}
+				},
+				"required": [
+					"action"
+				],
+				"type": "object"
+			},
 			"TriggerSourceEnum": {
 				"description": "* `scheduled` - Scheduled\n* `web_ui` - Web UI\n* `api_upload` - API Upload\n* `folder_consume` - Folder Consume\n* `email_consume` - Email Consume\n* `system` - System\n* `manual` - Manual",
 				"enum": [
@@ -5826,6 +5857,92 @@
 				],
 				"tags": [
 					"tasks"
+				]
+			}
+		},
+		"/api/trash/": {
+			"get": {
+				"operationId": "trash_list",
+				"parameters": [
+					{
+						"description": "A page number within the paginated result set.",
+						"in": "query",
+						"name": "page",
+						"required": false,
+						"schema": {
+							"type": "integer"
+						}
+					},
+					{
+						"description": "Number of results to return per page.",
+						"in": "query",
+						"name": "page_size",
+						"required": false,
+						"schema": {
+							"type": "integer"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "No response body"
+					}
+				},
+				"security": [
+					{
+						"PaperelessBasicAuthentication": []
+					},
+					{
+						"tokenAuth": []
+					},
+					{
+						"cookieAuth": []
+					}
+				],
+				"tags": [
+					"trash"
+				]
+			},
+			"post": {
+				"operationId": "trash_create",
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/TrashRequest"
+							}
+						},
+						"application/x-www-form-urlencoded": {
+							"schema": {
+								"$ref": "#/components/schemas/TrashRequest"
+							}
+						},
+						"multipart/form-data": {
+							"schema": {
+								"$ref": "#/components/schemas/TrashRequest"
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"description": "No response body"
+					}
+				},
+				"security": [
+					{
+						"PaperelessBasicAuthentication": []
+					},
+					{
+						"tokenAuth": []
+					},
+					{
+						"cookieAuth": []
+					}
+				],
+				"tags": [
+					"trash"
 				]
 			}
 		}

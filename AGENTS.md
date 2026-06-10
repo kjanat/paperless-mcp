@@ -25,7 +25,8 @@ src/
     ├── documentTypes.ts     # 5 tools: list, get, create, update, bulk_edit
     ├── storagePaths.ts      # 4 tools: list, create, update, bulk_edit
     ├── customFields.ts      # 4 tools: list, create, update, delete
-    └── tasks.ts             # 2 tools: get_task, list_tasks
+    ├── tasks.ts             # 2 tools: get_task, list_tasks
+    └── trash.ts             # 3 tools: list, restore, empty
 ```
 
 No barrel files. No cross-imports between leaf modules.
@@ -54,7 +55,7 @@ enums (`BulkEditMethod`, `MatchingAlgorithm`), and nested types (`ObjectPermissi
 
 ### `PaperlessAPI` (src/api/paperless.ts)
 
-Single class, 32 methods. All return typed responses (not `Promise<unknown>`).
+Single class, 35 methods. All return typed responses (not `Promise<unknown>`).
 `request<T>()` is generic base — adds token auth (`version=6`), JSON content type,
 throws on non-OK. Most methods delegate to it.
 
@@ -96,6 +97,9 @@ must update both paths.
 | `deleteCustomField`   | `/custom_fields/{id}/`      | DELETE |
 | `getTask`             | `/tasks/?task_id=...`       | GET    |
 | `listTasks`           | `/tasks/?ordering=...`      | GET    |
+| `getTrash`            | `/trash/`                   | GET    |
+| `restoreFromTrash`    | `/trash/`                   | POST   |
+| `emptyTrash`          | `/trash/`                   | POST   |
 | `bulkEditObjects`     | `/bulk_edit_objects/`       | POST   |
 
 ### Tool Registration (src/tools/)
@@ -170,7 +174,8 @@ bun run inspect              # Launch MCP inspector
 ## NOTES
 
 - `searchDocuments` strips `content`, `download_url`, `thumbnail_url` from results
-  to reduce token usage. `get_document` returns full content.
+  to reduce token usage; `getTrash` strips `content` the same way.
+  `get_document` returns full content.
 - Config: `PAPERLESS_URL` + `PAPERLESS_API_KEY` env vars (both modes), or
   positional CLI args. CLI args take precedence. Legacy `API_KEY` env var
   supported as fallback. HTTP bind is configurable via `--host` /

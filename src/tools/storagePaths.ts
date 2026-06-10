@@ -16,9 +16,16 @@ export function registerStoragePathTools(server: McpServer, api: PaperlessAPI): 
 		{
 			description:
 				"Retrieve all storage paths that control where document files land on disk. Returns names, path templates, and automatic matching rules. Use this to resolve a document's storage_path ID to a name.",
+			// Full schema with .default({}) so clients that omit arguments entirely
+			// (allowed by the MCP spec) still pass validation.
+			inputSchema: z.object({
+				name: z.string().optional().describe(
+					'Case-insensitive substring filter on the name. Omit to list all storage paths.',
+				),
+			}).default({}),
 		},
-		async (_extra) => {
-			return jsonResult(await api.getStoragePaths());
+		async ({ name }, _extra) => {
+			return jsonResult(await api.getStoragePaths(name));
 		},
 	);
 

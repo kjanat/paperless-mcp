@@ -16,6 +16,7 @@ import { registerDocumentTypeTools } from '#tools/documentTypes';
 import { registerStoragePathTools } from '#tools/storagePaths';
 import { registerTagTools } from '#tools/tags';
 import { registerTaskTools } from '#tools/tasks';
+import { registerTrashTools } from '#tools/trash';
 
 const DEFAULT_PORT = 3000;
 const DEFAULT_HOST = '127.0.0.1';
@@ -138,6 +139,7 @@ function createServer(api: PaperlessAPI, options: { allowFilePath: boolean }): M
 	registerStoragePathTools(server, api);
 	registerCustomFieldTools(server, api);
 	registerTaskTools(server, api);
+	registerTrashTools(server, api);
 
 	return server;
 }
