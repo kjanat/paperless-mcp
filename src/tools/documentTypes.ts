@@ -18,6 +18,22 @@ export function registerDocumentTypeTools(server: McpServer, api: PaperlessAPI):
 	);
 
 	server.registerTool(
+		'get_document_type',
+		{
+			description:
+				"Get a single document type by ID: name and matching rules. Cheaper than list_document_types when you already know the ID (e.g. from a document's document_type field).",
+			inputSchema: {
+				id: z.number().int().min(1).describe(
+					"Document type ID, e.g. from a document's document_type field or list_document_types.",
+				),
+			},
+		},
+		async ({ id }, _extra) => {
+			return jsonResult(await api.getDocumentType(id));
+		},
+	);
+
+	server.registerTool(
 		'create_document_type',
 		{
 			description:
@@ -49,7 +65,7 @@ export function registerDocumentTypeTools(server: McpServer, api: PaperlessAPI):
 			description:
 				"Modify an existing document type's name or automatic matching rules. Useful for fixing an over-matching type: narrow the match pattern or switch the matching algorithm. Use bulk_edit_document_types for permissions or deletion.",
 			inputSchema: {
-				id: z.number().describe(
+				id: z.number().int().min(1).describe(
 					'ID of the document type to update. Use list_document_types to find existing document type IDs.',
 				),
 
@@ -79,7 +95,7 @@ export function registerDocumentTypeTools(server: McpServer, api: PaperlessAPI):
 			description:
 				'Perform bulk operations on multiple document types: set permissions to control who can assign them to documents, or permanently delete multiple types. Use with caution as deletion affects all associated documents.',
 			inputSchema: {
-				document_type_ids: z.array(z.number()).describe(
+				document_type_ids: z.array(z.number().int().min(1)).describe(
 					'Array of document type IDs to perform bulk operations on. Use list_document_types to get valid document type IDs.',
 				),
 
@@ -87,7 +103,7 @@ export function registerDocumentTypeTools(server: McpServer, api: PaperlessAPI):
 					"Bulk operation: 'set_permissions' to control who can assign these document types to documents, 'delete' to permanently remove document types from the system. Warning: Deleting document types will remove the classification from all associated documents.",
 				),
 
-				owner: z.number().optional().describe(
+				owner: z.number().int().min(1).optional().describe(
 					"User ID to set as owner when operation is 'set_permissions'. The owner has full control over these document types.",
 				),
 

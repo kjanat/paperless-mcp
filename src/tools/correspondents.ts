@@ -18,6 +18,22 @@ export function registerCorrespondentTools(server: McpServer, api: PaperlessAPI)
 	);
 
 	server.registerTool(
+		'get_correspondent',
+		{
+			description:
+				"Get a single correspondent by ID: name and matching rules. Cheaper than list_correspondents when you already know the ID (e.g. from a document's correspondent field).",
+			inputSchema: {
+				id: z.number().int().min(1).describe(
+					"Correspondent ID, e.g. from a document's correspondent field or list_correspondents.",
+				),
+			},
+		},
+		async ({ id }, _extra) => {
+			return jsonResult(await api.getCorrespondent(id));
+		},
+	);
+
+	server.registerTool(
 		'create_correspondent',
 		{
 			description:
@@ -49,7 +65,7 @@ export function registerCorrespondentTools(server: McpServer, api: PaperlessAPI)
 			description:
 				"Modify an existing correspondent's name or automatic matching rules. Useful for fixing an over-matching correspondent: narrow the match pattern or switch the matching algorithm. Use bulk_edit_correspondents for permissions or deletion.",
 			inputSchema: {
-				id: z.number().describe(
+				id: z.number().int().min(1).describe(
 					'ID of the correspondent to update. Use list_correspondents to find existing correspondent IDs.',
 				),
 
@@ -79,7 +95,7 @@ export function registerCorrespondentTools(server: McpServer, api: PaperlessAPI)
 			description:
 				'Perform bulk operations on multiple correspondents: set permissions to control who can assign them to documents, or permanently delete multiple correspondents. Use with caution as deletion affects all associated documents.',
 			inputSchema: {
-				correspondent_ids: z.array(z.number()).describe(
+				correspondent_ids: z.array(z.number().int().min(1)).describe(
 					'Array of correspondent IDs to perform bulk operations on. Use list_correspondents to get valid correspondent IDs.',
 				),
 
@@ -87,7 +103,7 @@ export function registerCorrespondentTools(server: McpServer, api: PaperlessAPI)
 					"Bulk operation: 'set_permissions' to control who can assign these correspondents to documents, 'delete' to permanently remove correspondents from the system. Warning: Deleting correspondents will remove them from all associated documents.",
 				),
 
-				owner: z.number().optional().describe(
+				owner: z.number().int().min(1).optional().describe(
 					"User ID to set as owner when operation is 'set_permissions'. The owner has full control over these correspondents.",
 				),
 

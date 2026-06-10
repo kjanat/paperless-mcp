@@ -48,6 +48,52 @@ export const zCustomFieldInstanceRequest = z.object({
 });
 
 /**
+ * * `string` - string
+ * * `url` - url
+ * * `date` - date
+ * * `boolean` - boolean
+ * * `integer` - integer
+ * * `float` - float
+ * * `monetary` - monetary
+ * * `documentlink` - documentlink
+ * * `select` - select
+ * * `longtext` - longtext
+ */
+export const zDataTypeEnum = z.enum([
+	'string',
+	'url',
+	'date',
+	'boolean',
+	'integer',
+	'float',
+	'monetary',
+	'documentlink',
+	'select',
+	'longtext',
+]).register(z.globalRegistry, {
+	description:
+		'* `string` - string\n* `url` - url\n* `date` - date\n* `boolean` - boolean\n* `integer` - integer\n* `float` - float\n* `monetary` - monetary\n* `documentlink` - documentlink\n* `select` - select\n* `longtext` - longtext',
+});
+
+export const zCustomField = z.object({
+	data_type: zDataTypeEnum,
+	document_count: z.int().readonly(),
+	extra_data: z.unknown().register(z.globalRegistry, {
+		description: 'Extra data for the custom field, such as select options',
+	}).optional(),
+	id: z.int().readonly(),
+	name: z.string().max(128),
+});
+
+export const zCustomFieldRequest = z.object({
+	data_type: zDataTypeEnum,
+	extra_data: z.unknown().register(z.globalRegistry, {
+		description: 'Extra data for the custom field, such as select options',
+	}).optional(),
+	name: z.string().min(1).max(128),
+});
+
+/**
  * Adds update nested feature
  */
 export const zDocumentRequest = z.object({
@@ -206,6 +252,10 @@ export const zMethodEnum = z.enum([
 		'* `set_correspondent` - set_correspondent\n* `set_document_type` - set_document_type\n* `set_storage_path` - set_storage_path\n* `add_tag` - add_tag\n* `remove_tag` - remove_tag\n* `modify_tags` - modify_tags\n* `modify_custom_fields` - modify_custom_fields\n* `set_permissions` - set_permissions\n* `delete` - delete\n* `reprocess` - reprocess\n* `rotate` - rotate\n* `merge` - merge\n* `edit_pdf` - edit_pdf\n* `remove_password` - remove_password\n* `split` - split\n* `delete_pages` - delete_pages',
 });
 
+export const zNoteCreateRequestRequest = z.object({
+	note: z.string().min(1),
+});
+
 export const zNotes = z.object({
 	created: z.iso.datetime().optional(),
 	id: z.int().readonly(),
@@ -291,6 +341,13 @@ export const zPaginatedCorrespondentList = z.object({
 	results: z.array(zCorrespondent),
 });
 
+export const zPaginatedCustomFieldList = z.object({
+	count: z.int(),
+	next: z.url().nullish(),
+	previous: z.url().nullish(),
+	results: z.array(zCustomField),
+});
+
 export const zPaginatedDocumentList = z.object({
 	count: z.int(),
 	next: z.url().nullish(),
@@ -311,6 +368,14 @@ export const zPatchedCorrespondentRequest = z.object({
 	matching_algorithm: zMatchingAlgorithm.optional(),
 	name: z.string().min(1).max(128).optional(),
 	owner: z.int().nullish(),
+});
+
+export const zPatchedCustomFieldRequest = z.object({
+	data_type: zDataTypeEnum.optional(),
+	extra_data: z.unknown().register(z.globalRegistry, {
+		description: 'Extra data for the custom field, such as select options',
+	}).optional(),
+	name: z.string().min(1).max(128).optional(),
 });
 
 /**
@@ -343,6 +408,15 @@ export const zPatchedDocumentTypeRequest = z.object({
 	owner: z.int().nullish(),
 });
 
+export const zPatchedStoragePathRequest = z.object({
+	is_insensitive: z.boolean().optional(),
+	match: z.string().max(256).optional(),
+	matching_algorithm: zMatchingAlgorithm.optional(),
+	name: z.string().min(1).max(128).optional(),
+	owner: z.int().nullish(),
+	path: z.string().min(1).optional(),
+});
+
 export const zPatchedTagRequest = z.object({
 	color: z.string().min(1).max(7).optional(),
 	is_inbox_tag: z.boolean().register(z.globalRegistry, {
@@ -367,6 +441,35 @@ export const zPostDocumentRequest = z.object({
 	storage_path: z.int().nullish(),
 	tags: z.array(z.int()).optional(),
 	title: z.string().min(1).optional(),
+});
+
+export const zStoragePath = z.object({
+	document_count: z.int().readonly(),
+	id: z.int().readonly(),
+	is_insensitive: z.boolean().optional(),
+	match: z.string().max(256).optional(),
+	matching_algorithm: zMatchingAlgorithm.optional(),
+	name: z.string().max(128),
+	owner: z.int().nullish(),
+	path: z.string(),
+	slug: z.string().readonly(),
+	user_can_change: z.boolean().readonly(),
+});
+
+export const zPaginatedStoragePathList = z.object({
+	count: z.int(),
+	next: z.url().nullish(),
+	previous: z.url().nullish(),
+	results: z.array(zStoragePath),
+});
+
+export const zStoragePathRequest = z.object({
+	is_insensitive: z.boolean().optional(),
+	match: z.string().max(256).optional(),
+	matching_algorithm: zMatchingAlgorithm.optional(),
+	name: z.string().min(1).max(128),
+	owner: z.int().nullish(),
+	path: z.string().min(1),
 });
 
 export const zTag = z.object({
@@ -406,6 +509,117 @@ export const zTagRequest = z.object({
 	name: z.string().min(1).max(128),
 	owner: z.int().nullish(),
 	parent: z.int().nullish(),
+});
+
+/**
+ * * `pending` - Pending
+ * * `started` - Started
+ * * `success` - Success
+ * * `failure` - Failure
+ * * `revoked` - Revoked
+ */
+export const zTaskSerializerV10StatusEnum = z.enum([
+	'pending',
+	'started',
+	'success',
+	'failure',
+	'revoked',
+]).register(z.globalRegistry, {
+	description:
+		'* `pending` - Pending\n* `started` - Started\n* `success` - Success\n* `failure` - Failure\n* `revoked` - Revoked',
+});
+
+/**
+ * * `consume_file` - Consume File
+ * * `train_classifier` - Train Classifier
+ * * `sanity_check` - Sanity Check
+ * * `index_optimize` - Index Optimize
+ * * `mail_fetch` - Mail Fetch
+ * * `llm_index` - LLM Index
+ * * `empty_trash` - Empty Trash
+ * * `check_workflows` - Check Workflows
+ * * `bulk_update` - Bulk Update
+ * * `reprocess_document` - Reprocess Document
+ * * `build_share_link` - Build Share Link
+ * * `bulk_delete` - Bulk Delete
+ */
+export const zTaskTypeEnum = z.enum([
+	'consume_file',
+	'train_classifier',
+	'sanity_check',
+	'index_optimize',
+	'mail_fetch',
+	'llm_index',
+	'empty_trash',
+	'check_workflows',
+	'bulk_update',
+	'reprocess_document',
+	'build_share_link',
+	'bulk_delete',
+]).register(z.globalRegistry, {
+	description:
+		'* `consume_file` - Consume File\n* `train_classifier` - Train Classifier\n* `sanity_check` - Sanity Check\n* `index_optimize` - Index Optimize\n* `mail_fetch` - Mail Fetch\n* `llm_index` - LLM Index\n* `empty_trash` - Empty Trash\n* `check_workflows` - Check Workflows\n* `bulk_update` - Bulk Update\n* `reprocess_document` - Reprocess Document\n* `build_share_link` - Build Share Link\n* `bulk_delete` - Bulk Delete',
+});
+
+/**
+ * * `scheduled` - Scheduled
+ * * `web_ui` - Web UI
+ * * `api_upload` - API Upload
+ * * `folder_consume` - Folder Consume
+ * * `email_consume` - Email Consume
+ * * `system` - System
+ * * `manual` - Manual
+ */
+export const zTriggerSourceEnum = z.enum([
+	'scheduled',
+	'web_ui',
+	'api_upload',
+	'folder_consume',
+	'email_consume',
+	'system',
+	'manual',
+]).register(z.globalRegistry, {
+	description:
+		'* `scheduled` - Scheduled\n* `web_ui` - Web UI\n* `api_upload` - API Upload\n* `folder_consume` - Folder Consume\n* `email_consume` - Email Consume\n* `system` - System\n* `manual` - Manual',
+});
+
+/**
+ * Task serializer for API v10+ using new field names.
+ */
+export const zTaskSerializerV10 = z.object({
+	acknowledged: z.boolean().readonly(),
+	date_created: z.iso.datetime().readonly(),
+	date_done: z.iso.datetime().readonly().nullable(),
+	date_started: z.iso.datetime().readonly().nullable(),
+	duration_seconds: z.number().readonly().nullable(),
+	id: z.int().readonly(),
+	input_data: z.unknown().register(z.globalRegistry, {
+		description: 'Structured input parameters for the task',
+	}),
+	owner: z.int().readonly().nullable(),
+	related_document_ids: z.array(z.int()).readonly(),
+	result_data: z.unknown().register(z.globalRegistry, {
+		description: 'Structured result data from task execution',
+	}),
+	status: zTaskSerializerV10StatusEnum,
+	status_display: z.string().readonly(),
+	task_id: z.string().register(z.globalRegistry, {
+		description: 'Celery task ID',
+	}).readonly(),
+	task_type: zTaskTypeEnum,
+	task_type_display: z.string().readonly(),
+	trigger_source: zTriggerSourceEnum,
+	trigger_source_display: z.string().readonly(),
+	wait_time_seconds: z.number().readonly().nullable(),
+}).register(z.globalRegistry, {
+	description: 'Task serializer for API v10+ using new field names.',
+});
+
+export const zPaginatedTaskSerializerV10List = z.object({
+	count: z.int(),
+	next: z.url().nullish(),
+	previous: z.url().nullish(),
+	results: z.array(zTaskSerializerV10),
 });
 
 export const zBasicUserWritable = z.object({
@@ -460,6 +674,14 @@ export const zCorrespondentRequestWritable = z.object({
 			users: z.array(z.int()).optional(),
 		}).optional(),
 	}).optional(),
+});
+
+export const zCustomFieldWritable = z.object({
+	data_type: zDataTypeEnum,
+	extra_data: z.unknown().register(z.globalRegistry, {
+		description: 'Extra data for the custom field, such as select options',
+	}).optional(),
+	name: z.string().max(128),
 });
 
 /**
@@ -557,6 +779,13 @@ export const zPaginatedCorrespondentListWritable = z.object({
 	results: z.array(zCorrespondentWritable),
 });
 
+export const zPaginatedCustomFieldListWritable = z.object({
+	count: z.int(),
+	next: z.url().nullish(),
+	previous: z.url().nullish(),
+	results: z.array(zCustomFieldWritable),
+});
+
 export const zPaginatedDocumentListWritable = z.object({
 	count: z.int(),
 	next: z.url().nullish(),
@@ -569,6 +798,13 @@ export const zPaginatedDocumentTypeListWritable = z.object({
 	next: z.url().nullish(),
 	previous: z.url().nullish(),
 	results: z.array(zDocumentTypeWritable),
+});
+
+export const zPaginatedTaskSerializerV10ListWritable = z.object({
+	count: z.int(),
+	next: z.url().nullish(),
+	previous: z.url().nullish(),
+	results: z.array(z.unknown()),
 });
 
 export const zPatchedCorrespondentRequestWritable = z.object({
@@ -640,6 +876,25 @@ export const zPatchedDocumentTypeRequestWritable = z.object({
 	}).optional(),
 });
 
+export const zPatchedStoragePathRequestWritable = z.object({
+	is_insensitive: z.boolean().optional(),
+	match: z.string().max(256).optional(),
+	matching_algorithm: zMatchingAlgorithm.optional(),
+	name: z.string().min(1).max(128).optional(),
+	owner: z.int().nullish(),
+	path: z.string().min(1).optional(),
+	set_permissions: z.object({
+		change: z.object({
+			groups: z.array(z.int()).optional(),
+			users: z.array(z.int()).optional(),
+		}).optional(),
+		view: z.object({
+			groups: z.array(z.int()).optional(),
+			users: z.array(z.int()).optional(),
+		}).optional(),
+	}).optional(),
+});
+
 export const zPatchedTagRequestWritable = z.object({
 	color: z.string().min(1).max(7).optional(),
 	is_inbox_tag: z.boolean().register(z.globalRegistry, {
@@ -651,6 +906,41 @@ export const zPatchedTagRequestWritable = z.object({
 	name: z.string().min(1).max(128).optional(),
 	owner: z.int().nullish(),
 	parent: z.int().nullish(),
+	set_permissions: z.object({
+		change: z.object({
+			groups: z.array(z.int()).optional(),
+			users: z.array(z.int()).optional(),
+		}).optional(),
+		view: z.object({
+			groups: z.array(z.int()).optional(),
+			users: z.array(z.int()).optional(),
+		}).optional(),
+	}).optional(),
+});
+
+export const zStoragePathWritable = z.object({
+	is_insensitive: z.boolean().optional(),
+	match: z.string().max(256).optional(),
+	matching_algorithm: zMatchingAlgorithm.optional(),
+	name: z.string().max(128),
+	owner: z.int().nullish(),
+	path: z.string(),
+});
+
+export const zPaginatedStoragePathListWritable = z.object({
+	count: z.int(),
+	next: z.url().nullish(),
+	previous: z.url().nullish(),
+	results: z.array(zStoragePathWritable),
+});
+
+export const zStoragePathRequestWritable = z.object({
+	is_insensitive: z.boolean().optional(),
+	match: z.string().max(256).optional(),
+	matching_algorithm: zMatchingAlgorithm.optional(),
+	name: z.string().min(1).max(128),
+	owner: z.int().nullish(),
+	path: z.string().min(1),
 	set_permissions: z.object({
 		change: z.object({
 			groups: z.array(z.int()).optional(),
@@ -781,6 +1071,73 @@ export const zCorrespondentsUpdatePath = z.object({
 });
 
 export const zCorrespondentsUpdateResponse = zCorrespondent;
+
+export const zCustomFieldsListQuery = z.object({
+	id: z.int().optional(),
+	id__in: z.array(z.int()).register(z.globalRegistry, {
+		description: 'Multiple values may be separated by commas.',
+	}).optional(),
+	name__icontains: z.string().optional(),
+	name__iendswith: z.string().optional(),
+	name__iexact: z.string().optional(),
+	name__istartswith: z.string().optional(),
+	ordering: z.string().register(z.globalRegistry, {
+		description: 'Which field to use when ordering the results.',
+	}).optional(),
+	page: z.int().register(z.globalRegistry, {
+		description: 'A page number within the paginated result set.',
+	}).optional(),
+	page_size: z.int().register(z.globalRegistry, {
+		description: 'Number of results to return per page.',
+	}).optional(),
+});
+
+export const zCustomFieldsListResponse = zPaginatedCustomFieldList;
+
+export const zCustomFieldsCreateBody = zCustomFieldRequest;
+
+export const zCustomFieldsCreateResponse = zCustomField;
+
+export const zCustomFieldsDestroyPath = z.object({
+	id: z.int().register(z.globalRegistry, {
+		description: 'A unique integer value identifying this custom field.',
+	}),
+});
+
+/**
+ * No response body
+ */
+export const zCustomFieldsDestroyResponse = z.void().register(z.globalRegistry, {
+	description: 'No response body',
+});
+
+export const zCustomFieldsRetrievePath = z.object({
+	id: z.int().register(z.globalRegistry, {
+		description: 'A unique integer value identifying this custom field.',
+	}),
+});
+
+export const zCustomFieldsRetrieveResponse = zCustomField;
+
+export const zCustomFieldsPartialUpdateBody = zPatchedCustomFieldRequest;
+
+export const zCustomFieldsPartialUpdatePath = z.object({
+	id: z.int().register(z.globalRegistry, {
+		description: 'A unique integer value identifying this custom field.',
+	}),
+});
+
+export const zCustomFieldsPartialUpdateResponse = zCustomField;
+
+export const zCustomFieldsUpdateBody = zCustomFieldRequest;
+
+export const zCustomFieldsUpdatePath = z.object({
+	id: z.int().register(z.globalRegistry, {
+		description: 'A unique integer value identifying this custom field.',
+	}),
+});
+
+export const zCustomFieldsUpdateResponse = zCustomField;
 
 export const zDocumentTypesListQuery = z.object({
 	full_perms: z.boolean().optional(),
@@ -1069,6 +1426,126 @@ export const zDocumentsDownloadRetrieveQuery = z.object({
 
 export const zDocumentsDownloadRetrieveResponse = z.string();
 
+export const zDocumentsNotesDestroyPath = z.object({
+	id: z.int().register(z.globalRegistry, {
+		description: 'A unique integer value identifying this document.',
+	}),
+});
+
+export const zDocumentsNotesDestroyQuery = z.object({
+	id: z.int().register(z.globalRegistry, {
+		description: 'Note ID to delete (used only for DELETE requests)',
+	}).optional(),
+});
+
+export const zDocumentsNotesDestroyResponse = z.array(zNotes);
+
+export const zDocumentsNotesListPath = z.object({
+	id: z.int().register(z.globalRegistry, {
+		description: 'A unique integer value identifying this document.',
+	}),
+});
+
+export const zDocumentsNotesListQuery = z.object({
+	id: z.int().register(z.globalRegistry, {
+		description: 'Note ID to delete (used only for DELETE requests)',
+	}).optional(),
+});
+
+export const zDocumentsNotesListResponse = z.array(zNotes);
+
+export const zDocumentsNotesCreateBody = zNoteCreateRequestRequest;
+
+export const zDocumentsNotesCreatePath = z.object({
+	id: z.int().register(z.globalRegistry, {
+		description: 'A unique integer value identifying this document.',
+	}),
+});
+
+export const zDocumentsNotesCreateQuery = z.object({
+	id: z.int().register(z.globalRegistry, {
+		description: 'Note ID to delete (used only for DELETE requests)',
+	}).optional(),
+});
+
+export const zDocumentsNotesCreateResponse = z.array(zNotes);
+
+export const zStoragePathsListQuery = z.object({
+	full_perms: z.boolean().optional(),
+	id: z.int().optional(),
+	id__in: z.array(z.int()).register(z.globalRegistry, {
+		description: 'Multiple values may be separated by commas.',
+	}).optional(),
+	name__icontains: z.string().optional(),
+	name__iendswith: z.string().optional(),
+	name__iexact: z.string().optional(),
+	name__istartswith: z.string().optional(),
+	ordering: z.string().register(z.globalRegistry, {
+		description: 'Which field to use when ordering the results.',
+	}).optional(),
+	page: z.int().register(z.globalRegistry, {
+		description: 'A page number within the paginated result set.',
+	}).optional(),
+	page_size: z.int().register(z.globalRegistry, {
+		description: 'Number of results to return per page.',
+	}).optional(),
+	path__icontains: z.string().optional(),
+	path__iendswith: z.string().optional(),
+	path__iexact: z.string().optional(),
+	path__istartswith: z.string().optional(),
+});
+
+export const zStoragePathsListResponse = zPaginatedStoragePathList;
+
+export const zStoragePathsCreateBody = zStoragePathRequestWritable;
+
+export const zStoragePathsCreateResponse = zStoragePath;
+
+export const zStoragePathsDestroyPath = z.object({
+	id: z.int().register(z.globalRegistry, {
+		description: 'A unique integer value identifying this storage path.',
+	}),
+});
+
+/**
+ * No response body
+ */
+export const zStoragePathsDestroyResponse = z.void().register(z.globalRegistry, {
+	description: 'No response body',
+});
+
+export const zStoragePathsRetrievePath = z.object({
+	id: z.int().register(z.globalRegistry, {
+		description: 'A unique integer value identifying this storage path.',
+	}),
+});
+
+export const zStoragePathsRetrieveQuery = z.object({
+	full_perms: z.boolean().optional(),
+});
+
+export const zStoragePathsRetrieveResponse = zStoragePath;
+
+export const zStoragePathsPartialUpdateBody = zPatchedStoragePathRequestWritable;
+
+export const zStoragePathsPartialUpdatePath = z.object({
+	id: z.int().register(z.globalRegistry, {
+		description: 'A unique integer value identifying this storage path.',
+	}),
+});
+
+export const zStoragePathsPartialUpdateResponse = zStoragePath;
+
+export const zStoragePathsUpdateBody = zStoragePathRequestWritable;
+
+export const zStoragePathsUpdatePath = z.object({
+	id: z.int().register(z.globalRegistry, {
+		description: 'A unique integer value identifying this storage path.',
+	}),
+});
+
+export const zStoragePathsUpdateResponse = zStoragePath;
+
 export const zTagsListQuery = z.object({
 	full_perms: z.boolean().optional(),
 	id: z.int().optional(),
@@ -1143,3 +1620,72 @@ export const zTagsUpdatePath = z.object({
 });
 
 export const zTagsUpdateResponse = zTag;
+
+export const zTasksListQuery = z.object({
+	acknowledged: z.boolean().register(z.globalRegistry, {
+		description: 'Acknowledged',
+	}).optional(),
+	date_created_after: z.iso.datetime().register(z.globalRegistry, {
+		description: 'Created After',
+	}).optional(),
+	date_created_before: z.iso.datetime().register(z.globalRegistry, {
+		description: 'Created Before',
+	}).optional(),
+	is_complete: z.boolean().register(z.globalRegistry, {
+		description: 'Is Complete',
+	}).optional(),
+	ordering: z.string().register(z.globalRegistry, {
+		description: 'Which field to use when ordering the results.',
+	}).optional(),
+	owner: z.int().optional(),
+	page: z.int().register(z.globalRegistry, {
+		description: 'A page number within the paginated result set.',
+	}).optional(),
+	page_size: z.int().register(z.globalRegistry, {
+		description: 'Number of results to return per page.',
+	}).optional(),
+	status: z.array(z.enum([
+		'failure',
+		'pending',
+		'revoked',
+		'started',
+		'success',
+	])).register(z.globalRegistry, {
+		description:
+			'Status\n\n* `pending` - Pending\n* `started` - Started\n* `success` - Success\n* `failure` - Failure\n* `revoked` - Revoked',
+	}).optional(),
+	task_id: z.string().register(z.globalRegistry, {
+		description: 'Filter tasks by Celery UUID',
+	}).optional(),
+	task_type: z.array(z.enum([
+		'build_share_link',
+		'bulk_delete',
+		'bulk_update',
+		'check_workflows',
+		'consume_file',
+		'empty_trash',
+		'index_optimize',
+		'llm_index',
+		'mail_fetch',
+		'reprocess_document',
+		'sanity_check',
+		'train_classifier',
+	])).register(z.globalRegistry, {
+		description:
+			'Task Type\n\n* `consume_file` - Consume File\n* `train_classifier` - Train Classifier\n* `sanity_check` - Sanity Check\n* `index_optimize` - Index Optimize\n* `mail_fetch` - Mail Fetch\n* `llm_index` - LLM Index\n* `empty_trash` - Empty Trash\n* `check_workflows` - Check Workflows\n* `bulk_update` - Bulk Update\n* `reprocess_document` - Reprocess Document\n* `build_share_link` - Build Share Link\n* `bulk_delete` - Bulk Delete',
+	}).optional(),
+	trigger_source: z.array(z.enum([
+		'api_upload',
+		'email_consume',
+		'folder_consume',
+		'manual',
+		'scheduled',
+		'system',
+		'web_ui',
+	])).register(z.globalRegistry, {
+		description:
+			'Trigger Source\n\n* `scheduled` - Scheduled\n* `web_ui` - Web UI\n* `api_upload` - API Upload\n* `folder_consume` - Folder Consume\n* `email_consume` - Email Consume\n* `system` - System\n* `manual` - Manual',
+	}).optional(),
+});
+
+export const zTasksListResponse = zPaginatedTaskSerializerV10List;

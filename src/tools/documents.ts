@@ -13,7 +13,7 @@ export function registerDocumentTools(server: McpServer, api: PaperlessAPI): voi
 			description:
 				'Perform bulk operations on multiple documents simultaneously: set correspondent/type/tags, delete, reprocess, merge, split, rotate, or manage permissions. Efficient for managing large document collections.',
 			inputSchema: {
-				documents: z.array(z.number()).describe(
+				documents: z.array(z.number().int().min(1)).describe(
 					'Array of document IDs to perform bulk operations on. Get document IDs from search_documents first.',
 				),
 
@@ -21,56 +21,56 @@ export function registerDocumentTools(server: McpServer, api: PaperlessAPI): voi
 					'The bulk operation to perform.',
 				),
 
-				correspondent: z.number().optional().describe(
+				correspondent: z.number().int().min(1).optional().describe(
 					"ID of correspondent to assign when method is 'set_correspondent'. Use list_correspondents to get valid IDs.",
 				),
 
-				document_type: z.number().optional().describe(
+				document_type: z.number().int().min(1).optional().describe(
 					"ID of document type to assign when method is 'set_document_type'. Use list_document_types to get valid IDs.",
 				),
 
-				storage_path: z.number().optional().describe(
+				storage_path: z.number().int().min(1).optional().describe(
 					"ID of storage path to assign when method is 'set_storage_path'. Storage paths organize documents in folder hierarchies.",
 				),
 
-				tag: z.number().optional().describe(
+				tag: z.number().int().min(1).optional().describe(
 					"Single tag ID to add or remove when method is 'add_tag' or 'remove_tag'. Use list_tags to get valid IDs.",
 				),
 
-				add_tags: z.array(z.number()).optional().describe(
+				add_tags: z.array(z.number().int().min(1)).optional().describe(
 					"Array of tag IDs to add when method is 'modify_tags'. Use list_tags to get valid IDs.",
 				),
 
-				remove_tags: z.array(z.number()).optional().describe(
+				remove_tags: z.array(z.number().int().min(1)).optional().describe(
 					"Array of tag IDs to remove when method is 'modify_tags'. Use list_tags to get valid IDs.",
 				),
 
 				add_custom_fields: z
-					.union([z.array(z.number()), z.record(z.string(), z.unknown())])
+					.union([z.array(z.number().int().min(1)), z.record(z.string(), z.unknown())])
 					.optional().describe(
 						"Custom field IDs or id:value pairs to add when method is 'modify_custom_fields'.",
 					),
 
-				remove_custom_fields: z.array(z.number()).optional().describe(
+				remove_custom_fields: z.array(z.number().int().min(1)).optional().describe(
 					"Custom field IDs to remove when method is 'modify_custom_fields'.",
 				),
 
 				permissions: z
 					.object({
-						owner: z.number().nullable().optional().describe(
+						owner: z.number().int().min(1).nullable().optional().describe(
 							'User ID to set as document owner, or null to remove ownership',
 						),
 
 						set_permissions: z
 							.object({
 								view: z.object({
-									users: z.array(z.number()).describe('User IDs granted view permission'),
-									groups: z.array(z.number()).describe('Group IDs granted view permission'),
+									users: z.array(z.number().int().min(1)).describe('User IDs granted view permission'),
+									groups: z.array(z.number().int().min(1)).describe('Group IDs granted view permission'),
 								}).describe('Users and groups who can view these documents'),
 
 								change: z.object({
-									users: z.array(z.number()).describe('User IDs granted edit permission'),
-									groups: z.array(z.number()).describe('Group IDs granted edit permission'),
+									users: z.array(z.number().int().min(1)).describe('User IDs granted edit permission'),
+									groups: z.array(z.number().int().min(1)).describe('Group IDs granted edit permission'),
 								}).describe('Users and groups who can edit these documents'),
 							})
 							.optional().describe('Specific permission settings for users and groups'),
@@ -83,7 +83,7 @@ export function registerDocumentTools(server: McpServer, api: PaperlessAPI): voi
 						"Permission settings when method is 'set_permissions'. Controls who can view and edit the documents.",
 					),
 
-				metadata_document_id: z.number().optional().describe(
+				metadata_document_id: z.number().int().min(1).optional().describe(
 					'Source document ID when merging documents. The metadata from this document will be preserved.',
 				),
 
@@ -92,7 +92,7 @@ export function registerDocumentTools(server: McpServer, api: PaperlessAPI): voi
 				),
 
 				pages: z
-					.union([z.string(), z.array(z.number())])
+					.union([z.string(), z.array(z.number().int().min(1))])
 					.optional().describe(
 						"Page specification. For split, use a string like '1-2,3-4,5'. For delete_pages, use a number array like [1, 3, 5].",
 					),
@@ -103,9 +103,9 @@ export function registerDocumentTools(server: McpServer, api: PaperlessAPI): voi
 
 				operations: z
 					.array(z.object({
-						page: z.number(),
+						page: z.number().int().min(1),
 						rotate: z.number().optional(),
-						doc: z.number().optional(),
+						doc: z.number().int().min(0).optional(),
 					}))
 					.optional().describe(
 						"PDF edit operations when method is 'edit_pdf'. Each operation needs a source page and may include rotate/doc.",
@@ -161,19 +161,19 @@ export function registerDocumentTools(server: McpServer, api: PaperlessAPI): voi
 					'Document creation date in ISO format (YYYY-MM-DD or YYYY-MM-DDTHH:mm:ss). If not provided, uses current date.',
 				),
 
-				correspondent: z.number().optional().describe(
+				correspondent: z.number().int().min(1).optional().describe(
 					'ID of the correspondent (sender/receiver) for this document. Use list_correspondents to find or create_correspondent to add new ones.',
 				),
 
-				document_type: z.number().optional().describe(
+				document_type: z.number().int().min(1).optional().describe(
 					'ID of document type for categorization (e.g., Invoice, Receipt, Letter). Use list_document_types to find or create_document_type to add new ones.',
 				),
 
-				storage_path: z.number().optional().describe(
+				storage_path: z.number().int().min(1).optional().describe(
 					'ID of storage path to organize document location in folder hierarchy. Leave empty for default storage.',
 				),
 
-				tags: z.array(z.number()).optional().describe(
+				tags: z.array(z.number().int().min(1)).optional().describe(
 					'Array of tag IDs to label this document. Use list_tags to find existing tags or create_tag to add new ones.',
 				),
 
@@ -181,7 +181,7 @@ export function registerDocumentTools(server: McpServer, api: PaperlessAPI): voi
 					'Archive serial number for document organization and reference. Useful for maintaining external filing systems.',
 				),
 
-				custom_fields: z.array(z.number()).optional().describe(
+				custom_fields: z.array(z.number().int().min(1)).optional().describe(
 					'Array of custom field IDs to associate with this document. Custom fields store additional metadata.',
 				),
 			},
@@ -210,7 +210,7 @@ export function registerDocumentTools(server: McpServer, api: PaperlessAPI): voi
 			description:
 				'Get complete details for a specific document including full metadata, content preview, tags, correspondent, and document type information.',
 			inputSchema: {
-				id: z.number().describe(
+				id: z.number().int().min(1).describe(
 					'Unique document ID. Get this from search_documents results. Returns full document metadata, content preview, and associated tags/correspondent/type.',
 				),
 			},
@@ -226,7 +226,7 @@ export function registerDocumentTools(server: McpServer, api: PaperlessAPI): voi
 			description:
 				'Update metadata on a single document: rename its title, set or clear its archive serial number, set custom field values, or add a note. Use bulk_edit_documents instead for tags, correspondent, or document type — those operations are bulk-optimised on the backend.',
 			inputSchema: {
-				id: z.number().describe(
+				id: z.number().int().min(1).describe(
 					'Document ID to update. Get this from search_documents or get_document results.',
 				),
 
@@ -261,6 +261,24 @@ export function registerDocumentTools(server: McpServer, api: PaperlessAPI): voi
 	);
 
 	server.registerTool(
+		'delete_document_note',
+		{
+			description:
+				'Delete a note from a document. Get note IDs from the notes array on get_document or update_document results. Returns the remaining notes.',
+			inputSchema: {
+				id: z.number().int().min(1).describe('Document ID the note belongs to.'),
+
+				note_id: z.number().int().min(1).describe(
+					"ID of the note to delete, from the document's notes array.",
+				),
+			},
+		},
+		async ({ id, note_id }, _extra) => {
+			return jsonResult(await api.deleteDocumentNote(id, note_id));
+		},
+	);
+
+	server.registerTool(
 		'search_documents',
 		{
 			description:
@@ -270,11 +288,11 @@ export function registerDocumentTools(server: McpServer, api: PaperlessAPI): voi
 					"Search query using Paperless-ngx syntax. By default, matches documents containing ALL words. Advanced syntax: Field searches: 'tag:unpaid', 'type:invoice', 'correspondent:university'. Logical operators: 'term1 AND (term2 OR term3)'. Date ranges: 'created:[2020 to 2024]', 'added:yesterday', 'modified:today'. Wildcards: 'prod*name'. Combine multiple criteria as needed. Search looks through document content, title, correspondent, type, and tags.",
 				),
 
-				page: z.number().optional().describe(
+				page: z.number().int().min(1).optional().describe(
 					'Page number for pagination (starts at 1). Use to browse through large result sets without hitting token limits.',
 				),
 
-				page_size: z.number().optional().describe(
+				page_size: z.number().int().min(1).optional().describe(
 					'Number of documents per page (default 25, max 100). Smaller page sizes help avoid token limits when many documents match.',
 				),
 			},
@@ -290,7 +308,9 @@ export function registerDocumentTools(server: McpServer, api: PaperlessAPI): voi
 			description:
 				'Download a document file as base64-encoded data. Choose between original uploaded file or processed/archived version with OCR improvements.',
 			inputSchema: {
-				id: z.number().describe('Document ID to download. Get this from search_documents or get_document results.'),
+				id: z.number().int().min(1).describe(
+					'Document ID to download. Get this from search_documents or get_document results.',
+				),
 
 				original: z.boolean().optional().describe(
 					'Whether to download the original uploaded file (true) or the processed/archived version (false, default). Original files preserve exact formatting but may not include OCR improvements.',

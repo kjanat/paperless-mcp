@@ -18,6 +18,20 @@ export function registerTagTools(server: McpServer, api: PaperlessAPI): void {
 	);
 
 	server.registerTool(
+		'get_tag',
+		{
+			description:
+				"Get a single tag by ID: name, color, and matching rules. Cheaper than list_tags when you already know the ID (e.g. from a document's tags array).",
+			inputSchema: {
+				id: z.number().int().min(1).describe("Tag ID, e.g. from a document's tags array or list_tags."),
+			},
+		},
+		async ({ id }, _extra) => {
+			return jsonResult(await api.getTag(id));
+		},
+	);
+
+	server.registerTool(
 		'create_tag',
 		{
 			description:
@@ -48,7 +62,7 @@ export function registerTagTools(server: McpServer, api: PaperlessAPI): void {
 					'Whether this is an inbox tag. Documents with inbox tags appear in the inbox.',
 				),
 
-				parent: z.number().nullable().optional().describe(
+				parent: z.number().int().min(1).nullable().optional().describe(
 					'ID of the parent tag for hierarchical tag organization. Null for top-level tags.',
 				),
 			},
@@ -64,7 +78,7 @@ export function registerTagTools(server: McpServer, api: PaperlessAPI): void {
 			description:
 				"Modify an existing tag's name, color, or automatic matching rules. Useful for refining tag organization and improving automatic document classification.",
 			inputSchema: {
-				id: z.number().describe('ID of the tag to update. Use list_tags to find existing tag IDs.'),
+				id: z.number().int().min(1).describe('ID of the tag to update. Use list_tags to find existing tag IDs.'),
 
 				name: z.string().optional().describe('New tag name. Must be unique among all tags.'),
 
@@ -89,7 +103,7 @@ export function registerTagTools(server: McpServer, api: PaperlessAPI): void {
 					'Whether this is an inbox tag.',
 				),
 
-				parent: z.number().nullable().optional().describe(
+				parent: z.number().int().min(1).nullable().optional().describe(
 					'ID of the parent tag. Null for top-level tags.',
 				),
 			},
@@ -103,9 +117,9 @@ export function registerTagTools(server: McpServer, api: PaperlessAPI): void {
 		'delete_tag',
 		{
 			description:
-				'Permanently delete a tag from the system. This removes the tag from all documents that currently use it. Use with caution as this action cannot be undone.',
+				"Deprecated: use bulk_edit_tags with operation='delete' instead — this tool will be removed in v3.0.0. Permanently deletes a tag from the system, removing it from all documents that currently use it. Cannot be undone.",
 			inputSchema: {
-				id: z.number().describe(
+				id: z.number().int().min(1).describe(
 					'ID of the tag to permanently delete. This will remove the tag from all documents that currently use it. Use list_tags to find tag IDs.',
 				),
 			},
@@ -121,7 +135,7 @@ export function registerTagTools(server: McpServer, api: PaperlessAPI): void {
 			description:
 				'Perform bulk operations on multiple tags: set permissions to control access or permanently delete multiple tags at once. Efficient for managing large tag collections.',
 			inputSchema: {
-				tag_ids: z.array(z.number()).describe(
+				tag_ids: z.array(z.number().int().min(1)).describe(
 					'Array of tag IDs to perform bulk operations on. Use list_tags to get valid tag IDs.',
 				),
 
@@ -129,7 +143,7 @@ export function registerTagTools(server: McpServer, api: PaperlessAPI): void {
 					"Bulk operation: 'set_permissions' to control who can use these tags, 'delete' to permanently remove all specified tags from the system.",
 				),
 
-				owner: z.number().optional().describe(
+				owner: z.number().int().min(1).optional().describe(
 					"User ID to set as owner when operation is 'set_permissions'. Owner has full control over the tags.",
 				),
 

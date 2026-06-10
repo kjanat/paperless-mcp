@@ -19,10 +19,13 @@ src/
 │   └── paperless.test.ts
 └── tools/
     ├── utils.ts             # Shared jsonResult() helper
-    ├── documents.ts         # 6 tools: bulk_edit, post, get, update, search, download
-    ├── tags.ts              # 5 tools: list, create, update, delete, bulk_edit
-    ├── correspondents.ts    # 4 tools: list, create, update, bulk_edit
-    └── documentTypes.ts     # 4 tools: list, create, update, bulk_edit
+    ├── documents.ts         # 7 tools: bulk_edit, post, get, update, delete_note, search, download
+    ├── tags.ts              # 6 tools: list, get, create, update, delete (deprecated), bulk_edit
+    ├── correspondents.ts    # 5 tools: list, get, create, update, bulk_edit
+    ├── documentTypes.ts     # 5 tools: list, get, create, update, bulk_edit
+    ├── storagePaths.ts      # 3 tools: list, create, update
+    ├── customFields.ts      # 3 tools: list, create, update
+    └── tasks.ts             # 1 tool: get_task
 ```
 
 No barrel files. No cross-imports between leaf modules.
@@ -51,7 +54,7 @@ enums (`BulkEditMethod`, `MatchingAlgorithm`), and nested types (`ObjectPermissi
 
 ### `PaperlessAPI` (src/api/paperless.ts)
 
-Single class, 20 methods. All return typed responses (not `Promise<unknown>`).
+Single class, 30 methods. All return typed responses (not `Promise<unknown>`).
 `request<T>()` is generic base — adds token auth (`version=6`), JSON content type,
 throws on non-OK. Most methods delegate to it.
 
@@ -68,18 +71,29 @@ must update both paths.
 | `getDocument`         | `/documents/{id}/`          | GET    |
 | `updateDocument`      | `/documents/{id}/`          | PATCH  |
 | `addDocumentNote`     | `/documents/{id}/notes/`    | POST   |
+| `deleteDocumentNote`  | `/documents/{id}/notes/`    | DELETE |
 | `searchDocuments`     | `/documents/?query=...`     | GET    |
 | `downloadDocument`    | `/documents/{id}/download/` | GET    |
 | `getTags`             | `/tags/`                    | GET    |
+| `getTag`              | `/tags/{id}/`               | GET    |
 | `createTag`           | `/tags/`                    | POST   |
 | `updateTag`           | `/tags/{id}/`               | PATCH  |
 | `deleteTag`           | `/tags/{id}/`               | DELETE |
 | `getCorrespondents`   | `/correspondents/`          | GET    |
+| `getCorrespondent`    | `/correspondents/{id}/`     | GET    |
 | `createCorrespondent` | `/correspondents/`          | POST   |
 | `updateCorrespondent` | `/correspondents/{id}/`     | PATCH  |
 | `getDocumentTypes`    | `/document_types/`          | GET    |
+| `getDocumentType`     | `/document_types/{id}/`     | GET    |
 | `createDocumentType`  | `/document_types/`          | POST   |
 | `updateDocumentType`  | `/document_types/{id}/`     | PATCH  |
+| `getStoragePaths`     | `/storage_paths/`           | GET    |
+| `createStoragePath`   | `/storage_paths/`           | POST   |
+| `updateStoragePath`   | `/storage_paths/{id}/`      | PATCH  |
+| `getCustomFields`     | `/custom_fields/`           | GET    |
+| `createCustomField`   | `/custom_fields/`           | POST   |
+| `updateCustomField`   | `/custom_fields/{id}/`      | PATCH  |
+| `getTask`             | `/tasks/?task_id=...`       | GET    |
 | `bulkEditObjects`     | `/bulk_edit_objects/`       | POST   |
 
 ### Tool Registration (src/tools/)

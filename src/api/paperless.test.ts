@@ -275,6 +275,16 @@ describe('PaperlessAPI.addDocumentNote', () => {
 	});
 });
 
+describe('PaperlessAPI.deleteDocumentNote', () => {
+	test('DELETEs /documents/{id}/notes/ with note id query param', async () => {
+		stubFetch([]);
+		await api.deleteDocumentNote(42, 7);
+
+		expect(lastRequestUrl()).toBe(`${BASE_URL}/api/documents/42/notes/?id=7`);
+		expect(lastRequestInit().method).toBe('DELETE');
+	});
+});
+
 describe('PaperlessAPI.searchDocuments', () => {
 	test('strips content/download_url/thumbnail_url from results', async () => {
 		stubFetch({
@@ -417,6 +427,16 @@ describe('PaperlessAPI.getTags', () => {
 	});
 });
 
+describe('PaperlessAPI.getTag', () => {
+	test('fetches single tag by ID', async () => {
+		stubFetch({ id: 3, name: 'urgent' });
+		const result = await api.getTag(3);
+
+		expect(lastRequestUrl()).toBe(`${BASE_URL}/api/tags/3/`);
+		expect(result.name).toBe('urgent');
+	});
+});
+
 describe('PaperlessAPI.createTag', () => {
 	test('POSTs tag data', async () => {
 		stubFetch({ id: 5, name: 'new-tag' });
@@ -458,6 +478,16 @@ describe('PaperlessAPI.getCorrespondents', () => {
 		await api.getCorrespondents();
 
 		expect(lastRequestUrl()).toBe(`${BASE_URL}/api/correspondents/?page=1&page_size=100`);
+	});
+});
+
+describe('PaperlessAPI.getCorrespondent', () => {
+	test('fetches single correspondent by ID', async () => {
+		stubFetch({ id: 63, name: 'City Council' });
+		const result = await api.getCorrespondent(63);
+
+		expect(lastRequestUrl()).toBe(`${BASE_URL}/api/correspondents/63/`);
+		expect(result.name).toBe('City Council');
 	});
 });
 
@@ -511,6 +541,16 @@ describe('PaperlessAPI.getDocumentTypes', () => {
 	});
 });
 
+describe('PaperlessAPI.getDocumentType', () => {
+	test('fetches single document type by ID', async () => {
+		stubFetch({ id: 2, name: 'Invoice' });
+		const result = await api.getDocumentType(2);
+
+		expect(lastRequestUrl()).toBe(`${BASE_URL}/api/document_types/2/`);
+		expect(result.name).toBe('Invoice');
+	});
+});
+
 describe('PaperlessAPI.createDocumentType', () => {
 	test('POSTs document type data', async () => {
 		stubFetch({ id: 2, name: 'Invoice' });
@@ -544,6 +584,99 @@ describe('PaperlessAPI.updateDocumentType', () => {
 		await api.updateDocumentType(4, { name: 'Renamed', match: undefined });
 
 		expect(lastRequestBody()).toEqual({ name: 'Renamed' });
+	});
+});
+
+// ---------------------------------------------------------------------------
+// Storage path operations
+// ---------------------------------------------------------------------------
+
+describe('PaperlessAPI.getStoragePaths', () => {
+	test('fetches /storage_paths/ with pagination', async () => {
+		stubFetch({ count: 0, next: null, previous: null, all: [], results: [] });
+		await api.getStoragePaths();
+
+		expect(lastRequestUrl()).toBe(`${BASE_URL}/api/storage_paths/?page=1&page_size=100`);
+	});
+});
+
+describe('PaperlessAPI.createStoragePath', () => {
+	test('POSTs storage path data', async () => {
+		stubFetch({ id: 1, name: 'Archive', path: '{{ created_year }}/{{ title }}' });
+		await api.createStoragePath({ name: 'Archive', path: '{{ created_year }}/{{ title }}' });
+
+		expect(lastRequestInit().method).toBe('POST');
+		expect(lastRequestBody()).toEqual({ name: 'Archive', path: '{{ created_year }}/{{ title }}' });
+		expect(lastRequestUrl()).toBe(`${BASE_URL}/api/storage_paths/`);
+	});
+});
+
+describe('PaperlessAPI.updateStoragePath', () => {
+	test('PATCHes to /storage_paths/{id}/ and omits undefined', async () => {
+		stubFetch({ id: 1, path: '{{ created_year }}/{{ correspondent }}' });
+		await api.updateStoragePath(1, {
+			path: '{{ created_year }}/{{ correspondent }}',
+			name: undefined,
+		});
+
+		expect(lastRequestUrl()).toBe(`${BASE_URL}/api/storage_paths/1/`);
+		expect(lastRequestInit().method).toBe('PATCH');
+		expect(lastRequestBody()).toEqual({ path: '{{ created_year }}/{{ correspondent }}' });
+	});
+});
+
+// ---------------------------------------------------------------------------
+// Custom field operations
+// ---------------------------------------------------------------------------
+
+describe('PaperlessAPI.getCustomFields', () => {
+	test('fetches /custom_fields/ with pagination', async () => {
+		stubFetch({ count: 0, next: null, previous: null, all: [], results: [] });
+		await api.getCustomFields();
+
+		expect(lastRequestUrl()).toBe(`${BASE_URL}/api/custom_fields/?page=1&page_size=100`);
+	});
+});
+
+describe('PaperlessAPI.createCustomField', () => {
+	test('POSTs custom field data', async () => {
+		stubFetch({ id: 7, name: 'Invoice Number', data_type: 'string' });
+		await api.createCustomField({ name: 'Invoice Number', data_type: 'string' });
+
+		expect(lastRequestInit().method).toBe('POST');
+		expect(lastRequestBody()).toEqual({ name: 'Invoice Number', data_type: 'string' });
+	});
+});
+
+describe('PaperlessAPI.updateCustomField', () => {
+	test('PATCHes to /custom_fields/{id}/ and omits undefined', async () => {
+		stubFetch({ id: 7, name: 'Invoice No.' });
+		await api.updateCustomField(7, { name: 'Invoice No.', data_type: undefined });
+
+		expect(lastRequestUrl()).toBe(`${BASE_URL}/api/custom_fields/7/`);
+		expect(lastRequestInit().method).toBe('PATCH');
+		expect(lastRequestBody()).toEqual({ name: 'Invoice No.' });
+	});
+});
+
+// ---------------------------------------------------------------------------
+// Task operations
+// ---------------------------------------------------------------------------
+
+describe('PaperlessAPI.getTask', () => {
+	test('queries /tasks/ by task_id and unwraps results', async () => {
+		stubFetch({
+			count: 1,
+			next: null,
+			previous: null,
+			all: [],
+			results: [{ id: 12, task_id: 'abc-123', status: 'success', related_document_ids: [1601] }],
+		});
+		const result = await api.getTask('abc-123');
+
+		expect(lastRequestUrl()).toBe(`${BASE_URL}/api/tasks/?task_id=abc-123`);
+		expect(result[0]?.status).toBe('success');
+		expect(result[0]?.related_document_ids).toEqual([1601]);
 	});
 });
 

@@ -10,9 +10,12 @@ import type { JSONRPCErrorResponse } from '@modelcontextprotocol/sdk/types.js';
 import { PaperlessAPI } from '#api/paperless';
 import pkg from '#pkg';
 import { registerCorrespondentTools } from '#tools/correspondents';
+import { registerCustomFieldTools } from '#tools/customFields';
 import { registerDocumentTools } from '#tools/documents';
 import { registerDocumentTypeTools } from '#tools/documentTypes';
+import { registerStoragePathTools } from '#tools/storagePaths';
 import { registerTagTools } from '#tools/tags';
+import { registerTaskTools } from '#tools/tasks';
 
 const DEFAULT_PORT = 3000;
 const DEFAULT_HOST = '127.0.0.1';
@@ -132,6 +135,9 @@ function createServer(api: PaperlessAPI): McpServer {
 	registerTagTools(server, api);
 	registerCorrespondentTools(server, api);
 	registerDocumentTypeTools(server, api);
+	registerStoragePathTools(server, api);
+	registerCustomFieldTools(server, api);
+	registerTaskTools(server, api);
 
 	return server;
 }

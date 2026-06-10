@@ -171,6 +171,42 @@ export type UpdateDocumentTypeRequest = Pick<
 >;
 
 // ---------------------------------------------------------------------------
+// Storage Path / Custom Field / Task (derived)
+// ---------------------------------------------------------------------------
+
+/** Storage path as returned by GET /storage_paths/. */
+export type StoragePath = z.infer<typeof schemas.zStoragePath>;
+
+/**
+ * Request body for POST /storage_paths/.
+ *
+ * Narrowed to the fields `create_storage_path` exposes — permissions belong
+ * in bulk edit tooling, owner is implicit (the API token's user).
+ */
+export type CreateStoragePathRequest = Pick<
+	z.infer<typeof schemas.zStoragePathRequestWritable>,
+	'name' | 'path' | 'match' | 'matching_algorithm' | 'is_insensitive'
+>;
+
+/** Request body for PATCH /storage_paths/{id}/ (same field subset). */
+export type UpdateStoragePathRequest = Pick<
+	z.infer<typeof schemas.zPatchedStoragePathRequestWritable>,
+	'name' | 'path' | 'match' | 'matching_algorithm' | 'is_insensitive'
+>;
+
+/** Custom field definition as returned by GET /custom_fields/. */
+export type CustomField = z.infer<typeof schemas.zCustomField>;
+
+/** Request body for POST /custom_fields/. */
+export type CustomFieldRequest = z.infer<typeof schemas.zCustomFieldRequest>;
+
+/** Request body for PATCH /custom_fields/{id}/. */
+export type UpdateCustomFieldRequest = z.infer<typeof schemas.zPatchedCustomFieldRequest>;
+
+/** Consumer/queue task as returned by GET /tasks/. */
+export type PaperlessTask = z.infer<typeof schemas.zTaskSerializerV10>;
+
+// ---------------------------------------------------------------------------
 // Bulk operations
 // ---------------------------------------------------------------------------
 

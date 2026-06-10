@@ -1,6 +1,8 @@
 # Paperless-ngx MCP Server
 
 [![NPM Version](https://img.shields.io/npm/v/@kjanat/paperless-mcp?logo=npm&labelColor=CB3837&color=black)](https://www.npmjs.com/package/@kjanat/paperless-mcp)
+[![pkg.pr.new](https://pkg.pr.new/badge/kjanat/paperless-mcp)](https://pkg.pr.new/~/kjanat/paperless-mcp)
+
 [![Publish to npm](https://github.com/kjanat/paperless-mcp/actions/workflows/npm-publish.yml/badge.svg)](https://github.com/kjanat/paperless-mcp/actions/workflows/npm-publish.yml)
 [![Schema drift check](https://github.com/kjanat/paperless-mcp/actions/workflows/schema-check.yml/badge.svg)](https://github.com/kjanat/paperless-mcp/actions/workflows/schema-check.yml)
 [![Schema upstream sync](https://github.com/kjanat/paperless-mcp/actions/workflows/schema-update.yml/badge.svg)](https://github.com/kjanat/paperless-mcp/actions/workflows/schema-update.yml)
@@ -257,6 +259,9 @@ Parameters:
 - `archive_serial_number` (optional): Archive serial number
 - `custom_fields` (optional): Array of custom field IDs
 
+Returns a consume-task UUID, not a document ID — poll `get_task` with it to
+find out when processing finishes and which document was created.
+
 ```typescript
 post_document({
   file: "base64_encoded_content",
@@ -267,6 +272,23 @@ post_document({
   document_type: 2,
   tags: [1, 3],
   archive_serial_number: "2024-001",
+});
+```
+
+#### `delete_document_note`
+
+Delete a note from a document. Note IDs come from the `notes` array on
+`get_document` results. Returns the remaining notes.
+
+Parameters:
+
+- `id`: Document ID
+- `note_id`: ID of the note to delete
+
+```typescript
+delete_document_note({
+  id: 123,
+  note_id: 7,
 });
 ```
 
@@ -324,7 +346,20 @@ update_tag({
 });
 ```
 
+#### `get_tag`
+
+Get a single tag by ID.
+
+```typescript
+get_tag({
+  id: 5,
+});
+```
+
 #### `delete_tag`
+
+> **Deprecated** — use `bulk_edit_tags` with `operation: "delete"` instead.
+> Will be removed in v3.0.0.
 
 Permanently delete a tag. Removes it from all documents.
 
@@ -369,6 +404,17 @@ Get all correspondents.
 
 ```typescript
 list_correspondents();
+```
+
+#### `get_correspondent`
+
+Get a single correspondent by ID — cheaper than listing all correspondents to
+resolve a document's `correspondent` field.
+
+```typescript
+get_correspondent({
+  id: 63,
+});
 ```
 
 #### create_correspondent
@@ -444,6 +490,17 @@ Get all document types.
 list_document_types();
 ```
 
+#### `get_document_type`
+
+Get a single document type by ID — cheaper than listing all types to resolve
+a document's `document_type` field.
+
+```typescript
+get_document_type({
+  id: 2,
+});
+```
+
 #### create_document_type
 
 Create a new document type.
@@ -500,6 +557,134 @@ Parameters:
 bulk_edit_document_types({
   document_type_ids: [1, 2],
   operation: "delete",
+});
+```
+
+</details>
+<details>
+<summary>Storage Path Operations</summary>
+
+### Storage Path Operations
+
+#### `list_storage_paths`
+
+Get all storage paths (where document files land on disk).
+
+```typescript
+list_storage_paths();
+```
+
+#### `create_storage_path`
+
+Create a new storage path.
+
+Parameters:
+
+- `name`: Storage path name
+- `path`: Path template, e.g. `"{{ created_year }}/{{ correspondent }}/{{ title }}"`
+- `match` (optional): Text pattern to match
+- `matching_algorithm` (optional): Integer 0-6 (0=none, 1=any, 2=all, 3=exact, 4=regex, 5=fuzzy, 6=auto)
+- `is_insensitive` (optional): Whether matching is case-insensitive
+
+```typescript
+create_storage_path({
+  name: "Tax Archive",
+  path: "{{ created_year }}/taxes/{{ title }}",
+});
+```
+
+#### `update_storage_path`
+
+Update an existing storage path's name, path template, or matching rules via
+`PATCH /api/storage_paths/{id}/`.
+
+Parameters:
+
+- `id`: Storage path ID
+- `name` (optional): New name
+- `path` (optional): New path template
+- `match` (optional): Text pattern to match (empty string removes auto-matching)
+- `matching_algorithm` (optional): Integer 0-6
+- `is_insensitive` (optional): Whether matching is case-insensitive
+
+```typescript
+update_storage_path({
+  id: 1,
+  path: "{{ created_year }}/{{ correspondent }}/{{ title }}",
+});
+```
+
+</details>
+<details>
+<summary>Custom Field Operations</summary>
+
+### Custom Field Operations
+
+#### `list_custom_fields`
+
+Get all custom field definitions — the numeric IDs that
+`update_document.custom_fields` and `bulk_edit_documents.modify_custom_fields`
+require.
+
+```typescript
+list_custom_fields();
+```
+
+#### `create_custom_field`
+
+Create a new custom field definition.
+
+Parameters:
+
+- `name`: Field name
+- `data_type`: One of `string`, `url`, `date`, `boolean`, `integer`, `float`, `monetary`, `documentlink`, `select`
+- `extra_data` (optional): Extra configuration, e.g. `{ select_options: [{ label: "Open" }, { label: "Paid" }] }`
+
+```typescript
+create_custom_field({
+  name: "Invoice Number",
+  data_type: "string",
+});
+```
+
+#### `update_custom_field`
+
+Update an existing custom field definition via `PATCH /api/custom_fields/{id}/`.
+Changing the data type of a field with existing values may invalidate them.
+
+Parameters:
+
+- `id`: Custom field ID
+- `name` (optional): New field name
+- `data_type` (optional): New data type
+- `extra_data` (optional): New extra configuration
+
+```typescript
+update_custom_field({
+  id: 7,
+  name: "Invoice No.",
+});
+```
+
+</details>
+<details>
+<summary>Task Operations</summary>
+
+### Task Operations
+
+#### `get_task`
+
+Look up a consume task by the UUID that `post_document` returns. Shows
+processing status and, once finished, `related_document_ids` with the
+resulting document ID(s).
+
+Parameters:
+
+- `task_id`: Task UUID from `post_document`
+
+```typescript
+get_task({
+  task_id: "a1b2c3d4-...",
 });
 ```
 

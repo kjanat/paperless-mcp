@@ -1,8 +1,8 @@
 # src/tools/ — MCP Tool Registrations
 
-Four tool files + shared `utils.ts`. Each tool file exports
+Seven tool files + shared `utils.ts`. Each tool file exports
 `register*Tools(server: McpServer, api: PaperlessAPI)`.
-16 tools total. Called from `createServer()` in `src/index.ts`.
+30 tools total across 7 domains. Called from `createServer()` in `src/index.ts`.
 
 ## PATTERN
 
@@ -26,16 +26,26 @@ server.registerTool(
 - **`matching_algorithm` is integer (0-6)** — validated via the generated
   `zMatchingAlgorithm` schema (`@/api/generated/zod.gen`) across all endpoints,
   not a repeated inline `z.number()`.
+- **Object IDs are strict**: every scalar ID/array-of-IDs param uses
+  `z.number().int().min(1)`; `get_task.task_id` uses `z.uuid()`. Only
+  angle params (`degrees`, `rotate`) stay bare `z.number()` — no `.int()`,
+  `.min()`, or other constraints.
+- **Writable fields derive from generated schemas** — update/create tools pull
+  validators from `zPatched*RequestWritable.shape.*` so they can't drift from
+  the upstream OpenAPI schema.
 
 ## FILES
 
-| File                | Tools | Exports                      |
-| ------------------- | ----- | ---------------------------- |
-| `utils.ts`          | —     | `jsonResult()` helper        |
-| `documents.ts`      | 5     | `registerDocumentTools`      |
-| `tags.ts`           | 5     | `registerTagTools`           |
-| `correspondents.ts` | 3     | `registerCorrespondentTools` |
-| `documentTypes.ts`  | 3     | `registerDocumentTypeTools`  |
+| File                | Tools | Exports                              |
+| ------------------- | ----- | ------------------------------------ |
+| `utils.ts`          | —     | `jsonResult()`, `permissionsInput()` |
+| `documents.ts`      | 7     | `registerDocumentTools`              |
+| `tags.ts`           | 6     | `registerTagTools`                   |
+| `correspondents.ts` | 5     | `registerCorrespondentTools`         |
+| `documentTypes.ts`  | 5     | `registerDocumentTypeTools`          |
+| `storagePaths.ts`   | 3     | `registerStoragePathTools`           |
+| `customFields.ts`   | 3     | `registerCustomFieldTools`           |
+| `tasks.ts`          | 1     | `registerTaskTools`                  |
 
 ## GOTCHAS
 

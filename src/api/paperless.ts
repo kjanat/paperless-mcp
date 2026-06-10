@@ -5,18 +5,25 @@ import type {
 	BulkEditResult,
 	Correspondent,
 	CorrespondentRequest,
+	CreateStoragePathRequest,
+	CustomField,
+	CustomFieldRequest,
 	Document,
 	DocumentType,
 	DocumentTypeRequest,
 	Note,
 	PaginatedDocumentList,
 	PaginatedList,
+	PaperlessTask,
 	PostDocumentMetadata,
+	StoragePath,
 	Tag,
 	TagRequest,
 	UpdateCorrespondentRequest,
+	UpdateCustomFieldRequest,
 	UpdateDocumentRequest,
 	UpdateDocumentTypeRequest,
+	UpdateStoragePathRequest,
 } from '#types';
 
 export class PaperlessAPI {
@@ -155,6 +162,12 @@ export class PaperlessAPI {
 		});
 	}
 
+	async deleteDocumentNote(id: number, noteId: number): Promise<readonly Note[]> {
+		return this.request<readonly Note[]>(`/documents/${id}/notes/?id=${noteId}`, {
+			method: 'DELETE',
+		});
+	}
+
 	async searchDocuments(
 		query: string,
 		page?: number,
@@ -208,6 +221,10 @@ export class PaperlessAPI {
 		return this.getAllPages<Tag>('/tags/');
 	}
 
+	async getTag(id: number): Promise<Tag> {
+		return this.request<Tag>(`/tags/${id}/`);
+	}
+
 	async createTag(data: TagRequest): Promise<Tag> {
 		return this.request<Tag>('/tags/', {
 			method: 'POST',
@@ -230,6 +247,10 @@ export class PaperlessAPI {
 
 	async getCorrespondents(): Promise<PaginatedList<Correspondent>> {
 		return this.getAllPages<Correspondent>('/correspondents/');
+	}
+
+	async getCorrespondent(id: number): Promise<Correspondent> {
+		return this.request<Correspondent>(`/correspondents/${id}/`);
 	}
 
 	async createCorrespondent(data: CorrespondentRequest): Promise<Correspondent> {
@@ -255,6 +276,10 @@ export class PaperlessAPI {
 		return this.getAllPages<DocumentType>('/document_types/');
 	}
 
+	async getDocumentType(id: number): Promise<DocumentType> {
+		return this.request<DocumentType>(`/document_types/${id}/`);
+	}
+
 	async createDocumentType(data: DocumentTypeRequest): Promise<DocumentType> {
 		return this.request<DocumentType>('/document_types/', {
 			method: 'POST',
@@ -270,6 +295,62 @@ export class PaperlessAPI {
 			method: 'PATCH',
 			body: JSON.stringify(omitUndefined(data)),
 		});
+	}
+
+	// Storage path operations
+
+	async getStoragePaths(): Promise<PaginatedList<StoragePath>> {
+		return this.getAllPages<StoragePath>('/storage_paths/');
+	}
+
+	async createStoragePath(data: CreateStoragePathRequest): Promise<StoragePath> {
+		return this.request<StoragePath>('/storage_paths/', {
+			method: 'POST',
+			body: JSON.stringify(data),
+		});
+	}
+
+	async updateStoragePath(
+		id: number,
+		data: UpdateStoragePathRequest,
+	): Promise<StoragePath> {
+		return this.request<StoragePath>(`/storage_paths/${id}/`, {
+			method: 'PATCH',
+			body: JSON.stringify(omitUndefined(data)),
+		});
+	}
+
+	// Custom field operations
+
+	async getCustomFields(): Promise<PaginatedList<CustomField>> {
+		return this.getAllPages<CustomField>('/custom_fields/');
+	}
+
+	async createCustomField(data: CustomFieldRequest): Promise<CustomField> {
+		return this.request<CustomField>('/custom_fields/', {
+			method: 'POST',
+			body: JSON.stringify(data),
+		});
+	}
+
+	async updateCustomField(
+		id: number,
+		data: UpdateCustomFieldRequest,
+	): Promise<CustomField> {
+		return this.request<CustomField>(`/custom_fields/${id}/`, {
+			method: 'PATCH',
+			body: JSON.stringify(omitUndefined(data)),
+		});
+	}
+
+	// Task operations
+
+	async getTask(taskId: string): Promise<readonly PaperlessTask[]> {
+		const params = new URLSearchParams({ task_id: taskId });
+		const response = await this.request<PaginatedList<PaperlessTask>>(
+			`/tasks/?${params.toString()}`,
+		);
+		return response.results;
 	}
 
 	// Bulk object operations
