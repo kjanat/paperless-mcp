@@ -664,19 +664,35 @@ describe('PaperlessAPI.updateCustomField', () => {
 // ---------------------------------------------------------------------------
 
 describe('PaperlessAPI.getTask', () => {
-	test('queries /tasks/ by task_id and unwraps results', async () => {
+	test('queries /tasks/ by task_id and returns the plain array (version=6 shape)', async () => {
+		stubFetch([
+			{
+				id: 12055,
+				task_id: 'abc-123',
+				task_name: 'consume_file',
+				status: 'SUCCESS',
+				result: 'Success. New document id 1588 created',
+				related_document: '1588',
+			},
+		]);
+		const result = await api.getTask('abc-123');
+
+		expect(lastRequestUrl()).toBe(`${BASE_URL}/api/tasks/?task_id=abc-123`);
+		expect(result[0]?.status).toBe('SUCCESS');
+		expect(result[0]?.related_document).toBe('1588');
+	});
+
+	test('unwraps results when the response is paginated (newer API versions)', async () => {
 		stubFetch({
 			count: 1,
 			next: null,
 			previous: null,
 			all: [],
-			results: [{ id: 12, task_id: 'abc-123', status: 'success', related_document_ids: [1601] }],
+			results: [{ id: 12, task_id: 'abc-123', status: 'SUCCESS', related_document: '1601' }],
 		});
 		const result = await api.getTask('abc-123');
 
-		expect(lastRequestUrl()).toBe(`${BASE_URL}/api/tasks/?task_id=abc-123`);
-		expect(result[0]?.status).toBe('success');
-		expect(result[0]?.related_document_ids).toEqual([1601]);
+		expect(result[0]?.related_document).toBe('1601');
 	});
 });
 

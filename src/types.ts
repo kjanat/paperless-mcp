@@ -203,8 +203,29 @@ export type CustomFieldRequest = z.infer<typeof schemas.zCustomFieldRequest>;
 /** Request body for PATCH /custom_fields/{id}/. */
 export type UpdateCustomFieldRequest = z.infer<typeof schemas.zPatchedCustomFieldRequest>;
 
-/** Consumer/queue task as returned by GET /tasks/. */
-export type PaperlessTask = z.infer<typeof schemas.zTaskSerializerV10>;
+/**
+ * Consumer/queue task as returned by GET /tasks/.
+ *
+ * Hand-written divergence: the OpenAPI schema documents the newest API
+ * version's `TaskSerializerV10` (lowercase `status`, `related_document_ids`
+ * array, paginated list), but with the client's pinned `version=6` Accept
+ * header Paperless serves the legacy serializer — uppercase `status`, a
+ * singular `related_document` string, and a plain (non-paginated) array.
+ */
+export interface PaperlessTask {
+	readonly id: number;
+	readonly task_id: string;
+	readonly task_name?: string | null;
+	readonly task_file_name?: string | null;
+	readonly date_created?: string | null;
+	readonly date_done?: string | null;
+	readonly type?: string;
+	readonly status: 'PENDING' | 'STARTED' | 'SUCCESS' | 'FAILURE' | 'RETRY' | 'REVOKED';
+	readonly result?: string | null;
+	readonly acknowledged?: boolean;
+	readonly related_document?: string | null;
+	readonly owner?: number | null;
+}
 
 // ---------------------------------------------------------------------------
 // Bulk operations

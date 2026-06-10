@@ -16,7 +16,10 @@ Paperless-ngx REST API via `fetch()`. All methods return typed responses
   `undefined` fields before serializing, via the module-level `omitUndefined()`
   helper at the bottom of `paperless.ts`.
 - **`getTask` queries by Celery UUID** — `GET /tasks/?task_id=...` (filter, not
-  path param) and unwraps `.results`. The numeric task `id` is a different field.
+  path param). The numeric task `id` is a different field. With `version=6` the
+  endpoint returns a plain array (legacy serializer: uppercase `status`,
+  singular `related_document`), not the paginated `TaskSerializerV10` the
+  OpenAPI schema documents — `getTask` accepts both shapes.
 - **Notes are a sub-resource**: `addDocumentNote` (POST) and `deleteDocumentNote`
   (DELETE with `?id=` query) both return the document's remaining notes array.
 
