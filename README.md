@@ -675,7 +675,7 @@ update_custom_field({
 #### `get_task`
 
 Look up a consume task by the UUID that `post_document` returns. Shows
-processing status and, once finished, `related_document_ids` with the
+processing status and, once finished, `related_document` with the
 resulting document ID(s).
 
 Parameters:

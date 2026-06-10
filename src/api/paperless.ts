@@ -347,10 +347,11 @@ export class PaperlessAPI {
 
 	async getTask(taskId: string): Promise<readonly PaperlessTask[]> {
 		const params = new URLSearchParams({ task_id: taskId });
-		const response = await this.request<PaginatedList<PaperlessTask>>(
-			`/tasks/?${params.toString()}`,
-		);
-		return response.results;
+		// version=6 serves a plain array; newer API versions paginate. Accept both.
+		const response = await this.request<
+			readonly PaperlessTask[] | PaginatedList<PaperlessTask>
+		>(`/tasks/?${params.toString()}`);
+		return 'results' in response ? response.results : response;
 	}
 
 	// Bulk object operations

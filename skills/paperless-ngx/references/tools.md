@@ -308,6 +308,6 @@ No parameters. Returns all field definitions with the numeric IDs that
 | --------- | ------ | -------- | ------------------------------ |
 | `task_id` | string | yes      | UUID returned by post_document |
 
-Returns matching task(s) with `status` (`pending`, `started`, `success`,
-`failure`) and `related_document_ids` — the resulting document ID(s) once the
+Returns matching task(s) with `status` (`PENDING`, `STARTED`, `SUCCESS`,
+`FAILURE`) and `related_document` — the resulting document ID once the
 consumer finishes. Poll after `post_document` to close the upload loop.

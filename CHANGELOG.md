@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.7.1] - 2026-06-10
+
+### Fixed
+
+- `get_task` crashed with an MCP protocol error on real Paperless instances:
+  with the client's pinned `version=6` Accept header, `GET /api/tasks/` returns
+  a **plain array** in the legacy task shape (uppercase `status`, singular
+  `related_document` string) — not the paginated `TaskSerializerV10` the
+  OpenAPI schema documents. `getTask` now accepts both shapes, `PaperlessTask`
+  is a hand-written divergence type matching the actual `version=6` response,
+  and the tool description/docs reference the real field names. Found live on
+  first use of the post_document → get_task loop.
+
 ## [2.7.0] - 2026-06-10
 
 ### Added
@@ -342,7 +355,8 @@ Major rewrite of internals while preserving the same MCP tool surface.
 - Smithery configuration (broken `smithery.yaml`).
 - Obsolete Cursor rules.
 
-[Unreleased]: https://github.com/kjanat/paperless-mcp/compare/v2.7.0...HEAD
+[Unreleased]: https://github.com/kjanat/paperless-mcp/compare/v2.7.1...HEAD
+[2.7.1]: https://github.com/kjanat/paperless-mcp/compare/v2.7.0...v2.7.1
 [2.7.0]: https://github.com/kjanat/paperless-mcp/compare/v2.6.0...v2.7.0
 [2.6.0]: https://github.com/kjanat/paperless-mcp/compare/v2.5.0...v2.6.0
 [2.5.0]: https://github.com/kjanat/paperless-mcp/compare/v2.4.0...v2.5.0

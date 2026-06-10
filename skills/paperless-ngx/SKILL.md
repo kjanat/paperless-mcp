@@ -5,7 +5,7 @@ license: MIT
 compatibility: Requires a running Paperless-ngx instance with API token. MCP server must be connected with mcp_paperless_* tools available.
 metadata:
   author: kjanat
-  version: "2.7.0"
+  version: "2.7.1"
 ---
 
 # Paperless-ngx Document Management
@@ -124,8 +124,8 @@ What operation?
    └─ list_document_types  → find or create_document_type
 2. post_document(file=<base64>, filename="name.pdf", tags=[...], correspondent=ID, ...)
    → returns a task UUID, not a document ID
-3. get_task(task_id=<uuid>) until status="success"
-   → related_document_ids holds the new document ID(s)
+3. get_task(task_id=<uuid>) until status="SUCCESS"
+   → related_document holds the new document ID
 ```
 
 ### Manage Taxonomy (Tags/Correspondents/Types)
@@ -167,8 +167,8 @@ Need to change metadata objects?
   appends a note (notes live on a separate Paperless endpoint internally);
   remove one with `delete_document_note`.
 - **post_document returns a task UUID, not a document ID.** Poll
-  `get_task(task_id)` until `status="success"`; `related_document_ids` then
-  holds the resulting document ID(s).
+  `get_task(task_id)` until `status="SUCCESS"`; `related_document` then
+  holds the resulting document ID.
 - **custom field values need IDs from list_custom_fields.** Resolve the field
   name → numeric ID there before calling `update_document.custom_fields` or
   `bulk_edit_documents.modify_custom_fields`.
