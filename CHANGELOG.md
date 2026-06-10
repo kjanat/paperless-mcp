@@ -30,6 +30,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Codegen: `/api/storage_paths/`, `/api/custom_fields/`, `/api/tasks/`, and
   `/api/documents/{id}/notes/` added to the OpenAPI subset allowlist
   (`PATHS_WE_USE`); generated Zod schemas regenerated.
+- CI: continuous preview releases via [pkg.pr.new](https://pkg.pr.new) — every
+  push to master and every PR publishes an installable preview build
+  (`npm i https://pkg.pr.new/@kjanat/paperless-mcp@<sha>`), with an
+  auto-updated PR comment linking the build.
 
 ### Deprecated
 
