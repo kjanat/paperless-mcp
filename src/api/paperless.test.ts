@@ -751,6 +751,80 @@ describe('PaperlessAPI.listTasks', () => {
 });
 
 // ---------------------------------------------------------------------------
+// Trash operations
+// ---------------------------------------------------------------------------
+
+describe('PaperlessAPI.getTrash', () => {
+	test('fetches /trash/ with pagination and strips content', async () => {
+		stubFetch({
+			count: 1,
+			next: null,
+			previous: null,
+			all: [1588],
+			results: [{ id: 1588, title: 'Trashed doc', content: 'heavy OCR text' }],
+		});
+		const result = await api.getTrash();
+
+		expect(lastRequestUrl()).toBe(`${BASE_URL}/api/trash/?page=1&page_size=100`);
+		expect(result.results[0]).toEqual({ id: 1588, title: 'Trashed doc' });
+		expect(result.results[0]).not.toHaveProperty('content');
+	});
+});
+
+describe('PaperlessAPI.restoreFromTrash', () => {
+	test('POSTs restore action with document IDs', async () => {
+		stubFetch('OK');
+		await api.restoreFromTrash([1588, 1589]);
+
+		expect(lastRequestUrl()).toBe(`${BASE_URL}/api/trash/`);
+		expect(lastRequestInit().method).toBe('POST');
+		expect(lastRequestBody()).toEqual({ action: 'restore', documents: [1588, 1589] });
+	});
+});
+
+describe('PaperlessAPI.emptyTrash', () => {
+	test('POSTs empty action with document IDs', async () => {
+		stubFetch('OK');
+		await api.emptyTrash([1588]);
+
+		expect(lastRequestBody()).toEqual({ action: 'empty', documents: [1588] });
+	});
+
+	test('omits documents to empty the entire trash', async () => {
+		stubFetch('OK');
+		await api.emptyTrash();
+
+		expect(lastRequestBody()).toEqual({ action: 'empty' });
+	});
+});
+
+// ---------------------------------------------------------------------------
+// Name filters on list endpoints
+// ---------------------------------------------------------------------------
+
+describe('name__icontains filters', () => {
+	const cases = [
+		['getTags', '/api/tags/'],
+		['getCorrespondents', '/api/correspondents/'],
+		['getDocumentTypes', '/api/document_types/'],
+		['getStoragePaths', '/api/storage_paths/'],
+		['getCustomFields', '/api/custom_fields/'],
+	] as const;
+
+	for (const [method, path] of cases) {
+		test(`${method} forwards the name filter`, async () => {
+			stubFetch({ count: 0, next: null, previous: null, all: [], results: [] });
+			await api[method]('Fac tuur');
+
+			const url = new URL(lastRequestUrl());
+			expect(url.pathname).toBe(path);
+			expect(url.searchParams.get('name__icontains')).toBe('Fac tuur');
+			expect(url.searchParams.get('page')).toBe('1');
+		});
+	}
+});
+
+// ---------------------------------------------------------------------------
 // Bulk object operations
 // ---------------------------------------------------------------------------
 

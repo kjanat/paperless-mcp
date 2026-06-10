@@ -306,10 +306,10 @@ delete_document_note({
 
 #### `list_tags`
 
-Get all tags.
+Get all tags. Optional `name` filters on a case-insensitive substring.
 
 ```typescript
-list_tags();
+list_tags({ name: "invoice" });
 ```
 
 #### `create_tag`
@@ -406,10 +406,10 @@ bulk_edit_tags({
 
 #### `list_correspondents`
 
-Get all correspondents.
+Get all correspondents. Optional `name` filters on a case-insensitive substring.
 
 ```typescript
-list_correspondents();
+list_correspondents({ name: "acme" });
 ```
 
 #### `get_correspondent`
@@ -490,10 +490,10 @@ bulk_edit_correspondents({
 
 #### `list_document_types`
 
-Get all document types.
+Get all document types. Optional `name` filters on a case-insensitive substring.
 
 ```typescript
-list_document_types();
+list_document_types({ name: "invoice" });
 ```
 
 #### `get_document_type`
@@ -574,7 +574,8 @@ bulk_edit_document_types({
 
 #### `list_storage_paths`
 
-Get all storage paths (where document files land on disk).
+Get all storage paths (where document files land on disk). Optional `name`
+filters on a case-insensitive substring.
 
 ```typescript
 list_storage_paths();
@@ -648,7 +649,7 @@ bulk_edit_storage_paths({
 
 #### `list_custom_fields`
 
-Get all custom field definitions — the numeric IDs that
+Get all custom field definitions (optional `name` substring filter) — the numeric IDs that
 `update_document.custom_fields` and `bulk_edit_documents.modify_custom_fields`
 require.
 
@@ -749,6 +750,50 @@ Parameters:
 list_tasks({
   task_name: "consume_file",
   status: "FAILURE",
+});
+```
+
+</details>
+<details>
+<summary>Trash Operations</summary>
+
+### Trash Operations
+
+#### `list_trash`
+
+List soft-deleted documents awaiting purge. Documents land here via
+`bulk_edit_documents` with `method: "delete"`.
+
+```typescript
+list_trash();
+```
+
+#### `restore_from_trash`
+
+Restore soft-deleted documents back into the archive, metadata intact.
+
+Parameters:
+
+- `documents`: Document IDs to restore (from `list_trash`)
+
+```typescript
+restore_from_trash({
+  documents: [123, 124],
+});
+```
+
+#### `empty_trash`
+
+**Permanently** delete documents from the trash. This is the irreversible
+step. Omit `documents` to purge the entire trash.
+
+Parameters:
+
+- `documents` (optional): Document IDs to purge; omit for everything
+
+```typescript
+empty_trash({
+  documents: [123],
 });
 ```
 

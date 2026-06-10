@@ -234,6 +234,17 @@ export interface PaperlessTask {
  * real instance, no server-side pagination at `version=6`), so the client
  * always sorts newest-first server-side and applies `limit` client-side.
  */
+/**
+ * Response from POST /trash/ (restore/empty actions).
+ *
+ * Hand-written: the OpenAPI schema documents a bodyless 200, but Paperless
+ * actually returns this shape (verified live and against upstream TrashView).
+ */
+export interface TrashResult {
+	readonly result: string;
+	readonly doc_ids?: readonly number[] | null;
+}
+
 export interface ListTasksFilters {
 	readonly status?: PaperlessTask['status'];
 	readonly acknowledged?: boolean;

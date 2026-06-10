@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.10.0] - 2026-06-10
+
+### Added
+
+- **Trash tools** wrapping `/api/trash/`: `list_trash` (soft-deleted documents,
+  content stripped), `restore_from_trash` (bring documents back with metadata
+  intact), and `empty_trash` (the actually-permanent delete; specific IDs or
+  the entire trash). Documents deleted via `bulk_edit_documents` go to the
+  trash first; until now that was invisible and unrecoverable from MCP.
+- **Name filter on every list tool**: `list_tags`, `list_correspondents`,
+  `list_document_types`, `list_storage_paths`, and `list_custom_fields` accept
+  an optional `name` parameter (case-insensitive substring, server-side
+  `name__icontains`), avoiding full-collection dumps when resolving one name.
+
 ## [2.9.0] - 2026-06-10
 
 ### Added
@@ -396,7 +410,8 @@ Major rewrite of internals while preserving the same MCP tool surface.
 - Smithery configuration (broken `smithery.yaml`).
 - Obsolete Cursor rules.
 
-[Unreleased]: https://github.com/kjanat/paperless-mcp/compare/v2.9.0...HEAD
+[Unreleased]: https://github.com/kjanat/paperless-mcp/compare/v2.10.0...HEAD
+[2.10.0]: https://github.com/kjanat/paperless-mcp/compare/v2.9.0...v2.10.0
 [2.9.0]: https://github.com/kjanat/paperless-mcp/compare/v2.8.0...v2.9.0
 [2.8.0]: https://github.com/kjanat/paperless-mcp/compare/v2.7.1...v2.8.0
 [2.7.1]: https://github.com/kjanat/paperless-mcp/compare/v2.7.0...v2.7.1

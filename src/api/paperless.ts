@@ -20,6 +20,7 @@ import type {
 	StoragePath,
 	Tag,
 	TagRequest,
+	TrashResult,
 	UpdateCorrespondentRequest,
 	UpdateCustomFieldRequest,
 	UpdateDocumentRequest,
@@ -218,8 +219,8 @@ export class PaperlessAPI {
 
 	// Tag operations
 
-	async getTags(): Promise<PaginatedList<Tag>> {
-		return this.getAllPages<Tag>('/tags/');
+	async getTags(nameContains?: string): Promise<PaginatedList<Tag>> {
+		return this.getAllPages<Tag>(withNameFilter('/tags/', nameContains));
 	}
 
 	async getTag(id: number): Promise<Tag> {
@@ -246,8 +247,8 @@ export class PaperlessAPI {
 
 	// Correspondent operations
 
-	async getCorrespondents(): Promise<PaginatedList<Correspondent>> {
-		return this.getAllPages<Correspondent>('/correspondents/');
+	async getCorrespondents(nameContains?: string): Promise<PaginatedList<Correspondent>> {
+		return this.getAllPages<Correspondent>(withNameFilter('/correspondents/', nameContains));
 	}
 
 	async getCorrespondent(id: number): Promise<Correspondent> {
@@ -273,8 +274,8 @@ export class PaperlessAPI {
 
 	// Document type operations
 
-	async getDocumentTypes(): Promise<PaginatedList<DocumentType>> {
-		return this.getAllPages<DocumentType>('/document_types/');
+	async getDocumentTypes(nameContains?: string): Promise<PaginatedList<DocumentType>> {
+		return this.getAllPages<DocumentType>(withNameFilter('/document_types/', nameContains));
 	}
 
 	async getDocumentType(id: number): Promise<DocumentType> {
@@ -300,8 +301,8 @@ export class PaperlessAPI {
 
 	// Storage path operations
 
-	async getStoragePaths(): Promise<PaginatedList<StoragePath>> {
-		return this.getAllPages<StoragePath>('/storage_paths/');
+	async getStoragePaths(nameContains?: string): Promise<PaginatedList<StoragePath>> {
+		return this.getAllPages<StoragePath>(withNameFilter('/storage_paths/', nameContains));
 	}
 
 	async createStoragePath(data: CreateStoragePathRequest): Promise<StoragePath> {
@@ -323,8 +324,8 @@ export class PaperlessAPI {
 
 	// Custom field operations
 
-	async getCustomFields(): Promise<PaginatedList<CustomField>> {
-		return this.getAllPages<CustomField>('/custom_fields/');
+	async getCustomFields(nameContains?: string): Promise<PaginatedList<CustomField>> {
+		return this.getAllPages<CustomField>(withNameFilter('/custom_fields/', nameContains));
 	}
 
 	async createCustomField(data: CustomFieldRequest): Promise<CustomField> {
@@ -375,6 +376,37 @@ export class PaperlessAPI {
 		>(`/tasks/?${params.toString()}`);
 		const tasks = 'results' in response ? response.results : response;
 		return tasks.slice(0, filters.limit ?? 25);
+	}
+
+	// Trash operations
+
+	async getTrash(): Promise<PaginatedDocumentList> {
+		const response = await this.getAllPages<Document>('/trash/');
+		// Trashed items are full documents: strip the heavy content field like
+		// searchDocuments does to keep tool output small.
+		return {
+			...response,
+			results: response.results.map((doc) => {
+				const { content: _, ...rest } = doc;
+				return rest;
+			}),
+		};
+	}
+
+	async restoreFromTrash(documents: readonly number[]): Promise<TrashResult> {
+		return this.request<TrashResult>('/trash/', {
+			method: 'POST',
+			body: JSON.stringify({ action: 'restore', documents }),
+		});
+	}
+
+	async emptyTrash(documents?: readonly number[]): Promise<TrashResult> {
+		return this.request<TrashResult>('/trash/', {
+			method: 'POST',
+			body: JSON.stringify(
+				documents == null ? { action: 'empty' } : { action: 'empty', documents },
+			),
+		});
 	}
 
 	// Bulk object operations
@@ -428,6 +460,12 @@ export class PaperlessAPI {
 			page += 1;
 		}
 	}
+}
+
+/** Append a name__icontains filter to a list path when a filter is given. */
+function withNameFilter(path: string, nameContains?: string): string {
+	if (nameContains == null) return path;
+	return `${path}?name__icontains=${encodeURIComponent(nameContains)}`;
 }
 
 function omitUndefined(data: Record<string, unknown>): Record<string, unknown> {

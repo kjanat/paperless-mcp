@@ -1,6 +1,6 @@
 # MCP Tool Reference
 
-Full parameter signatures for all 33 Paperless-ngx MCP tools.
+Full parameter signatures for all 36 Paperless-ngx MCP tools.
 
 ## Contents
 
@@ -11,6 +11,7 @@ Full parameter signatures for all 33 Paperless-ngx MCP tools.
 - [Storage Path Tools](#storage-path-tools) — list, create, update, bulk_edit
 - [Custom Field Tools](#custom-field-tools) — list, create, update, delete
 - [Task Tools](#task-tools) — get, list
+- [Trash Tools](#trash-tools) — list, restore, empty
 
 ## Document Tools
 
@@ -121,7 +122,7 @@ only the relevant fields to Paperless' nested `parameters` payload.
 
 ### list_tags
 
-No parameters. Returns all tags with name, color, matching rules. The MCP client
+Optional `name` param: case-insensitive substring filter. Returns all tags with name, color, matching rules. The MCP client
 fetches all pages and combines `results`.
 
 ### get_tag
@@ -172,7 +173,7 @@ fetches all pages and combines `results`.
 
 ### list_correspondents
 
-No parameters. The MCP client fetches all pages and combines `results`.
+Optional `name` param: case-insensitive substring filter. The MCP client fetches all pages and combines `results`.
 
 ### get_correspondent
 
@@ -215,7 +216,7 @@ Single-correspondent `PATCH /api/correspondents/{id}/`. Use
 
 ### list_document_types
 
-No parameters. The MCP client fetches all pages and combines `results`.
+Optional `name` param: case-insensitive substring filter. The MCP client fetches all pages and combines `results`.
 
 ### get_document_type
 
@@ -258,7 +259,7 @@ for permissions/deletion.
 
 ### list_storage_paths
 
-No parameters. The MCP client fetches all pages and combines `results`. Use to
+Optional `name` param: case-insensitive substring filter. The MCP client fetches all pages and combines `results`. Use to
 resolve a document's `storage_path` ID to a name.
 
 ### create_storage_path
@@ -302,7 +303,7 @@ default storage location.
 
 ### list_custom_fields
 
-No parameters. Returns all field definitions with the numeric IDs that
+Optional `name` param: case-insensitive substring filter. Returns all field definitions with the numeric IDs that
 `update_document.custom_fields` and `modify_custom_fields` require.
 
 ### create_custom_field
@@ -356,3 +357,26 @@ Recent tasks newest-first. Use when the `post_document` UUID is lost, or to
 find failed consumptions (`status="FAILURE"`). The instance keeps thousands of
 historical tasks; the limit is applied client-side because the endpoint
 returns everything in one array.
+
+## Trash Tools
+
+### list_trash
+
+No parameters. Returns soft-deleted documents awaiting purge (content field
+stripped). Documents land here via `bulk_edit_documents(method="delete")`.
+
+### restore_from_trash
+
+| Param       | Type     | Required | Notes               |
+| ----------- | -------- | -------- | ------------------- |
+| `documents` | number[] | yes      | IDs from list_trash |
+
+Restores documents to the archive with metadata intact.
+
+### empty_trash
+
+| Param       | Type     | Required | Notes                          |
+| ----------- | -------- | -------- | ------------------------------ |
+| `documents` | number[] | no       | Omit to purge the ENTIRE trash |
+
+**Permanent and irreversible.** This is the step that actually deletes files.

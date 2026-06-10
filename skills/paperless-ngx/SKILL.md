@@ -5,12 +5,12 @@ license: MIT
 compatibility: Requires a running Paperless-ngx instance with API token. MCP server must be connected with mcp_paperless_* tools available.
 metadata:
   author: kjanat
-  version: "2.9.0"
+  version: "2.10.0"
 ---
 
 # Paperless-ngx Document Management
 
-Orchestrate Paperless-ngx through 33 MCP tools across 7 domains.
+Orchestrate Paperless-ngx through 36 MCP tools across 8 domains.
 
 ## Tool Catalog
 
@@ -82,6 +82,14 @@ Orchestrate Paperless-ngx through 33 MCP tools across 7 domains.
 | `get_task`   | Status + resulting doc IDs for a `post_document` UUID  |
 | `list_tasks` | Recent tasks newest-first; filter status/name, max 100 |
 
+### Trash (3 tools)
+
+| Tool                 | Operation                                 |
+| -------------------- | ----------------------------------------- |
+| `list_trash`         | Soft-deleted documents awaiting purge     |
+| `restore_from_trash` | Bring documents back with metadata intact |
+| `empty_trash`        | PERMANENTLY purge (all, or specific IDs)  |
+
 ## Decision Trees
 
 ### Find a Document
@@ -115,7 +123,9 @@ What operation?
 ├─ Rotate pages    → bulk_edit_documents(method="rotate", degrees=90|180|270)
 ├─ Delete pages    → bulk_edit_documents(method="delete_pages", pages=[1, 3, 5])
 ├─ Reprocess OCR   → bulk_edit_documents(method="reprocess")
-└─ Delete          → bulk_edit_documents(method="delete")  !! PERMANENT !!
+├─ Delete          → bulk_edit_documents(method="delete")  → goes to TRASH
+├─ Undo a delete   → list_trash → restore_from_trash(documents=[...])
+└─ Purge for good  → empty_trash(documents=[...])  !! PERMANENT !!
 ```
 
 ### Upload a Document
@@ -140,6 +150,7 @@ Lost the UUID? → list_tasks(task_name="consume_file") shows recent uploads;
 Need to change metadata objects?
 ├─ View all          → list_tags / list_correspondents / list_document_types /
 │                      list_storage_paths / list_custom_fields
+│                      (all take an optional name= substring filter)
 ├─ Resolve one ID    → get_tag / get_correspondent / get_document_type
 ├─ Create new        → create_tag / create_correspondent / create_document_type /
 │                      create_storage_path / create_custom_field
@@ -164,7 +175,11 @@ Need to change metadata objects?
 - **matching_algorithm** is integer `0-6` across all endpoints (tags,
   correspondents, document types): `0`=none, `1`=any, `2`=all, `3`=exact,
   `4`=regex, `5`=fuzzy, `6`=auto. See [tools.md](references/tools.md).
-- **Bulk delete is permanent and irreversible.**
+- **Document delete is a soft-delete**: `bulk_edit_documents(method="delete")`
+  moves documents to the trash, restorable via `restore_from_trash` until the
+  retention period expires or `empty_trash` purges them. Taxonomy deletes
+  (tags, correspondents, document types, storage paths, custom fields) are
+  immediate and permanent.
 - **download_document** returns base64 blob + filename from content-disposition.
 - **list_tags**, **list_correspondents**, and **list_document_types** return
   complete paginated result sets; use IDs from `results`, not the bare `all` ID
