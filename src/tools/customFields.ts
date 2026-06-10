@@ -47,7 +47,7 @@ export function registerCustomFieldTools(server: McpServer, api: PaperlessAPI): 
 			description:
 				"Modify an existing custom field definition's name, data type, or options. Changing the data type of a field that already has values may invalidate them — prefer renaming or extending options.",
 			inputSchema: {
-				id: z.number().describe(
+				id: z.number().int().min(1).describe(
 					'ID of the custom field to update. Use list_custom_fields to find existing field IDs.',
 				),
 

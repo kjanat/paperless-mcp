@@ -57,7 +57,7 @@ export function registerStoragePathTools(server: McpServer, api: PaperlessAPI): 
 			description:
 				"Modify an existing storage path's name, path template, or automatic matching rules. Changing the path template re-files matching documents on the next consumption/rename run.",
 			inputSchema: {
-				id: z.number().describe(
+				id: z.number().int().min(1).describe(
 					'ID of the storage path to update. Use list_storage_paths to find existing storage path IDs.',
 				),
 

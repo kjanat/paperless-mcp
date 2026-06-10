@@ -23,7 +23,7 @@ export function registerDocumentTypeTools(server: McpServer, api: PaperlessAPI):
 			description:
 				"Get a single document type by ID: name and matching rules. Cheaper than list_document_types when you already know the ID (e.g. from a document's document_type field).",
 			inputSchema: {
-				id: z.number().describe(
+				id: z.number().int().min(1).describe(
 					"Document type ID, e.g. from a document's document_type field or list_document_types.",
 				),
 			},
@@ -65,7 +65,7 @@ export function registerDocumentTypeTools(server: McpServer, api: PaperlessAPI):
 			description:
 				"Modify an existing document type's name or automatic matching rules. Useful for fixing an over-matching type: narrow the match pattern or switch the matching algorithm. Use bulk_edit_document_types for permissions or deletion.",
 			inputSchema: {
-				id: z.number().describe(
+				id: z.number().int().min(1).describe(
 					'ID of the document type to update. Use list_document_types to find existing document type IDs.',
 				),
 

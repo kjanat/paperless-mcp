@@ -23,7 +23,7 @@ export function registerCorrespondentTools(server: McpServer, api: PaperlessAPI)
 			description:
 				"Get a single correspondent by ID: name and matching rules. Cheaper than list_correspondents when you already know the ID (e.g. from a document's correspondent field).",
 			inputSchema: {
-				id: z.number().describe(
+				id: z.number().int().min(1).describe(
 					"Correspondent ID, e.g. from a document's correspondent field or list_correspondents.",
 				),
 			},
@@ -65,7 +65,7 @@ export function registerCorrespondentTools(server: McpServer, api: PaperlessAPI)
 			description:
 				"Modify an existing correspondent's name or automatic matching rules. Useful for fixing an over-matching correspondent: narrow the match pattern or switch the matching algorithm. Use bulk_edit_correspondents for permissions or deletion.",
 			inputSchema: {
-				id: z.number().describe(
+				id: z.number().int().min(1).describe(
 					'ID of the correspondent to update. Use list_correspondents to find existing correspondent IDs.',
 				),
 

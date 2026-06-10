@@ -83,7 +83,7 @@ export function registerDocumentTools(server: McpServer, api: PaperlessAPI): voi
 						"Permission settings when method is 'set_permissions'. Controls who can view and edit the documents.",
 					),
 
-				metadata_document_id: z.number().optional().describe(
+				metadata_document_id: z.number().int().min(1).optional().describe(
 					'Source document ID when merging documents. The metadata from this document will be preserved.',
 				),
 
@@ -210,7 +210,7 @@ export function registerDocumentTools(server: McpServer, api: PaperlessAPI): voi
 			description:
 				'Get complete details for a specific document including full metadata, content preview, tags, correspondent, and document type information.',
 			inputSchema: {
-				id: z.number().describe(
+				id: z.number().int().min(1).describe(
 					'Unique document ID. Get this from search_documents results. Returns full document metadata, content preview, and associated tags/correspondent/type.',
 				),
 			},
@@ -226,7 +226,7 @@ export function registerDocumentTools(server: McpServer, api: PaperlessAPI): voi
 			description:
 				'Update metadata on a single document: rename its title, set or clear its archive serial number, set custom field values, or add a note. Use bulk_edit_documents instead for tags, correspondent, or document type — those operations are bulk-optimised on the backend.',
 			inputSchema: {
-				id: z.number().describe(
+				id: z.number().int().min(1).describe(
 					'Document ID to update. Get this from search_documents or get_document results.',
 				),
 
@@ -266,9 +266,9 @@ export function registerDocumentTools(server: McpServer, api: PaperlessAPI): voi
 			description:
 				'Delete a note from a document. Get note IDs from the notes array on get_document or update_document results. Returns the remaining notes.',
 			inputSchema: {
-				id: z.number().describe('Document ID the note belongs to.'),
+				id: z.number().int().min(1).describe('Document ID the note belongs to.'),
 
-				note_id: z.number().describe(
+				note_id: z.number().int().min(1).describe(
 					"ID of the note to delete, from the document's notes array.",
 				),
 			},
@@ -308,7 +308,9 @@ export function registerDocumentTools(server: McpServer, api: PaperlessAPI): voi
 			description:
 				'Download a document file as base64-encoded data. Choose between original uploaded file or processed/archived version with OCR improvements.',
 			inputSchema: {
-				id: z.number().describe('Document ID to download. Get this from search_documents or get_document results.'),
+				id: z.number().int().min(1).describe(
+					'Document ID to download. Get this from search_documents or get_document results.',
+				),
 
 				original: z.boolean().optional().describe(
 					'Whether to download the original uploaded file (true) or the processed/archived version (false, default). Original files preserve exact formatting but may not include OCR improvements.',

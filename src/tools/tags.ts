@@ -23,7 +23,7 @@ export function registerTagTools(server: McpServer, api: PaperlessAPI): void {
 			description:
 				"Get a single tag by ID: name, color, and matching rules. Cheaper than list_tags when you already know the ID (e.g. from a document's tags array).",
 			inputSchema: {
-				id: z.number().describe("Tag ID, e.g. from a document's tags array or list_tags."),
+				id: z.number().int().min(1).describe("Tag ID, e.g. from a document's tags array or list_tags."),
 			},
 		},
 		async ({ id }, _extra) => {
@@ -78,7 +78,7 @@ export function registerTagTools(server: McpServer, api: PaperlessAPI): void {
 			description:
 				"Modify an existing tag's name, color, or automatic matching rules. Useful for refining tag organization and improving automatic document classification.",
 			inputSchema: {
-				id: z.number().describe('ID of the tag to update. Use list_tags to find existing tag IDs.'),
+				id: z.number().int().min(1).describe('ID of the tag to update. Use list_tags to find existing tag IDs.'),
 
 				name: z.string().optional().describe('New tag name. Must be unique among all tags.'),
 
@@ -119,7 +119,7 @@ export function registerTagTools(server: McpServer, api: PaperlessAPI): void {
 			description:
 				"Deprecated: use bulk_edit_tags with operation='delete' instead — this tool will be removed in v3.0.0. Permanently deletes a tag from the system, removing it from all documents that currently use it. Cannot be undone.",
 			inputSchema: {
-				id: z.number().describe(
+				id: z.number().int().min(1).describe(
 					'ID of the tag to permanently delete. This will remove the tag from all documents that currently use it. Use list_tags to find tag IDs.',
 				),
 			},
