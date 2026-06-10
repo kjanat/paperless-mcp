@@ -1,7 +1,7 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
 
-import { zMethodEnum } from '#api/generated/zod.gen';
+import { zMethodEnum, zPatchedDocumentRequestWritable } from '#api/generated/zod.gen';
 import type { PaperlessAPI } from '#api/paperless';
 import { jsonResult } from '#tools/utils';
 import type { PostDocumentMetadata } from '#types';
@@ -216,6 +216,46 @@ export function registerDocumentTools(server: McpServer, api: PaperlessAPI): voi
 			},
 		},
 		async ({ id }, _extra) => {
+			return jsonResult(await api.getDocument(id));
+		},
+	);
+
+	server.registerTool(
+		'update_document',
+		{
+			description:
+				'Update metadata on a single document: rename its title, set or clear its archive serial number, set custom field values, or add a note. Use bulk_edit_documents instead for tags, correspondent, or document type — those operations are bulk-optimised on the backend.',
+			inputSchema: {
+				id: z.number().describe(
+					'Document ID to update. Get this from search_documents or get_document results.',
+				),
+
+				title: zPatchedDocumentRequestWritable.shape.title.describe(
+					"New document title (max 128 characters). Useful for renaming consumer-generated titles like 'doc20260609123253' after classification.",
+				),
+
+				archive_serial_number: zPatchedDocumentRequestWritable.shape.archive_serial_number.describe(
+					'Archive serial number for external filing reference, or null to clear it.',
+				),
+
+				custom_fields: zPatchedDocumentRequestWritable.shape.custom_fields.describe(
+					'Custom field instances to set as {field, value} pairs. Replaces the full set of custom fields on the document.',
+				),
+
+				note: z.string().min(1).optional().describe(
+					'Note text to add to the document. Appends a new note; existing notes are kept.',
+				),
+			},
+		},
+		async ({ id, note, ...data }, _extra) => {
+			// Notes live on a separate endpoint — add first so the document
+			// returned below already includes the new note.
+			if (note !== undefined) {
+				await api.addDocumentNote(id, note);
+			}
+			if (Object.keys(data).length > 0) {
+				return jsonResult(await api.updateDocument(id, data));
+			}
 			return jsonResult(await api.getDocument(id));
 		},
 	);

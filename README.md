@@ -103,6 +103,30 @@ get_document({
 });
 ```
 
+#### `update_document`
+
+Update metadata on a single document via `PATCH /api/documents/{id}/`, and/or
+add a note (sent to `POST /api/documents/{id}/notes/` under the hood). Use
+`bulk_edit_documents` for tags, correspondent, or document type — those are
+bulk-optimised on the backend.
+
+Parameters:
+
+- `id`: Document ID
+- `title` (optional): New document title (max 128 characters)
+- `archive_serial_number` (optional): Archive serial number, or `null` to clear it
+- `custom_fields` (optional): Array of `{ field, value }` pairs — replaces the
+  document's custom field instances
+- `note` (optional): Note text to append to the document (existing notes are kept)
+
+```typescript
+update_document({
+  id: 123,
+  title: "Electricity Invoice March 2024",
+  note: "Renamed after inbox triage",
+});
+```
+
 #### `search_documents`
 
 Full-text search across documents.

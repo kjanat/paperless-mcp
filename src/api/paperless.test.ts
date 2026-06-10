@@ -237,6 +237,44 @@ describe('PaperlessAPI.getDocument', () => {
 	});
 });
 
+describe('PaperlessAPI.updateDocument', () => {
+	test('PATCHes to /documents/{id}/', async () => {
+		stubFetch({ id: 42, title: 'Renamed' });
+		const result = await api.updateDocument(42, { title: 'Renamed' });
+
+		expect(lastRequestUrl()).toBe(`${BASE_URL}/api/documents/42/`);
+		expect(lastRequestInit().method).toBe('PATCH');
+		expect(lastRequestBody()).toEqual({ title: 'Renamed' });
+		expect(result.title).toBe('Renamed');
+	});
+
+	test('omits undefined fields but keeps explicit null', async () => {
+		stubFetch({ id: 7 });
+		await api.updateDocument(7, {
+			title: undefined,
+			archive_serial_number: null,
+			custom_fields: [{ field: 1, value: 'x' }],
+		});
+
+		expect(lastRequestBody()).toEqual({
+			archive_serial_number: null,
+			custom_fields: [{ field: 1, value: 'x' }],
+		});
+	});
+});
+
+describe('PaperlessAPI.addDocumentNote', () => {
+	test('POSTs to /documents/{id}/notes/ and returns the notes list', async () => {
+		stubFetch([{ id: 1, note: 'Checked against the paper original' }]);
+		const result = await api.addDocumentNote(42, 'Checked against the paper original');
+
+		expect(lastRequestUrl()).toBe(`${BASE_URL}/api/documents/42/notes/`);
+		expect(lastRequestInit().method).toBe('POST');
+		expect(lastRequestBody()).toEqual({ note: 'Checked against the paper original' });
+		expect(result[0]?.note).toBe('Checked against the paper original');
+	});
+});
+
 describe('PaperlessAPI.searchDocuments', () => {
 	test('strips content/download_url/thumbnail_url from results', async () => {
 		stubFetch({

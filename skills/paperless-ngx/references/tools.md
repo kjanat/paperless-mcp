@@ -1,10 +1,10 @@
 # MCP Tool Reference
 
-Full parameter signatures for all 16 Paperless-ngx MCP tools.
+Full parameter signatures for all 17 Paperless-ngx MCP tools.
 
 ## Contents
 
-- [Document Tools](#document-tools) — search, get, post, download, bulk_edit
+- [Document Tools](#document-tools) — search, get, update, post, download, bulk_edit
 - [Tag Tools](#tag-tools) — list, create, update, delete, bulk_edit
 - [Correspondent Tools](#correspondent-tools) — list, create, bulk_edit
 - [Document Type Tools](#document-type-tools) — list, create, bulk_edit
@@ -26,6 +26,20 @@ Returns metadata **without** `content` field. Use `get_document` for full text.
 | Param | Type   | Required | Notes                     |
 | ----- | ------ | -------- | ------------------------- |
 | `id`  | number | yes      | Returns full content+meta |
+
+### update_document
+
+| Param                   | Type             | Required | Notes                           |
+| ----------------------- | ---------------- | -------- | ------------------------------- |
+| `id`                    | number           | yes      | Document to patch               |
+| `title`                 | string           | no       | Max 128 characters              |
+| `archive_serial_number` | integer \| null  | no       | `null` clears the ASN           |
+| `custom_fields`         | {field, value}[] | no       | Replaces custom field instances |
+| `note`                  | string           | no       | Appends a note (existing kept)  |
+
+Single-document `PATCH /api/documents/{id}/`; `note` goes to
+`POST /api/documents/{id}/notes/` internally. Use `bulk_edit_documents` for
+tags/correspondent/type — the bulk endpoint has no `set_title` method.
 
 ### post_document
 

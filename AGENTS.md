@@ -19,7 +19,7 @@ src/
 │   └── paperless.test.ts
 └── tools/
     ├── utils.ts             # Shared jsonResult() helper
-    ├── documents.ts         # 5 tools: bulk_edit, post, get, search, download
+    ├── documents.ts         # 6 tools: bulk_edit, post, get, update, search, download
     ├── tags.ts              # 5 tools: list, create, update, delete, bulk_edit
     ├── correspondents.ts    # 3 tools: list, create, bulk_edit
     └── documentTypes.ts     # 3 tools: list, create, bulk_edit
@@ -51,7 +51,7 @@ enums (`BulkEditMethod`, `MatchingAlgorithm`), and nested types (`ObjectPermissi
 
 ### `PaperlessAPI` (src/api/paperless.ts)
 
-Single class, 16 methods. All return typed responses (not `Promise<unknown>`).
+Single class, 18 methods. All return typed responses (not `Promise<unknown>`).
 `request<T>()` is generic base — adds token auth (`version=6`), JSON content type,
 throws on non-OK. Most methods delegate to it.
 
@@ -66,6 +66,8 @@ must update both paths.
 | `postDocument`        | `/documents/post_document/` | POST   |
 | `getDocuments`        | `/documents/{query}`        | GET    |
 | `getDocument`         | `/documents/{id}/`          | GET    |
+| `updateDocument`      | `/documents/{id}/`          | PATCH  |
+| `addDocumentNote`     | `/documents/{id}/notes/`    | POST   |
 | `searchDocuments`     | `/documents/?query=...`     | GET    |
 | `downloadDocument`    | `/documents/{id}/download/` | GET    |
 | `getTags`             | `/tags/`                    | GET    |
