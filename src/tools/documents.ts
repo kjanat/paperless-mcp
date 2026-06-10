@@ -1,3 +1,7 @@
+import { readFile } from 'node:fs/promises';
+import { homedir } from 'node:os';
+import { basename } from 'node:path';
+
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
 
@@ -143,14 +147,18 @@ export function registerDocumentTools(server: McpServer, api: PaperlessAPI): voi
 		'post_document',
 		{
 			description:
-				'Upload a new document to Paperless-ngx with metadata. Supports PDF, images (PNG/JPG/TIFF), and text files. Automatically processes for OCR and indexing.',
+				'Upload a new document to Paperless-ngx with metadata. Supports PDF, images (PNG/JPG/TIFF), and text files. Automatically processes for OCR and indexing. Provide the file either as a local path (file_path — preferred, the server reads it directly so size does not matter) or as inline base64 (file).',
 			inputSchema: {
-				file: z.string().describe(
-					'Base64 encoded file content. Convert your file to base64 before uploading. Supports PDF, images (PNG, JPG, TIFF), and text files.',
+				file_path: z.string().optional().describe(
+					"Path to the file on the machine running this MCP server (with stdio transport: the local machine). Preferred for real files — the server reads it directly, so large PDFs never pass through the model. Supports a leading '~'. Note: with the HTTP transport the path resolves on the server host. Provide either this or file, not both.",
 				),
 
-				filename: z.string().describe(
-					"Original filename with extension (e.g., 'invoice.pdf', 'receipt.png'). This helps Paperless determine file type and initial document title.",
+				file: z.string().optional().describe(
+					'Base64 encoded file content. Only practical for small files — inline content passes through the model. Prefer file_path for anything real. Provide either this or file_path, not both.',
+				),
+
+				filename: z.string().optional().describe(
+					"Original filename with extension (e.g., 'invoice.pdf', 'receipt.png'). This helps Paperless determine file type and initial document title. Required with file; defaults to the basename of file_path otherwise.",
 				),
 
 				title: z.string().optional().describe(
@@ -187,9 +195,30 @@ export function registerDocumentTools(server: McpServer, api: PaperlessAPI): voi
 			},
 		},
 		async (args, _extra) => {
-			const binaryData = Buffer.from(args.file, 'base64');
+			if (args.file_path != null && args.file != null) {
+				throw new Error("Provide either 'file_path' or 'file' (base64), not both.");
+			}
+
+			let binaryData: Buffer;
+			let name: string;
+			if (args.file_path != null) {
+				const path = args.file_path === '~' || args.file_path.startsWith('~/')
+					? `${homedir()}${args.file_path.slice(1)}`
+					: args.file_path;
+				binaryData = await readFile(path);
+				name = args.filename ?? basename(path);
+			} else if (args.file != null) {
+				if (args.filename == null) {
+					throw new Error("'filename' is required when uploading inline base64 'file' content.");
+				}
+				binaryData = Buffer.from(args.file, 'base64');
+				name = args.filename;
+			} else {
+				throw new Error("Provide 'file_path' (preferred) or 'file' (base64).");
+			}
+
 			const blob = new Blob([binaryData]);
-			const file = new File([blob], args.filename);
+			const file = new File([blob], name);
 			const metadata: PostDocumentMetadata = {
 				title: args.title,
 				created: args.created,

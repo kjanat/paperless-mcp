@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.8.0] - 2026-06-10
+
+### Added
+
+- `post_document` accepts a `file_path` parameter as the preferred alternative
+  to inline base64: the MCP server reads the file from its own filesystem
+  (supports a leading `~`), so large PDFs never pass through the model's
+  context window. `filename` defaults to the path's basename. Inline `file`
+  (base64) remains supported for clients without a shared filesystem; exactly
+  one of the two must be provided. Note: with the HTTP transport, `file_path`
+  resolves on the server host.
+
 ## [2.7.1] - 2026-06-10
 
 ### Fixed
@@ -355,7 +367,8 @@ Major rewrite of internals while preserving the same MCP tool surface.
 - Smithery configuration (broken `smithery.yaml`).
 - Obsolete Cursor rules.
 
-[Unreleased]: https://github.com/kjanat/paperless-mcp/compare/v2.7.1...HEAD
+[Unreleased]: https://github.com/kjanat/paperless-mcp/compare/v2.8.0...HEAD
+[2.8.0]: https://github.com/kjanat/paperless-mcp/compare/v2.7.1...v2.8.0
 [2.7.1]: https://github.com/kjanat/paperless-mcp/compare/v2.7.0...v2.7.1
 [2.7.0]: https://github.com/kjanat/paperless-mcp/compare/v2.6.0...v2.7.0
 [2.6.0]: https://github.com/kjanat/paperless-mcp/compare/v2.5.0...v2.6.0
