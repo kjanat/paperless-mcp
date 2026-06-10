@@ -4,12 +4,16 @@ on:
   push: { branches: [master] }
   pull_request: {}
 
+# Newer runs supersede older ones per ref — previews are only useful for the latest commit.
+concurrency: { group: "pkg-pr-new-${{ github.ref }}", cancel-in-progress: true }
+
 permissions: {}
 
 jobs:
   preview:
     runs-on: ubuntu-latest
-    permissions: read-all
+    # Checkout only; pkg-pr-new authenticates via its GitHub App, not GITHUB_TOKEN.
+    permissions: { contents: read }
     steps:
       - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with: { persist-credentials: false }
