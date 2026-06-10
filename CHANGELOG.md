@@ -18,6 +18,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   UI ([#13](https://github.com/kjanat/paperless-mcp/issues/13)). Input schema
   derived from the generated `zPatchedCorrespondentRequestWritable`, same
   pattern as `update_document`.
+- `update_document_type` tool wrapping `PATCH /api/document_types/{id}/` —
+  the sibling gap flagged in #13's "Related gaps": same fields (`name`,
+  `match`, `matching_algorithm`, `is_insensitive`), same generated-schema
+  derivation (`zPatchedDocumentTypeRequestWritable`).
 
 ## [2.5.0] - 2026-06-10
 

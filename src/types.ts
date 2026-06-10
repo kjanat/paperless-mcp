@@ -159,6 +159,17 @@ export type DocumentType = z.infer<typeof schemas.zDocumentType>;
 /** Request body for POST /document_types/. */
 export type DocumentTypeRequest = z.infer<typeof schemas.zDocumentTypeRequest>;
 
+/**
+ * Request body for PATCH /document_types/{id}/.
+ *
+ * Narrowed to the fields `update_document_type` exposes (name, matching
+ * rules) — permissions belong in `bulk_edit_document_types`.
+ */
+export type UpdateDocumentTypeRequest = Pick<
+	z.infer<typeof schemas.zPatchedDocumentTypeRequestWritable>,
+	'name' | 'match' | 'matching_algorithm' | 'is_insensitive'
+>;
+
 // ---------------------------------------------------------------------------
 // Bulk operations
 // ---------------------------------------------------------------------------

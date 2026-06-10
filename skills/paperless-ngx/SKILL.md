@@ -10,7 +10,7 @@ metadata:
 
 # Paperless-ngx Document Management
 
-Orchestrate Paperless-ngx through 18 MCP tools across 4 domains.
+Orchestrate Paperless-ngx through 19 MCP tools across 4 domains.
 
 ## Tool Catalog
 
@@ -44,13 +44,14 @@ Orchestrate Paperless-ngx through 18 MCP tools across 4 domains.
 | `update_correspondent`     | Modify name/matching rules |
 | `bulk_edit_correspondents` | Batch permissions/delete   |
 
-### Document Types (3 tools)
+### Document Types (4 tools)
 
-| Tool                       | Operation                |
-| -------------------------- | ------------------------ |
-| `list_document_types`      | All document types       |
-| `create_document_type`     | New, optional auto-match |
-| `bulk_edit_document_types` | Batch permissions/delete |
+| Tool                       | Operation                  |
+| -------------------------- | -------------------------- |
+| `list_document_types`      | All document types         |
+| `create_document_type`     | New, optional auto-match   |
+| `update_document_type`     | Modify name/matching rules |
+| `bulk_edit_document_types` | Batch permissions/delete   |
 
 ## Decision Trees
 
@@ -105,6 +106,7 @@ Need to change metadata objects?
 ├─ Create new        → create_tag / create_correspondent / create_document_type
 ├─ Edit tag          → update_tag(id, name, color, match, matching_algorithm)
 ├─ Edit sender       → update_correspondent(id, name, match, matching_algorithm)
+├─ Edit type         → update_document_type(id, name, match, matching_algorithm)
 ├─ Delete one tag    → delete_tag(id)
 ├─ Batch delete/perm → bulk_edit_tags / bulk_edit_correspondents / bulk_edit_document_types
 ```

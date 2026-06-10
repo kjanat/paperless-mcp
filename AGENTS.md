@@ -22,7 +22,7 @@ src/
     ├── documents.ts         # 6 tools: bulk_edit, post, get, update, search, download
     ├── tags.ts              # 5 tools: list, create, update, delete, bulk_edit
     ├── correspondents.ts    # 4 tools: list, create, update, bulk_edit
-    └── documentTypes.ts     # 3 tools: list, create, bulk_edit
+    └── documentTypes.ts     # 4 tools: list, create, update, bulk_edit
 ```
 
 No barrel files. No cross-imports between leaf modules.
@@ -51,7 +51,7 @@ enums (`BulkEditMethod`, `MatchingAlgorithm`), and nested types (`ObjectPermissi
 
 ### `PaperlessAPI` (src/api/paperless.ts)
 
-Single class, 19 methods. All return typed responses (not `Promise<unknown>`).
+Single class, 20 methods. All return typed responses (not `Promise<unknown>`).
 `request<T>()` is generic base — adds token auth (`version=6`), JSON content type,
 throws on non-OK. Most methods delegate to it.
 
@@ -79,6 +79,7 @@ must update both paths.
 | `updateCorrespondent` | `/correspondents/{id}/`     | PATCH  |
 | `getDocumentTypes`    | `/document_types/`          | GET    |
 | `createDocumentType`  | `/document_types/`          | POST   |
+| `updateDocumentType`  | `/document_types/{id}/`     | PATCH  |
 | `bulkEditObjects`     | `/bulk_edit_objects/`       | POST   |
 
 ### Tool Registration (src/tools/)
