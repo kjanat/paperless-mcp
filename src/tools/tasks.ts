@@ -11,8 +11,8 @@ export function registerTaskTools(server: McpServer, api: PaperlessAPI): void {
 			description:
 				'Look up a consumer/queue task by its task UUID — the value returned by post_document. Shows processing status (pending, started, success, failure) and, once finished, related_document_ids with the resulting document ID(s). Poll this after post_document to find out when OCR is done and which document was created.',
 			inputSchema: {
-				task_id: z.string().describe(
-					'Task UUID as returned by post_document. Returns the matching task(s) with status and resulting document IDs.',
+				task_id: z.uuid().describe(
+					'Task UUID as returned by post_document (not the numeric task id). Returns the matching task(s) with status and resulting document IDs.',
 				),
 			},
 		},
