@@ -1,6 +1,6 @@
 # src/api/ — Paperless-ngx HTTP Client
 
-Single class `PaperlessAPI` in `paperless.ts`. 31 methods wrapping the
+Single class `PaperlessAPI` in `paperless.ts`. 32 methods wrapping the
 Paperless-ngx REST API via `fetch()`. All methods return typed responses
 (interfaces from `src/types.ts`), not `Promise<unknown>`.
 
@@ -19,7 +19,10 @@ Paperless-ngx REST API via `fetch()`. All methods return typed responses
   path param). The numeric task `id` is a different field. With `version=6` the
   endpoint returns a plain array (legacy serializer: uppercase `status`,
   singular `related_document`), not the paginated `TaskSerializerV10` the
-  OpenAPI schema documents — `getTask` accepts both shapes.
+  OpenAPI schema documents — `getTask`/`listTasks` accept both shapes.
+  `listTasks` caps the unpaginated array client-side (default 25, max 100);
+  its `task_name` filter and uppercase `status` values exist only in the
+  legacy `version=6` filterset, so the schema-drift CI cannot guard them.
 - **Notes are a sub-resource**: `addDocumentNote` (POST) and `deleteDocumentNote`
   (DELETE with `?id=` query) both return the document's remaining notes array.
 
@@ -36,7 +39,7 @@ Paperless-ngx REST API via `fetch()`. All methods return typed responses
 
 ## TESTING
 
-`paperless.test.ts` (59 tests) covers all 31 methods via
+`paperless.test.ts` (62 tests) covers all 32 methods via
 `spyOn(globalThis, 'fetch')`. Helpers: `stubFetch()`, `stubFetchRaw()`,
 `lastRequestBody()`, `lastRequestUrl()`, `lastRequestInit()`.
 

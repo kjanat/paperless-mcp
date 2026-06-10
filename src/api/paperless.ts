@@ -11,6 +11,7 @@ import type {
 	Document,
 	DocumentType,
 	DocumentTypeRequest,
+	ListTasksFilters,
 	Note,
 	PaginatedDocumentList,
 	PaginatedList,
@@ -356,6 +357,24 @@ export class PaperlessAPI {
 			readonly PaperlessTask[] | PaginatedList<PaperlessTask>
 		>(`/tasks/?${params.toString()}`);
 		return 'results' in response ? response.results : response;
+	}
+
+	async listTasks(filters: ListTasksFilters = {}): Promise<readonly PaperlessTask[]> {
+		// The endpoint returns ALL tasks as one array at version=6 (no server
+		// pagination): sort newest-first server-side, cap client-side. The
+		// task_name param and uppercase status values exist only in this legacy
+		// version=6 filterset (the OpenAPI schema documents task_type and
+		// lowercase statuses), so the schema-drift CI cannot guard them.
+		const params = new URLSearchParams({ ordering: '-date_created' });
+		if (filters.status != null) params.set('status', filters.status);
+		if (filters.acknowledged != null) params.set('acknowledged', String(filters.acknowledged));
+		if (filters.task_name != null) params.set('task_name', filters.task_name);
+
+		const response = await this.request<
+			readonly PaperlessTask[] | PaginatedList<PaperlessTask>
+		>(`/tasks/?${params.toString()}`);
+		const tasks = 'results' in response ? response.results : response;
+		return tasks.slice(0, filters.limit ?? 25);
 	}
 
 	// Bulk object operations

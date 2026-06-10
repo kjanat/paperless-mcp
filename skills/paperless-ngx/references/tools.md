@@ -1,6 +1,6 @@
 # MCP Tool Reference
 
-Full parameter signatures for all 32 Paperless-ngx MCP tools.
+Full parameter signatures for all 33 Paperless-ngx MCP tools.
 
 ## Contents
 
@@ -10,7 +10,7 @@ Full parameter signatures for all 32 Paperless-ngx MCP tools.
 - [Document Type Tools](#document-type-tools) — list, get, create, update, bulk_edit
 - [Storage Path Tools](#storage-path-tools) — list, create, update, bulk_edit
 - [Custom Field Tools](#custom-field-tools) — list, create, update, delete
-- [Task Tools](#task-tools) — get
+- [Task Tools](#task-tools) — get, list
 
 ## Document Tools
 
@@ -342,3 +342,17 @@ Single-delete only — the backend has no bulk endpoint for custom fields
 Returns matching task(s) with `status` (`PENDING`, `STARTED`, `SUCCESS`,
 `FAILURE`) and `related_document` — the resulting document ID once the
 consumer finishes. Poll after `post_document` to close the upload loop.
+
+### list_tasks
+
+| Param          | Type    | Required | Notes                                                     |
+| -------------- | ------- | -------- | --------------------------------------------------------- |
+| `status`       | enum    | no       | `PENDING`/`STARTED`/`SUCCESS`/`FAILURE`/`RETRY`/`REVOKED` |
+| `acknowledged` | boolean | no       | `false` = still visible in the Paperless tasks view       |
+| `task_name`    | string  | no       | `consume_file`, `train_classifier`, `check_sanity`, ...   |
+| `limit`        | int     | no       | Max tasks returned, newest first. Default 25, max 100     |
+
+Recent tasks newest-first. Use when the `post_document` UUID is lost, or to
+find failed consumptions (`status="FAILURE"`). The instance keeps thousands of
+historical tasks; the limit is applied client-side because the endpoint
+returns everything in one array.

@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.9.0] - 2026-06-10
+
+### Added
+
+- `list_tasks` tool wrapping `GET /api/tasks/` with `ordering=-date_created`:
+  recent consumer/queue tasks newest-first, with optional `status`,
+  `acknowledged`, and `task_name` filters. Closes the "get_task only works if
+  you kept the UUID" gap: find recent uploads or failed consumptions without
+  client-side bookkeeping. The endpoint returns every task ever recorded as
+  one plain array at `version=6` (12k+ on a real instance, no server-side
+  pagination), so a client-side `limit` (default 25, max 100) is always
+  applied.
+
 ## [2.8.0] - 2026-06-10
 
 ### Added
@@ -383,7 +396,8 @@ Major rewrite of internals while preserving the same MCP tool surface.
 - Smithery configuration (broken `smithery.yaml`).
 - Obsolete Cursor rules.
 
-[Unreleased]: https://github.com/kjanat/paperless-mcp/compare/v2.8.0...HEAD
+[Unreleased]: https://github.com/kjanat/paperless-mcp/compare/v2.9.0...HEAD
+[2.9.0]: https://github.com/kjanat/paperless-mcp/compare/v2.8.0...v2.9.0
 [2.8.0]: https://github.com/kjanat/paperless-mcp/compare/v2.7.1...v2.8.0
 [2.7.1]: https://github.com/kjanat/paperless-mcp/compare/v2.7.0...v2.7.1
 [2.7.0]: https://github.com/kjanat/paperless-mcp/compare/v2.6.0...v2.7.0
