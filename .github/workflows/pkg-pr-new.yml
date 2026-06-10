@@ -20,5 +20,6 @@ jobs:
       - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
       - run: bun install --frozen-lockfile
       - run: bun run bd
+      # --bun: pack via bun pm pack (runs the same prepack -> bun bd); drops the implicit npm dependency
       # --bin: CLI package, show execute commands (npx/bunx) instead of install
-      - run: bun run pkg-pr-new publish --comment=update --bin --packageManager=npm,pnpm,bun
+      - run: bun run pkg-pr-new publish --bun --comment=update --bin --packageManager=npm,pnpm,bun
