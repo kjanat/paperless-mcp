@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- CI: continuous preview releases via [pkg.pr.new](https://pkg.pr.new) — every
+  push to master and every PR publishes an installable preview build
+  (`npm i https://pkg.pr.new/@kjanat/paperless-mcp@<sha>`), with an
+  auto-updated PR comment linking the build.
+
 ## [2.6.0] - 2026-06-10
 
 ### Added

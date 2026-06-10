@@ -1,0 +1,19 @@
+---
+name: Publish preview (pkg.pr.new)
+on:
+  push: { branches: [master] }
+  pull_request: {}
+
+permissions: {}
+
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+    permissions: read-all
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with: { persist-credentials: false }
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+      - run: bun install --frozen-lockfile
+      - run: bun run bd
+      - run: bun run pkg-pr-new publish --comment=update
