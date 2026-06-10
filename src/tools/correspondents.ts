@@ -95,7 +95,7 @@ export function registerCorrespondentTools(server: McpServer, api: PaperlessAPI)
 			description:
 				'Perform bulk operations on multiple correspondents: set permissions to control who can assign them to documents, or permanently delete multiple correspondents. Use with caution as deletion affects all associated documents.',
 			inputSchema: {
-				correspondent_ids: z.array(z.number()).describe(
+				correspondent_ids: z.array(z.number().int().min(1)).describe(
 					'Array of correspondent IDs to perform bulk operations on. Use list_correspondents to get valid correspondent IDs.',
 				),
 
@@ -103,7 +103,7 @@ export function registerCorrespondentTools(server: McpServer, api: PaperlessAPI)
 					"Bulk operation: 'set_permissions' to control who can assign these correspondents to documents, 'delete' to permanently remove correspondents from the system. Warning: Deleting correspondents will remove them from all associated documents.",
 				),
 
-				owner: z.number().optional().describe(
+				owner: z.number().int().min(1).optional().describe(
 					"User ID to set as owner when operation is 'set_permissions'. The owner has full control over these correspondents.",
 				),
 

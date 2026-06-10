@@ -62,7 +62,7 @@ export function registerTagTools(server: McpServer, api: PaperlessAPI): void {
 					'Whether this is an inbox tag. Documents with inbox tags appear in the inbox.',
 				),
 
-				parent: z.number().nullable().optional().describe(
+				parent: z.number().int().min(1).nullable().optional().describe(
 					'ID of the parent tag for hierarchical tag organization. Null for top-level tags.',
 				),
 			},
@@ -103,7 +103,7 @@ export function registerTagTools(server: McpServer, api: PaperlessAPI): void {
 					'Whether this is an inbox tag.',
 				),
 
-				parent: z.number().nullable().optional().describe(
+				parent: z.number().int().min(1).nullable().optional().describe(
 					'ID of the parent tag. Null for top-level tags.',
 				),
 			},
@@ -135,7 +135,7 @@ export function registerTagTools(server: McpServer, api: PaperlessAPI): void {
 			description:
 				'Perform bulk operations on multiple tags: set permissions to control access or permanently delete multiple tags at once. Efficient for managing large tag collections.',
 			inputSchema: {
-				tag_ids: z.array(z.number()).describe(
+				tag_ids: z.array(z.number().int().min(1)).describe(
 					'Array of tag IDs to perform bulk operations on. Use list_tags to get valid tag IDs.',
 				),
 
@@ -143,7 +143,7 @@ export function registerTagTools(server: McpServer, api: PaperlessAPI): void {
 					"Bulk operation: 'set_permissions' to control who can use these tags, 'delete' to permanently remove all specified tags from the system.",
 				),
 
-				owner: z.number().optional().describe(
+				owner: z.number().int().min(1).optional().describe(
 					"User ID to set as owner when operation is 'set_permissions'. Owner has full control over the tags.",
 				),
 

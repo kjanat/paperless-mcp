@@ -24,12 +24,12 @@ export function permissionsInput(d: {
 	return z
 		.object({
 			view: z.object({
-				users: z.array(z.number()).optional().describe(d.viewUsers),
-				groups: z.array(z.number()).optional().describe(d.viewGroups),
+				users: z.array(z.number().int().min(1)).optional().describe(d.viewUsers),
+				groups: z.array(z.number().int().min(1)).optional().describe(d.viewGroups),
 			}).describe(d.view),
 			change: z.object({
-				users: z.array(z.number()).optional().describe(d.changeUsers),
-				groups: z.array(z.number()).optional().describe(d.changeGroups),
+				users: z.array(z.number().int().min(1)).optional().describe(d.changeUsers),
+				groups: z.array(z.number().int().min(1)).optional().describe(d.changeGroups),
 			}).describe(d.change),
 		})
 		.optional().describe(d.root);
