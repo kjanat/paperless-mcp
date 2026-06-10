@@ -407,6 +407,7 @@ update_correspondent({
   id: 9,
   match: "ACME Corp Inc",
   matching_algorithm: 3,
+  is_insensitive: true,
 });
 ```
 
