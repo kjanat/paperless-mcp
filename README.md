@@ -733,6 +733,25 @@ get_task({
 });
 ```
 
+#### `list_tasks`
+
+List recent consumer/queue tasks, newest first. Useful when the
+`post_document` UUID is lost, or to find failed consumptions.
+
+Parameters:
+
+- `status` (optional): `PENDING`, `STARTED`, `SUCCESS`, `FAILURE`, `RETRY`, or `REVOKED`
+- `acknowledged` (optional): `false` returns tasks still visible in the Paperless tasks view
+- `task_name` (optional): e.g. `consume_file` (uploads), `train_classifier`, `check_sanity`
+- `limit` (optional): max tasks returned (default 25, max 100)
+
+```typescript
+list_tasks({
+  task_name: "consume_file",
+  status: "FAILURE",
+});
+```
+
 </details>
 
 ## Error Handling

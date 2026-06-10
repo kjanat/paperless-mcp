@@ -706,6 +706,50 @@ describe('PaperlessAPI.getTask', () => {
 	});
 });
 
+describe('PaperlessAPI.listTasks', () => {
+	test('queries /tasks/ newest-first and forwards filters', async () => {
+		stubFetch([{ id: 1, task_id: 'a', status: 'FAILURE' }]);
+		await api.listTasks({ status: 'FAILURE', acknowledged: false, task_name: 'consume_file' });
+
+		const url = new URL(lastRequestUrl());
+		expect(url.pathname).toBe('/api/tasks/');
+		expect(url.searchParams.get('ordering')).toBe('-date_created');
+		expect(url.searchParams.get('status')).toBe('FAILURE');
+		expect(url.searchParams.get('acknowledged')).toBe('false');
+		expect(url.searchParams.get('task_name')).toBe('consume_file');
+	});
+
+	test('caps the plain-array response at limit (default 25)', async () => {
+		const sixty = Array.from({ length: 60 }, (_, i) => ({ id: i, task_id: `t${i}`, status: 'SUCCESS' }));
+
+		stubFetch(sixty);
+		const defaulted = await api.listTasks();
+		expect(defaulted.length).toBe(25);
+
+		fetchSpy.mockRestore();
+		stubFetch(sixty);
+		const limited = await api.listTasks({ limit: 3 });
+		expect(limited.length).toBe(3);
+		expect(limited[0]?.id).toBe(0);
+	});
+
+	test('defensively unwraps results if the response ever arrives paginated', async () => {
+		// Dead branch at the pinned version=6 (always a plain array); kept so an
+		// upstream change to pagination degrades gracefully instead of crashing.
+		stubFetch({
+			count: 1,
+			next: null,
+			previous: null,
+			all: [],
+			results: [{ id: 5, task_id: 'x', status: 'SUCCESS' }],
+		});
+		const result = await api.listTasks();
+
+		expect(result.length).toBe(1);
+		expect(result[0]?.task_id).toBe('x');
+	});
+});
+
 // ---------------------------------------------------------------------------
 // Bulk object operations
 // ---------------------------------------------------------------------------

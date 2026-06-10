@@ -5,12 +5,12 @@ license: MIT
 compatibility: Requires a running Paperless-ngx instance with API token. MCP server must be connected with mcp_paperless_* tools available.
 metadata:
   author: kjanat
-  version: "2.8.0"
+  version: "2.9.0"
 ---
 
 # Paperless-ngx Document Management
 
-Orchestrate Paperless-ngx through 32 MCP tools across 7 domains.
+Orchestrate Paperless-ngx through 33 MCP tools across 7 domains.
 
 ## Tool Catalog
 
@@ -75,11 +75,12 @@ Orchestrate Paperless-ngx through 32 MCP tools across 7 domains.
 | `update_custom_field` | Modify name/data type/options            |
 | `delete_custom_field` | Delete one field + its values everywhere |
 
-### Tasks (1 tool)
+### Tasks (2 tools)
 
-| Tool       | Operation                                             |
-| ---------- | ----------------------------------------------------- |
-| `get_task` | Status + resulting doc IDs for a `post_document` UUID |
+| Tool         | Operation                                              |
+| ------------ | ------------------------------------------------------ |
+| `get_task`   | Status + resulting doc IDs for a `post_document` UUID  |
+| `list_tasks` | Recent tasks newest-first; filter status/name, max 100 |
 
 ## Decision Trees
 
@@ -129,6 +130,8 @@ What operation?
    (file=<base64> + filename also works, but only for small files)
 3. get_task(task_id=<uuid>) until status="SUCCESS"
    → related_document holds the new document ID
+Lost the UUID? → list_tasks(task_name="consume_file") shows recent uploads;
+                 list_tasks(status="FAILURE") shows rejected ones (e.g. duplicates)
 ```
 
 ### Manage Taxonomy (Tags/Correspondents/Types)

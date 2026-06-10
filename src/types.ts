@@ -227,6 +227,20 @@ export interface PaperlessTask {
 	readonly owner?: number | null;
 }
 
+/**
+ * Filters for listTasks.
+ *
+ * The endpoint returns every task ever recorded as one plain array (12k+ on a
+ * real instance, no server-side pagination at `version=6`), so the client
+ * always sorts newest-first server-side and applies `limit` client-side.
+ */
+export interface ListTasksFilters {
+	readonly status?: PaperlessTask['status'];
+	readonly acknowledged?: boolean;
+	readonly task_name?: string;
+	readonly limit?: number;
+}
+
 // ---------------------------------------------------------------------------
 // Bulk operations
 // ---------------------------------------------------------------------------

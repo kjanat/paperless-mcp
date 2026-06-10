@@ -2,7 +2,7 @@
 
 Seven tool files + shared `utils.ts`. Each tool file exports
 `register*Tools(server: McpServer, api: PaperlessAPI)`.
-32 tools total across 7 domains. Called from `createServer()` in `src/index.ts`.
+33 tools total across 7 domains. Called from `createServer()` in `src/index.ts`.
 
 ## PATTERN
 
@@ -45,7 +45,7 @@ server.registerTool(
 | `documentTypes.ts`  | 5     | `registerDocumentTypeTools`          |
 | `storagePaths.ts`   | 4     | `registerStoragePathTools`           |
 | `customFields.ts`   | 4     | `registerCustomFieldTools`           |
-| `tasks.ts`          | 1     | `registerTaskTools`                  |
+| `tasks.ts`          | 2     | `registerTaskTools`                  |
 
 ## GOTCHAS
 
