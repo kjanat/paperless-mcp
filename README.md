@@ -1,6 +1,8 @@
 # Paperless-ngx MCP Server
 
 [![NPM Version](https://img.shields.io/npm/v/@kjanat/paperless-mcp?logo=npm&labelColor=CB3837&color=black)](https://www.npmjs.com/package/@kjanat/paperless-mcp)
+[![pkg.pr.new](https://pkg.pr.new/badge/kjanat/paperless-mcp)](https://pkg.pr.new/~/kjanat/paperless-mcp)
+
 [![Publish to npm](https://github.com/kjanat/paperless-mcp/actions/workflows/npm-publish.yml/badge.svg)](https://github.com/kjanat/paperless-mcp/actions/workflows/npm-publish.yml)
 [![Schema drift check](https://github.com/kjanat/paperless-mcp/actions/workflows/schema-check.yml/badge.svg)](https://github.com/kjanat/paperless-mcp/actions/workflows/schema-check.yml)
 [![Schema upstream sync](https://github.com/kjanat/paperless-mcp/actions/workflows/schema-update.yml/badge.svg)](https://github.com/kjanat/paperless-mcp/actions/workflows/schema-update.yml)
