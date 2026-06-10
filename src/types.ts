@@ -142,11 +142,33 @@ export type Correspondent = z.infer<typeof schemas.zCorrespondent>;
 /** Request body for POST /correspondents/. */
 export type CorrespondentRequest = z.infer<typeof schemas.zCorrespondentRequest>;
 
+/**
+ * Request body for PATCH /correspondents/{id}/.
+ *
+ * Narrowed to the fields `update_correspondent` exposes (name, matching
+ * rules) — permissions belong in `bulk_edit_correspondents`.
+ */
+export type UpdateCorrespondentRequest = Pick<
+	z.infer<typeof schemas.zPatchedCorrespondentRequestWritable>,
+	'name' | 'match' | 'matching_algorithm' | 'is_insensitive'
+>;
+
 /** Document type as returned by GET /document_types/. */
 export type DocumentType = z.infer<typeof schemas.zDocumentType>;
 
 /** Request body for POST /document_types/. */
 export type DocumentTypeRequest = z.infer<typeof schemas.zDocumentTypeRequest>;
+
+/**
+ * Request body for PATCH /document_types/{id}/.
+ *
+ * Narrowed to the fields `update_document_type` exposes (name, matching
+ * rules) — permissions belong in `bulk_edit_document_types`.
+ */
+export type UpdateDocumentTypeRequest = Pick<
+	z.infer<typeof schemas.zPatchedDocumentTypeRequestWritable>,
+	'name' | 'match' | 'matching_algorithm' | 'is_insensitive'
+>;
 
 // ---------------------------------------------------------------------------
 // Bulk operations

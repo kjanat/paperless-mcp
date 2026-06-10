@@ -389,6 +389,28 @@ create_correspondent({
 });
 ```
 
+#### `update_correspondent`
+
+Update an existing correspondent's name or matching rules via
+`PATCH /api/correspondents/{id}/`.
+
+Parameters:
+
+- `id`: Correspondent ID
+- `name` (optional): New correspondent name
+- `match` (optional): Text pattern to match (empty string removes auto-matching)
+- `matching_algorithm` (optional): Integer 0-6 (0=none, 1=any, 2=all, 3=exact, 4=regex, 5=fuzzy, 6=auto)
+- `is_insensitive` (optional): Whether matching is case-insensitive
+
+```typescript
+update_correspondent({
+  id: 9,
+  match: "ACME Corp Inc",
+  matching_algorithm: 3,
+  is_insensitive: true,
+});
+```
+
 #### `bulk_edit_correspondents`
 
 Bulk set permissions or delete multiple correspondents.
@@ -437,6 +459,28 @@ create_document_type({
   name: "Invoice",
   match: "invoice total amount due",
   matching_algorithm: 1,
+});
+```
+
+#### `update_document_type`
+
+Update an existing document type's name or matching rules via
+`PATCH /api/document_types/{id}/`.
+
+Parameters:
+
+- `id`: Document type ID
+- `name` (optional): New document type name
+- `match` (optional): Text pattern to match (empty string removes auto-matching)
+- `matching_algorithm` (optional): Integer 0-6 (0=none, 1=any, 2=all, 3=exact, 4=regex, 5=fuzzy, 6=auto)
+- `is_insensitive` (optional): Whether matching is case-insensitive
+
+```typescript
+update_document_type({
+  id: 4,
+  match: "invoice number",
+  matching_algorithm: 3,
+  is_insensitive: true,
 });
 ```
 

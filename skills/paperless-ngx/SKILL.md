@@ -5,12 +5,12 @@ license: MIT
 compatibility: Requires a running Paperless-ngx instance with API token. MCP server must be connected with mcp_paperless_* tools available.
 metadata:
   author: kjanat
-  version: "2.5.0"
+  version: "2.6.0"
 ---
 
 # Paperless-ngx Document Management
 
-Orchestrate Paperless-ngx through 17 MCP tools across 4 domains.
+Orchestrate Paperless-ngx through 19 MCP tools across 4 domains.
 
 ## Tool Catalog
 
@@ -35,21 +35,23 @@ Orchestrate Paperless-ngx through 17 MCP tools across 4 domains.
 | `delete_tag`     | Remove permanently           |
 | `bulk_edit_tags` | Batch permissions/deletion   |
 
-### Correspondents (3 tools)
+### Correspondents (4 tools)
 
-| Tool                       | Operation                |
-| -------------------------- | ------------------------ |
-| `list_correspondents`      | All correspondents       |
-| `create_correspondent`     | New, optional auto-match |
-| `bulk_edit_correspondents` | Batch permissions/delete |
+| Tool                       | Operation                  |
+| -------------------------- | -------------------------- |
+| `list_correspondents`      | All correspondents         |
+| `create_correspondent`     | New, optional auto-match   |
+| `update_correspondent`     | Modify name/matching rules |
+| `bulk_edit_correspondents` | Batch permissions/delete   |
 
-### Document Types (3 tools)
+### Document Types (4 tools)
 
-| Tool                       | Operation                |
-| -------------------------- | ------------------------ |
-| `list_document_types`      | All document types       |
-| `create_document_type`     | New, optional auto-match |
-| `bulk_edit_document_types` | Batch permissions/delete |
+| Tool                       | Operation                  |
+| -------------------------- | -------------------------- |
+| `list_document_types`      | All document types         |
+| `create_document_type`     | New, optional auto-match   |
+| `update_document_type`     | Modify name/matching rules |
+| `bulk_edit_document_types` | Batch permissions/delete   |
 
 ## Decision Trees
 
@@ -103,6 +105,8 @@ Need to change metadata objects?
 ├─ View all          → list_tags / list_correspondents / list_document_types
 ├─ Create new        → create_tag / create_correspondent / create_document_type
 ├─ Edit tag          → update_tag(id, name, color, match, matching_algorithm)
+├─ Edit sender       → update_correspondent(id, name, match, matching_algorithm)
+├─ Edit type         → update_document_type(id, name, match, matching_algorithm)
 ├─ Delete one tag    → delete_tag(id)
 ├─ Batch delete/perm → bulk_edit_tags / bulk_edit_correspondents / bulk_edit_document_types
 ```

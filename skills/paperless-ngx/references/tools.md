@@ -1,13 +1,13 @@
 # MCP Tool Reference
 
-Full parameter signatures for all 17 Paperless-ngx MCP tools.
+Full parameter signatures for all 19 Paperless-ngx MCP tools.
 
 ## Contents
 
 - [Document Tools](#document-tools) — search, get, update, post, download, bulk_edit
 - [Tag Tools](#tag-tools) — list, create, update, delete, bulk_edit
-- [Correspondent Tools](#correspondent-tools) — list, create, bulk_edit
-- [Document Type Tools](#document-type-tools) — list, create, bulk_edit
+- [Correspondent Tools](#correspondent-tools) — list, create, update, bulk_edit
+- [Document Type Tools](#document-type-tools) — list, create, update, bulk_edit
 
 ## Document Tools
 
@@ -155,6 +155,19 @@ No parameters. The MCP client fetches all pages and combines `results`.
 | `match`              | string | no       | Auto-assign pattern                                                   |
 | `matching_algorithm` | int    | no       | `0`=none, `1`=any, `2`=all, `3`=exact, `4`=regex, `5`=fuzzy, `6`=auto |
 
+### update_correspondent
+
+| Param                | Type    | Required | Notes                              |
+| -------------------- | ------- | -------- | ---------------------------------- |
+| `id`                 | number  | yes      | From list_correspondents           |
+| `name`               | string  | no       | New name                           |
+| `match`              | string  | no       | Empty string removes auto-matching |
+| `matching_algorithm` | int     | no       | `0`-`6` (same as create)           |
+| `is_insensitive`     | boolean | no       | Case-insensitive matching          |
+
+Single-correspondent `PATCH /api/correspondents/{id}/`. Use
+`bulk_edit_correspondents` for permissions/deletion.
+
 ### bulk_edit_correspondents
 
 | Param               | Type     | Required | Notes                             |
@@ -178,6 +191,19 @@ No parameters. The MCP client fetches all pages and combines `results`.
 | `name`               | string | yes      | Type name (Invoice, Receipt, etc.)                                    |
 | `match`              | string | no       | Auto-assign pattern                                                   |
 | `matching_algorithm` | int    | no       | `0`=none, `1`=any, `2`=all, `3`=exact, `4`=regex, `5`=fuzzy, `6`=auto |
+
+### update_document_type
+
+| Param                | Type    | Required | Notes                              |
+| -------------------- | ------- | -------- | ---------------------------------- |
+| `id`                 | number  | yes      | From list_document_types           |
+| `name`               | string  | no       | New name                           |
+| `match`              | string  | no       | Empty string removes auto-matching |
+| `matching_algorithm` | int     | no       | `0`-`6` (same as create)           |
+| `is_insensitive`     | boolean | no       | Case-insensitive matching          |
+
+Single-type `PATCH /api/document_types/{id}/`. Use `bulk_edit_document_types`
+for permissions/deletion.
 
 ### bulk_edit_document_types
 

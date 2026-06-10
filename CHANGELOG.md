@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.6.0] - 2026-06-10
+
+### Added
+
+- `update_correspondent` tool wrapping `PATCH /api/correspondents/{id}/` —
+  edit an existing correspondent's `name`, `match`, `matching_algorithm`, and
+  `is_insensitive` from MCP. Lets an agent fix an over-matching correspondent
+  (narrow the pattern or switch the algorithm) without dropping into the web
+  UI ([#13](https://github.com/kjanat/paperless-mcp/issues/13)). Input schema
+  derived from the generated `zPatchedCorrespondentRequestWritable`, same
+  pattern as `update_document`.
+- `update_document_type` tool wrapping `PATCH /api/document_types/{id}/` —
+  the sibling gap flagged in #13's "Related gaps": same fields (`name`,
+  `match`, `matching_algorithm`, `is_insensitive`), same generated-schema
+  derivation (`zPatchedDocumentTypeRequestWritable`).
+
 ## [2.5.0] - 2026-06-10
 
 ### Added
@@ -292,7 +308,8 @@ Major rewrite of internals while preserving the same MCP tool surface.
 - Smithery configuration (broken `smithery.yaml`).
 - Obsolete Cursor rules.
 
-[Unreleased]: https://github.com/kjanat/paperless-mcp/compare/v2.5.0...HEAD
+[Unreleased]: https://github.com/kjanat/paperless-mcp/compare/v2.6.0...HEAD
+[2.6.0]: https://github.com/kjanat/paperless-mcp/compare/v2.5.0...v2.6.0
 [2.5.0]: https://github.com/kjanat/paperless-mcp/compare/v2.4.0...v2.5.0
 [2.4.0]: https://github.com/kjanat/paperless-mcp/compare/v2.3.2...v2.4.0
 [2.3.2]: https://github.com/kjanat/paperless-mcp/compare/v2.3.1...v2.3.2

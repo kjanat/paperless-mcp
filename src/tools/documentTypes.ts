@@ -1,7 +1,7 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
 
-import { zMatchingAlgorithm, zOperationEnum } from '#api/generated/zod.gen';
+import { zMatchingAlgorithm, zOperationEnum, zPatchedDocumentTypeRequestWritable } from '#api/generated/zod.gen';
 import type { PaperlessAPI } from '#api/paperless';
 import { jsonResult, permissionsInput } from '#tools/utils';
 
@@ -40,6 +40,36 @@ export function registerDocumentTypeTools(server: McpServer, api: PaperlessAPI):
 		},
 		async (args, _extra) => {
 			return jsonResult(await api.createDocumentType(args));
+		},
+	);
+
+	server.registerTool(
+		'update_document_type',
+		{
+			description:
+				"Modify an existing document type's name or automatic matching rules. Useful for fixing an over-matching type: narrow the match pattern or switch the matching algorithm. Use bulk_edit_document_types for permissions or deletion.",
+			inputSchema: {
+				id: z.number().describe(
+					'ID of the document type to update. Use list_document_types to find existing document type IDs.',
+				),
+
+				name: zPatchedDocumentTypeRequestWritable.shape.name.describe(
+					'New document type name. Must be unique among all document types.',
+				),
+
+				match: zPatchedDocumentTypeRequestWritable.shape.match.describe(
+					'Text pattern for automatic assignment. Empty string removes auto-matching. Use keywords, phrases, or regex depending on matching_algorithm.',
+				),
+
+				matching_algorithm: zMatchingAlgorithm.optional(),
+
+				is_insensitive: zPatchedDocumentTypeRequestWritable.shape.is_insensitive.describe(
+					'Whether matching is case-insensitive.',
+				),
+			},
+		},
+		async ({ id, ...data }, _extra) => {
+			return jsonResult(await api.updateDocumentType(id, data));
 		},
 	);
 

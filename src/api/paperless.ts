@@ -14,7 +14,9 @@ import type {
 	PostDocumentMetadata,
 	Tag,
 	TagRequest,
+	UpdateCorrespondentRequest,
 	UpdateDocumentRequest,
+	UpdateDocumentTypeRequest,
 } from '#types';
 
 export class PaperlessAPI {
@@ -237,6 +239,16 @@ export class PaperlessAPI {
 		});
 	}
 
+	async updateCorrespondent(
+		id: number,
+		data: UpdateCorrespondentRequest,
+	): Promise<Correspondent> {
+		return this.request<Correspondent>(`/correspondents/${id}/`, {
+			method: 'PATCH',
+			body: JSON.stringify(omitUndefined(data)),
+		});
+	}
+
 	// Document type operations
 
 	async getDocumentTypes(): Promise<PaginatedList<DocumentType>> {
@@ -247,6 +259,16 @@ export class PaperlessAPI {
 		return this.request<DocumentType>('/document_types/', {
 			method: 'POST',
 			body: JSON.stringify(data),
+		});
+	}
+
+	async updateDocumentType(
+		id: number,
+		data: UpdateDocumentTypeRequest,
+	): Promise<DocumentType> {
+		return this.request<DocumentType>(`/document_types/${id}/`, {
+			method: 'PATCH',
+			body: JSON.stringify(omitUndefined(data)),
 		});
 	}
 
