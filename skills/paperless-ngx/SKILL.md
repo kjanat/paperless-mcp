@@ -166,6 +166,12 @@ Need to change metadata objects?
   to rename; keep tags/correspondent/type in `bulk_edit_documents`. `note`
   appends a note (notes live on a separate Paperless endpoint internally);
   remove one with `delete_document_note`.
+- **Notes are an append-only log.** A document can hold multiple notes, each
+  with its own timestamp and author. There is no edit operation — not in the
+  API, not in the web UI; this is by design (log semantics). To correct an
+  earlier note, append a new one (e.g. "correction: ..."). Reserve
+  `delete_document_note` for entries that truly must go — deleting rewrites
+  history.
 - **post_document returns a task UUID, not a document ID.** Poll
   `get_task(task_id)` until `status="SUCCESS"`; `related_document` then
   holds the resulting document ID.
