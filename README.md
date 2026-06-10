@@ -578,7 +578,7 @@ Get all storage paths (where document files land on disk). Optional `name`
 filters on a case-insensitive substring.
 
 ```typescript
-list_storage_paths();
+list_storage_paths({ name: "tax" });
 ```
 
 #### `create_storage_path`
@@ -654,7 +654,7 @@ Get all custom field definitions (optional `name` substring filter) — the nume
 require.
 
 ```typescript
-list_custom_fields();
+list_custom_fields({ name: "invoice" });
 ```
 
 #### `create_custom_field`
