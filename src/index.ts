@@ -20,6 +20,8 @@ import { registerTrashTools } from '#tools/trash';
 
 const DEFAULT_PORT = 3000;
 const DEFAULT_HOST = '127.0.0.1';
+const CLI_NAME = Object.keys(pkg.bin)[0]!;
+const REPOSITORY_URL = `https://github.com/${pkg.repository}`;
 const SERVER_NAME = 'paperless-ngx';
 /** Grace period to let in-flight HTTP requests drain before force-closing sockets. */
 const SHUTDOWN_GRACE_MS = 10_000;
@@ -197,7 +199,7 @@ async function runUntilShutdown(cleanup: () => Promise<void> | void): Promise<vo
 	await cleanup();
 }
 
-const serve = command('paperless-mcp')
+const serve = command(CLI_NAME)
 	.description('MCP server for the Paperless-ngx document management system.')
 	.arg('baseUrl', baseUrlArg)
 	.arg('token', tokenArg())
@@ -253,7 +255,8 @@ const serve = command('paperless-mcp')
 		}
 	});
 
-void cli('paperless-mcp')
+void cli(CLI_NAME)
 	.version(pkg.version)
+	.links({ name: REPOSITORY_URL, version: `${REPOSITORY_URL}/releases/tag/v${pkg.version}` })
 	.default(serve)
 	.run();
