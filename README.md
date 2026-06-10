@@ -68,7 +68,7 @@ View the skill on the registry: https://skills.sh/kjanat/paperless-mcp/paperless
 _Add using_:
 
 ```bash
-bunx skills add https://github.com/kjanat/paperless-mcp --skill paperless-ngx
+bunx skills add kjanat/paperless-mcp --skill paperless-ngx
 ```
 
 `# or npx -y skills...`
