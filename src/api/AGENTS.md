@@ -13,7 +13,8 @@ Paperless-ngx REST API via `fetch()`. All methods return typed responses
   `thumbnail_url` from results to reduce token usage.
 - **All PATCH methods** (`updateDocument`, `updateTag`, `updateCorrespondent`,
   `updateDocumentType`, `updateStoragePath`, `updateCustomField`) strip
-  `undefined` fields via `omitUndefined()` before serializing.
+  `undefined` fields before serializing, via the module-level `omitUndefined()`
+  helper at the bottom of `paperless.ts`.
 - **`getTask` queries by Celery UUID** — `GET /tasks/?task_id=...` (filter, not
   path param) and unwraps `.results`. The numeric task `id` is a different field.
 - **Notes are a sub-resource**: `addDocumentNote` (POST) and `deleteDocumentNote`

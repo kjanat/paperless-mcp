@@ -28,7 +28,8 @@ server.registerTool(
   not a repeated inline `z.number()`.
 - **Object IDs are strict**: every scalar ID/array-of-IDs param uses
   `z.number().int().min(1)`; `get_task.task_id` uses `z.uuid()`. Only
-  angle params (`degrees`, `rotate`) stay plain numbers.
+  angle params (`degrees`, `rotate`) stay bare `z.number()` — no `.int()`,
+  `.min()`, or other constraints.
 - **Writable fields derive from generated schemas** — update/create tools pull
   validators from `zPatched*RequestWritable.shape.*` so they can't drift from
   the upstream OpenAPI schema.
