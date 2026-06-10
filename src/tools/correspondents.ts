@@ -18,6 +18,22 @@ export function registerCorrespondentTools(server: McpServer, api: PaperlessAPI)
 	);
 
 	server.registerTool(
+		'get_correspondent',
+		{
+			description:
+				"Get a single correspondent by ID: name and matching rules. Cheaper than list_correspondents when you already know the ID (e.g. from a document's correspondent field).",
+			inputSchema: {
+				id: z.number().describe(
+					"Correspondent ID, e.g. from a document's correspondent field or list_correspondents.",
+				),
+			},
+		},
+		async ({ id }, _extra) => {
+			return jsonResult(await api.getCorrespondent(id));
+		},
+	);
+
+	server.registerTool(
 		'create_correspondent',
 		{
 			description:

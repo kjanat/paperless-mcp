@@ -1,13 +1,16 @@
 # MCP Tool Reference
 
-Full parameter signatures for all 19 Paperless-ngx MCP tools.
+Full parameter signatures for all 30 Paperless-ngx MCP tools.
 
 ## Contents
 
-- [Document Tools](#document-tools) — search, get, update, post, download, bulk_edit
-- [Tag Tools](#tag-tools) — list, create, update, delete, bulk_edit
-- [Correspondent Tools](#correspondent-tools) — list, create, update, bulk_edit
-- [Document Type Tools](#document-type-tools) — list, create, update, bulk_edit
+- [Document Tools](#document-tools) — search, get, update, delete_note, post, download, bulk_edit
+- [Tag Tools](#tag-tools) — list, get, create, update, delete (deprecated), bulk_edit
+- [Correspondent Tools](#correspondent-tools) — list, get, create, update, bulk_edit
+- [Document Type Tools](#document-type-tools) — list, get, create, update, bulk_edit
+- [Storage Path Tools](#storage-path-tools) — list, create, update
+- [Custom Field Tools](#custom-field-tools) — list, create, update
+- [Task Tools](#task-tools) — get
 
 ## Document Tools
 
@@ -40,6 +43,15 @@ Returns metadata **without** `content` field. Use `get_document` for full text.
 Single-document `PATCH /api/documents/{id}/`; `note` goes to
 `POST /api/documents/{id}/notes/` internally. Use `bulk_edit_documents` for
 tags/correspondent/type — the bulk endpoint has no `set_title` method.
+
+### delete_document_note
+
+| Param     | Type   | Required | Notes                             |
+| --------- | ------ | -------- | --------------------------------- |
+| `id`      | number | yes      | Document the note belongs to      |
+| `note_id` | number | yes      | From the document's `notes` array |
+
+Returns the remaining notes.
 
 ### post_document
 
@@ -106,6 +118,12 @@ only the relevant fields to Paperless' nested `parameters` payload.
 No parameters. Returns all tags with name, color, matching rules. The MCP client
 fetches all pages and combines `results`.
 
+### get_tag
+
+| Param | Type   | Required | Notes                        |
+| ----- | ------ | -------- | ---------------------------- |
+| `id`  | number | yes      | Single tag: name/color/match |
+
 ### create_tag
 
 | Param                | Type   | Required | Notes                                                                 |
@@ -125,11 +143,14 @@ fetches all pages and combines `results`.
 | `match`              | string | no       | Auto-assign pattern      |
 | `matching_algorithm` | int    | no       | `0`-`6` (same as create) |
 
-### delete_tag
+### delete_tag (deprecated)
 
 | Param | Type   | Required | Notes                                  |
 | ----- | ------ | -------- | -------------------------------------- |
 | `id`  | number | yes      | Removes from all documents. Permanent. |
+
+**Deprecated** — removal planned for v3.0.0. Use `bulk_edit_tags` with
+`operation="delete"` instead.
 
 ### bulk_edit_tags
 
@@ -146,6 +167,12 @@ fetches all pages and combines `results`.
 ### list_correspondents
 
 No parameters. The MCP client fetches all pages and combines `results`.
+
+### get_correspondent
+
+| Param | Type   | Required | Notes                                 |
+| ----- | ------ | -------- | ------------------------------------- |
+| `id`  | number | yes      | Resolve a document's correspondent ID |
 
 ### create_correspondent
 
@@ -184,6 +211,12 @@ Single-correspondent `PATCH /api/correspondents/{id}/`. Use
 
 No parameters. The MCP client fetches all pages and combines `results`.
 
+### get_document_type
+
+| Param | Type   | Required | Notes                                 |
+| ----- | ------ | -------- | ------------------------------------- |
+| `id`  | number | yes      | Resolve a document's document_type ID |
+
 ### create_document_type
 
 | Param                | Type   | Required | Notes                                                                 |
@@ -214,3 +247,67 @@ for permissions/deletion.
 | `owner`             | number   | no       | For `set_permissions`             |
 | `permissions`       | object   | no       | Same shape as tags                |
 | `merge`             | boolean  | no       | Merge or replace permissions      |
+
+## Storage Path Tools
+
+### list_storage_paths
+
+No parameters. The MCP client fetches all pages and combines `results`. Use to
+resolve a document's `storage_path` ID to a name.
+
+### create_storage_path
+
+| Param                | Type    | Required | Notes                                                          |
+| -------------------- | ------- | -------- | -------------------------------------------------------------- |
+| `name`               | string  | yes      | Unique storage path name                                       |
+| `path`               | string  | yes      | Template: `{{ created_year }}/{{ correspondent }}/{{ title }}` |
+| `match`              | string  | no       | Auto-assign pattern                                            |
+| `matching_algorithm` | int     | no       | `0`-`6` (same as tags)                                         |
+| `is_insensitive`     | boolean | no       | Case-insensitive matching                                      |
+
+### update_storage_path
+
+| Param                | Type    | Required | Notes                              |
+| -------------------- | ------- | -------- | ---------------------------------- |
+| `id`                 | number  | yes      | From list_storage_paths            |
+| `name`               | string  | no       | New name                           |
+| `path`               | string  | no       | New path template                  |
+| `match`              | string  | no       | Empty string removes auto-matching |
+| `matching_algorithm` | int     | no       | `0`-`6` (same as create)           |
+| `is_insensitive`     | boolean | no       | Case-insensitive matching          |
+
+## Custom Field Tools
+
+### list_custom_fields
+
+No parameters. Returns all field definitions with the numeric IDs that
+`update_document.custom_fields` and `modify_custom_fields` require.
+
+### create_custom_field
+
+| Param        | Type   | Required | Notes                                                                                        |
+| ------------ | ------ | -------- | -------------------------------------------------------------------------------------------- |
+| `name`       | string | yes      | Unique field name                                                                            |
+| `data_type`  | enum   | yes      | `string`, `url`, `date`, `boolean`, `integer`, `float`, `monetary`, `documentlink`, `select` |
+| `extra_data` | object | no       | E.g. `{select_options: [{label: "Open"}]}`                                                   |
+
+### update_custom_field
+
+| Param        | Type   | Required | Notes                                        |
+| ------------ | ------ | -------- | -------------------------------------------- |
+| `id`         | number | yes      | From list_custom_fields                      |
+| `name`       | string | no       | New name                                     |
+| `data_type`  | enum   | no       | Changing type may invalidate existing values |
+| `extra_data` | object | no       | New options/config                           |
+
+## Task Tools
+
+### get_task
+
+| Param     | Type   | Required | Notes                          |
+| --------- | ------ | -------- | ------------------------------ |
+| `task_id` | string | yes      | UUID returned by post_document |
+
+Returns matching task(s) with `status` (`pending`, `started`, `success`,
+`failure`) and `related_document_ids` — the resulting document ID(s) once the
+consumer finishes. Poll after `post_document` to close the upload loop.

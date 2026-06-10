@@ -261,6 +261,24 @@ export function registerDocumentTools(server: McpServer, api: PaperlessAPI): voi
 	);
 
 	server.registerTool(
+		'delete_document_note',
+		{
+			description:
+				'Delete a note from a document. Get note IDs from the notes array on get_document or update_document results. Returns the remaining notes.',
+			inputSchema: {
+				id: z.number().describe('Document ID the note belongs to.'),
+
+				note_id: z.number().describe(
+					"ID of the note to delete, from the document's notes array.",
+				),
+			},
+		},
+		async ({ id, note_id }, _extra) => {
+			return jsonResult(await api.deleteDocumentNote(id, note_id));
+		},
+	);
+
+	server.registerTool(
 		'search_documents',
 		{
 			description:

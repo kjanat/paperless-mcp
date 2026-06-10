@@ -7,6 +7,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.7.0] - 2026-06-10
+
+### Added
+
+- **Tasks**: `get_task` tool wrapping `GET /api/tasks/?task_id=...` — resolves
+  the task UUID returned by `post_document` to processing status and
+  `related_document_ids`, closing the agentic upload loop (no more polling via
+  the web UI or searching by filename).
+- **Custom fields**: `list_custom_fields`, `create_custom_field`, and
+  `update_custom_field` tools wrapping `/api/custom_fields/`. The list tool
+  makes `update_document.custom_fields` and `modify_custom_fields` usable
+  without hardcoded field IDs.
+- **Storage paths**: `list_storage_paths`, `create_storage_path`, and
+  `update_storage_path` tools wrapping `/api/storage_paths/` — a document's
+  `storage_path` ID can now be resolved, created, and tuned from MCP.
+- **Notes**: `delete_document_note` tool wrapping
+  `DELETE /api/documents/{id}/notes/` — notes added via `update_document` are
+  no longer write-only.
+- **Single-resource getters**: `get_tag`, `get_correspondent`, and
+  `get_document_type` — resolve one ID without listing the entire collection.
+- Codegen: `/api/storage_paths/`, `/api/custom_fields/`, `/api/tasks/`, and
+  `/api/documents/{id}/notes/` added to the OpenAPI subset allowlist
+  (`PATHS_WE_USE`); generated Zod schemas regenerated.
+
+### Deprecated
+
+- `delete_tag` — use `bulk_edit_tags` with `operation="delete"` instead,
+  consistent with correspondents and document types. Removal planned for
+  v3.0.0.
+
 ## [2.6.0] - 2026-06-10
 
 ### Added
@@ -308,7 +338,8 @@ Major rewrite of internals while preserving the same MCP tool surface.
 - Smithery configuration (broken `smithery.yaml`).
 - Obsolete Cursor rules.
 
-[Unreleased]: https://github.com/kjanat/paperless-mcp/compare/v2.6.0...HEAD
+[Unreleased]: https://github.com/kjanat/paperless-mcp/compare/v2.7.0...HEAD
+[2.7.0]: https://github.com/kjanat/paperless-mcp/compare/v2.6.0...v2.7.0
 [2.6.0]: https://github.com/kjanat/paperless-mcp/compare/v2.5.0...v2.6.0
 [2.5.0]: https://github.com/kjanat/paperless-mcp/compare/v2.4.0...v2.5.0
 [2.4.0]: https://github.com/kjanat/paperless-mcp/compare/v2.3.2...v2.4.0

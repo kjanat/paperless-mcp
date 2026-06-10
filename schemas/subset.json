@@ -322,6 +322,36 @@
 				],
 				"type": "object"
 			},
+			"CustomField": {
+				"properties": {
+					"data_type": {
+						"$ref": "#/components/schemas/DataTypeEnum"
+					},
+					"document_count": {
+						"readOnly": true,
+						"type": "integer"
+					},
+					"extra_data": {
+						"description": "Extra data for the custom field, such as select options",
+						"nullable": true
+					},
+					"id": {
+						"readOnly": true,
+						"type": "integer"
+					},
+					"name": {
+						"maxLength": 128,
+						"type": "string"
+					}
+				},
+				"required": [
+					"data_type",
+					"document_count",
+					"id",
+					"name"
+				],
+				"type": "object"
+			},
 			"CustomFieldInstance": {
 				"properties": {
 					"field": {
@@ -385,6 +415,43 @@
 					"value"
 				],
 				"type": "object"
+			},
+			"CustomFieldRequest": {
+				"properties": {
+					"data_type": {
+						"$ref": "#/components/schemas/DataTypeEnum"
+					},
+					"extra_data": {
+						"description": "Extra data for the custom field, such as select options",
+						"nullable": true
+					},
+					"name": {
+						"maxLength": 128,
+						"minLength": 1,
+						"type": "string"
+					}
+				},
+				"required": [
+					"data_type",
+					"name"
+				],
+				"type": "object"
+			},
+			"DataTypeEnum": {
+				"description": "* `string` - string\n* `url` - url\n* `date` - date\n* `boolean` - boolean\n* `integer` - integer\n* `float` - float\n* `monetary` - monetary\n* `documentlink` - documentlink\n* `select` - select\n* `longtext` - longtext",
+				"enum": [
+					"string",
+					"url",
+					"date",
+					"boolean",
+					"integer",
+					"float",
+					"monetary",
+					"documentlink",
+					"select",
+					"longtext"
+				],
+				"type": "string"
 			},
 			"Document": {
 				"description": "Adds update nested feature",
@@ -940,6 +1007,18 @@
 				],
 				"type": "string"
 			},
+			"NoteCreateRequestRequest": {
+				"properties": {
+					"note": {
+						"minLength": 1,
+						"type": "string"
+					}
+				},
+				"required": [
+					"note"
+				],
+				"type": "object"
+			},
 			"Notes": {
 				"properties": {
 					"created": {
@@ -1019,6 +1098,37 @@
 				],
 				"type": "object"
 			},
+			"PaginatedCustomFieldList": {
+				"properties": {
+					"count": {
+						"example": 123,
+						"type": "integer"
+					},
+					"next": {
+						"example": "http://api.example.org/accounts/?page=4",
+						"format": "uri",
+						"nullable": true,
+						"type": "string"
+					},
+					"previous": {
+						"example": "http://api.example.org/accounts/?page=2",
+						"format": "uri",
+						"nullable": true,
+						"type": "string"
+					},
+					"results": {
+						"items": {
+							"$ref": "#/components/schemas/CustomField"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"count",
+					"results"
+				],
+				"type": "object"
+			},
 			"PaginatedDocumentList": {
 				"properties": {
 					"count": {
@@ -1081,6 +1191,37 @@
 				],
 				"type": "object"
 			},
+			"PaginatedStoragePathList": {
+				"properties": {
+					"count": {
+						"example": 123,
+						"type": "integer"
+					},
+					"next": {
+						"example": "http://api.example.org/accounts/?page=4",
+						"format": "uri",
+						"nullable": true,
+						"type": "string"
+					},
+					"previous": {
+						"example": "http://api.example.org/accounts/?page=2",
+						"format": "uri",
+						"nullable": true,
+						"type": "string"
+					},
+					"results": {
+						"items": {
+							"$ref": "#/components/schemas/StoragePath"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"count",
+					"results"
+				],
+				"type": "object"
+			},
 			"PaginatedTagList": {
 				"properties": {
 					"count": {
@@ -1102,6 +1243,37 @@
 					"results": {
 						"items": {
 							"$ref": "#/components/schemas/Tag"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"count",
+					"results"
+				],
+				"type": "object"
+			},
+			"PaginatedTaskSerializerV10List": {
+				"properties": {
+					"count": {
+						"example": 123,
+						"type": "integer"
+					},
+					"next": {
+						"example": "http://api.example.org/accounts/?page=4",
+						"format": "uri",
+						"nullable": true,
+						"type": "string"
+					},
+					"previous": {
+						"example": "http://api.example.org/accounts/?page=2",
+						"format": "uri",
+						"nullable": true,
+						"type": "string"
+					},
+					"results": {
+						"items": {
+							"$ref": "#/components/schemas/TaskSerializerV10"
 						},
 						"type": "array"
 					}
@@ -1178,6 +1350,23 @@
 						},
 						"type": "object",
 						"writeOnly": true
+					}
+				},
+				"type": "object"
+			},
+			"PatchedCustomFieldRequest": {
+				"properties": {
+					"data_type": {
+						"$ref": "#/components/schemas/DataTypeEnum"
+					},
+					"extra_data": {
+						"description": "Extra data for the custom field, such as select options",
+						"nullable": true
+					},
+					"name": {
+						"maxLength": 128,
+						"minLength": 1,
+						"type": "string"
 					}
 				},
 				"type": "object"
@@ -1317,6 +1506,80 @@
 					"owner": {
 						"nullable": true,
 						"type": "integer"
+					},
+					"set_permissions": {
+						"properties": {
+							"change": {
+								"properties": {
+									"groups": {
+										"items": {
+											"type": "integer"
+										},
+										"type": "array"
+									},
+									"users": {
+										"items": {
+											"type": "integer"
+										},
+										"type": "array"
+									}
+								},
+								"type": "object"
+							},
+							"view": {
+								"properties": {
+									"groups": {
+										"items": {
+											"type": "integer"
+										},
+										"type": "array"
+									},
+									"users": {
+										"items": {
+											"type": "integer"
+										},
+										"type": "array"
+									}
+								},
+								"type": "object"
+							}
+						},
+						"type": "object",
+						"writeOnly": true
+					}
+				},
+				"type": "object"
+			},
+			"PatchedStoragePathRequest": {
+				"properties": {
+					"is_insensitive": {
+						"type": "boolean"
+					},
+					"match": {
+						"maxLength": 256,
+						"type": "string"
+					},
+					"matching_algorithm": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/MatchingAlgorithm"
+							}
+						],
+						"maximum": 9223372036854775807,
+						"minimum": 0
+					},
+					"name": {
+						"maxLength": 128,
+						"minLength": 1,
+						"type": "string"
+					},
+					"owner": {
+						"nullable": true,
+						"type": "integer"
+					},
+					"path": {
+						"minLength": 1,
+						"type": "string"
 					},
 					"set_permissions": {
 						"properties": {
@@ -1507,6 +1770,140 @@
 				],
 				"type": "object"
 			},
+			"StoragePath": {
+				"properties": {
+					"document_count": {
+						"readOnly": true,
+						"type": "integer"
+					},
+					"id": {
+						"readOnly": true,
+						"type": "integer"
+					},
+					"is_insensitive": {
+						"type": "boolean"
+					},
+					"match": {
+						"maxLength": 256,
+						"type": "string"
+					},
+					"matching_algorithm": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/MatchingAlgorithm"
+							}
+						],
+						"maximum": 9223372036854775807,
+						"minimum": 0
+					},
+					"name": {
+						"maxLength": 128,
+						"type": "string"
+					},
+					"owner": {
+						"nullable": true,
+						"type": "integer"
+					},
+					"path": {
+						"type": "string"
+					},
+					"slug": {
+						"readOnly": true,
+						"type": "string"
+					},
+					"user_can_change": {
+						"readOnly": true,
+						"type": "boolean"
+					}
+				},
+				"required": [
+					"document_count",
+					"id",
+					"name",
+					"path",
+					"slug",
+					"user_can_change"
+				],
+				"type": "object"
+			},
+			"StoragePathRequest": {
+				"properties": {
+					"is_insensitive": {
+						"type": "boolean"
+					},
+					"match": {
+						"maxLength": 256,
+						"type": "string"
+					},
+					"matching_algorithm": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/MatchingAlgorithm"
+							}
+						],
+						"maximum": 9223372036854775807,
+						"minimum": 0
+					},
+					"name": {
+						"maxLength": 128,
+						"minLength": 1,
+						"type": "string"
+					},
+					"owner": {
+						"nullable": true,
+						"type": "integer"
+					},
+					"path": {
+						"minLength": 1,
+						"type": "string"
+					},
+					"set_permissions": {
+						"properties": {
+							"change": {
+								"properties": {
+									"groups": {
+										"items": {
+											"type": "integer"
+										},
+										"type": "array"
+									},
+									"users": {
+										"items": {
+											"type": "integer"
+										},
+										"type": "array"
+									}
+								},
+								"type": "object"
+							},
+							"view": {
+								"properties": {
+									"groups": {
+										"items": {
+											"type": "integer"
+										},
+										"type": "array"
+									},
+									"users": {
+										"items": {
+											"type": "integer"
+										},
+										"type": "array"
+									}
+								},
+								"type": "object"
+							}
+						},
+						"type": "object",
+						"writeOnly": true
+					}
+				},
+				"required": [
+					"name",
+					"path"
+				],
+				"type": "object"
+			},
 			"Tag": {
 				"properties": {
 					"children": {
@@ -1669,6 +2066,182 @@
 					"name"
 				],
 				"type": "object"
+			},
+			"TaskSerializerV10": {
+				"description": "Task serializer for API v10+ using new field names.",
+				"properties": {
+					"acknowledged": {
+						"readOnly": true,
+						"type": "boolean"
+					},
+					"date_created": {
+						"format": "date-time",
+						"readOnly": true,
+						"title": "Created",
+						"type": "string"
+					},
+					"date_done": {
+						"format": "date-time",
+						"nullable": true,
+						"readOnly": true,
+						"title": "Completed",
+						"type": "string"
+					},
+					"date_started": {
+						"format": "date-time",
+						"nullable": true,
+						"readOnly": true,
+						"title": "Started",
+						"type": "string"
+					},
+					"duration_seconds": {
+						"description": "Elapsed time from start to completion",
+						"format": "double",
+						"nullable": true,
+						"readOnly": true,
+						"title": "Duration (seconds)",
+						"type": "number"
+					},
+					"id": {
+						"readOnly": true,
+						"type": "integer"
+					},
+					"input_data": {
+						"description": "Structured input parameters for the task",
+						"readOnly": true
+					},
+					"owner": {
+						"nullable": true,
+						"readOnly": true,
+						"type": "integer"
+					},
+					"related_document_ids": {
+						"items": {
+							"type": "integer"
+						},
+						"readOnly": true,
+						"type": "array"
+					},
+					"result_data": {
+						"description": "Structured result data from task execution",
+						"nullable": true,
+						"readOnly": true
+					},
+					"status": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/TaskSerializerV10StatusEnum"
+							}
+						],
+						"readOnly": true
+					},
+					"status_display": {
+						"readOnly": true,
+						"type": "string"
+					},
+					"task_id": {
+						"description": "Celery task ID",
+						"readOnly": true,
+						"type": "string"
+					},
+					"task_type": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/TaskTypeEnum"
+							}
+						],
+						"description": "The kind of work being performed\n\n* `consume_file` - Consume File\n* `train_classifier` - Train Classifier\n* `sanity_check` - Sanity Check\n* `index_optimize` - Index Optimize\n* `mail_fetch` - Mail Fetch\n* `llm_index` - LLM Index\n* `empty_trash` - Empty Trash\n* `check_workflows` - Check Workflows\n* `bulk_update` - Bulk Update\n* `reprocess_document` - Reprocess Document\n* `build_share_link` - Build Share Link\n* `bulk_delete` - Bulk Delete",
+						"readOnly": true
+					},
+					"task_type_display": {
+						"readOnly": true,
+						"type": "string"
+					},
+					"trigger_source": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/TriggerSourceEnum"
+							}
+						],
+						"description": "What initiated this task\n\n* `scheduled` - Scheduled\n* `web_ui` - Web UI\n* `api_upload` - API Upload\n* `folder_consume` - Folder Consume\n* `email_consume` - Email Consume\n* `system` - System\n* `manual` - Manual",
+						"readOnly": true
+					},
+					"trigger_source_display": {
+						"readOnly": true,
+						"type": "string"
+					},
+					"wait_time_seconds": {
+						"description": "Time from task creation to worker pickup",
+						"format": "double",
+						"nullable": true,
+						"readOnly": true,
+						"title": "Wait Time (seconds)",
+						"type": "number"
+					}
+				},
+				"required": [
+					"acknowledged",
+					"date_created",
+					"date_done",
+					"date_started",
+					"duration_seconds",
+					"id",
+					"input_data",
+					"owner",
+					"related_document_ids",
+					"result_data",
+					"status",
+					"status_display",
+					"task_id",
+					"task_type",
+					"task_type_display",
+					"trigger_source",
+					"trigger_source_display",
+					"wait_time_seconds"
+				],
+				"type": "object"
+			},
+			"TaskSerializerV10StatusEnum": {
+				"description": "* `pending` - Pending\n* `started` - Started\n* `success` - Success\n* `failure` - Failure\n* `revoked` - Revoked",
+				"enum": [
+					"pending",
+					"started",
+					"success",
+					"failure",
+					"revoked"
+				],
+				"type": "string"
+			},
+			"TaskTypeEnum": {
+				"description": "* `consume_file` - Consume File\n* `train_classifier` - Train Classifier\n* `sanity_check` - Sanity Check\n* `index_optimize` - Index Optimize\n* `mail_fetch` - Mail Fetch\n* `llm_index` - LLM Index\n* `empty_trash` - Empty Trash\n* `check_workflows` - Check Workflows\n* `bulk_update` - Bulk Update\n* `reprocess_document` - Reprocess Document\n* `build_share_link` - Build Share Link\n* `bulk_delete` - Bulk Delete",
+				"enum": [
+					"consume_file",
+					"train_classifier",
+					"sanity_check",
+					"index_optimize",
+					"mail_fetch",
+					"llm_index",
+					"empty_trash",
+					"check_workflows",
+					"bulk_update",
+					"reprocess_document",
+					"build_share_link",
+					"bulk_delete"
+				],
+				"type": "string"
+			},
+			"TriggerSourceEnum": {
+				"description": "* `scheduled` - Scheduled\n* `web_ui` - Web UI\n* `api_upload` - API Upload\n* `folder_consume` - Folder Consume\n* `email_consume` - Email Consume\n* `system` - System\n* `manual` - Manual",
+				"enum": [
+					"scheduled",
+					"web_ui",
+					"api_upload",
+					"folder_consume",
+					"email_consume",
+					"system",
+					"manual"
+				],
+				"type": "string"
 			}
 		}
 	},
@@ -2093,6 +2666,363 @@
 				],
 				"tags": [
 					"correspondents"
+				]
+			}
+		},
+		"/api/custom_fields/": {
+			"get": {
+				"description": "Mixin to add document count to queryset, permissions-aware if needed",
+				"operationId": "custom_fields_list",
+				"parameters": [
+					{
+						"in": "query",
+						"name": "id",
+						"schema": {
+							"type": "integer"
+						}
+					},
+					{
+						"description": "Multiple values may be separated by commas.",
+						"explode": false,
+						"in": "query",
+						"name": "id__in",
+						"schema": {
+							"items": {
+								"type": "integer"
+							},
+							"type": "array"
+						},
+						"style": "form"
+					},
+					{
+						"in": "query",
+						"name": "name__icontains",
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "name__iendswith",
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "name__iexact",
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "name__istartswith",
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"description": "Which field to use when ordering the results.",
+						"in": "query",
+						"name": "ordering",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"description": "A page number within the paginated result set.",
+						"in": "query",
+						"name": "page",
+						"required": false,
+						"schema": {
+							"type": "integer"
+						}
+					},
+					{
+						"description": "Number of results to return per page.",
+						"in": "query",
+						"name": "page_size",
+						"required": false,
+						"schema": {
+							"type": "integer"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/PaginatedCustomFieldList"
+								}
+							}
+						},
+						"description": ""
+					}
+				},
+				"security": [
+					{
+						"PaperelessBasicAuthentication": []
+					},
+					{
+						"tokenAuth": []
+					},
+					{
+						"cookieAuth": []
+					}
+				],
+				"tags": [
+					"custom_fields"
+				]
+			},
+			"post": {
+				"description": "Mixin to add document count to queryset, permissions-aware if needed",
+				"operationId": "custom_fields_create",
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/CustomFieldRequest"
+							}
+						},
+						"application/x-www-form-urlencoded": {
+							"schema": {
+								"$ref": "#/components/schemas/CustomFieldRequest"
+							}
+						},
+						"multipart/form-data": {
+							"schema": {
+								"$ref": "#/components/schemas/CustomFieldRequest"
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"201": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/CustomField"
+								}
+							}
+						},
+						"description": ""
+					}
+				},
+				"security": [
+					{
+						"PaperelessBasicAuthentication": []
+					},
+					{
+						"tokenAuth": []
+					},
+					{
+						"cookieAuth": []
+					}
+				],
+				"tags": [
+					"custom_fields"
+				]
+			}
+		},
+		"/api/custom_fields/{id}/": {
+			"delete": {
+				"description": "Mixin to add document count to queryset, permissions-aware if needed",
+				"operationId": "custom_fields_destroy",
+				"parameters": [
+					{
+						"description": "A unique integer value identifying this custom field.",
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "integer"
+						}
+					}
+				],
+				"responses": {
+					"204": {
+						"description": "No response body"
+					}
+				},
+				"security": [
+					{
+						"PaperelessBasicAuthentication": []
+					},
+					{
+						"tokenAuth": []
+					},
+					{
+						"cookieAuth": []
+					}
+				],
+				"tags": [
+					"custom_fields"
+				]
+			},
+			"get": {
+				"description": "Mixin to add document count to queryset, permissions-aware if needed",
+				"operationId": "custom_fields_retrieve",
+				"parameters": [
+					{
+						"description": "A unique integer value identifying this custom field.",
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "integer"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/CustomField"
+								}
+							}
+						},
+						"description": ""
+					}
+				},
+				"security": [
+					{
+						"PaperelessBasicAuthentication": []
+					},
+					{
+						"tokenAuth": []
+					},
+					{
+						"cookieAuth": []
+					}
+				],
+				"tags": [
+					"custom_fields"
+				]
+			},
+			"patch": {
+				"description": "Mixin to add document count to queryset, permissions-aware if needed",
+				"operationId": "custom_fields_partial_update",
+				"parameters": [
+					{
+						"description": "A unique integer value identifying this custom field.",
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "integer"
+						}
+					}
+				],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/PatchedCustomFieldRequest"
+							}
+						},
+						"application/x-www-form-urlencoded": {
+							"schema": {
+								"$ref": "#/components/schemas/PatchedCustomFieldRequest"
+							}
+						},
+						"multipart/form-data": {
+							"schema": {
+								"$ref": "#/components/schemas/PatchedCustomFieldRequest"
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/CustomField"
+								}
+							}
+						},
+						"description": ""
+					}
+				},
+				"security": [
+					{
+						"PaperelessBasicAuthentication": []
+					},
+					{
+						"tokenAuth": []
+					},
+					{
+						"cookieAuth": []
+					}
+				],
+				"tags": [
+					"custom_fields"
+				]
+			},
+			"put": {
+				"description": "Mixin to add document count to queryset, permissions-aware if needed",
+				"operationId": "custom_fields_update",
+				"parameters": [
+					{
+						"description": "A unique integer value identifying this custom field.",
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "integer"
+						}
+					}
+				],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/CustomFieldRequest"
+							}
+						},
+						"application/x-www-form-urlencoded": {
+							"schema": {
+								"$ref": "#/components/schemas/CustomFieldRequest"
+							}
+						},
+						"multipart/form-data": {
+							"schema": {
+								"$ref": "#/components/schemas/CustomFieldRequest"
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/CustomField"
+								}
+							}
+						},
+						"description": ""
+					}
+				},
+				"security": [
+					{
+						"PaperelessBasicAuthentication": []
+					},
+					{
+						"tokenAuth": []
+					},
+					{
+						"cookieAuth": []
+					}
+				],
+				"tags": [
+					"custom_fields"
 				]
 			}
 		},
@@ -3738,6 +4668,610 @@
 				]
 			}
 		},
+		"/api/documents/{id}/notes/": {
+			"delete": {
+				"description": "View, add, or delete notes for the document",
+				"operationId": "documents_notes_destroy",
+				"parameters": [
+					{
+						"description": "A unique integer value identifying this document.",
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "integer"
+						}
+					},
+					{
+						"description": "Note ID to delete (used only for DELETE requests)",
+						"in": "query",
+						"name": "id",
+						"schema": {
+							"type": "integer"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"items": {
+										"$ref": "#/components/schemas/Notes"
+									},
+									"type": "array"
+								}
+							}
+						},
+						"description": ""
+					},
+					"400": {
+						"description": "No response body"
+					},
+					"403": {
+						"description": "No response body"
+					},
+					"404": {
+						"description": "No response body"
+					}
+				},
+				"security": [
+					{
+						"PaperelessBasicAuthentication": []
+					},
+					{
+						"tokenAuth": []
+					},
+					{
+						"cookieAuth": []
+					}
+				],
+				"tags": [
+					"documents"
+				]
+			},
+			"get": {
+				"description": "View, add, or delete notes for the document",
+				"operationId": "documents_notes_list",
+				"parameters": [
+					{
+						"description": "A unique integer value identifying this document.",
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "integer"
+						}
+					},
+					{
+						"description": "Note ID to delete (used only for DELETE requests)",
+						"in": "query",
+						"name": "id",
+						"schema": {
+							"type": "integer"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"items": {
+										"$ref": "#/components/schemas/Notes"
+									},
+									"type": "array"
+								}
+							}
+						},
+						"description": ""
+					},
+					"400": {
+						"description": "No response body"
+					},
+					"403": {
+						"description": "No response body"
+					},
+					"404": {
+						"description": "No response body"
+					}
+				},
+				"security": [
+					{
+						"PaperelessBasicAuthentication": []
+					},
+					{
+						"tokenAuth": []
+					},
+					{
+						"cookieAuth": []
+					}
+				],
+				"tags": [
+					"documents"
+				]
+			},
+			"post": {
+				"description": "View, add, or delete notes for the document",
+				"operationId": "documents_notes_create",
+				"parameters": [
+					{
+						"description": "A unique integer value identifying this document.",
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "integer"
+						}
+					},
+					{
+						"description": "Note ID to delete (used only for DELETE requests)",
+						"in": "query",
+						"name": "id",
+						"schema": {
+							"type": "integer"
+						}
+					}
+				],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/NoteCreateRequestRequest"
+							}
+						},
+						"application/x-www-form-urlencoded": {
+							"schema": {
+								"$ref": "#/components/schemas/NoteCreateRequestRequest"
+							}
+						},
+						"multipart/form-data": {
+							"schema": {
+								"$ref": "#/components/schemas/NoteCreateRequestRequest"
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"items": {
+										"$ref": "#/components/schemas/Notes"
+									},
+									"type": "array"
+								}
+							}
+						},
+						"description": ""
+					},
+					"400": {
+						"description": "No response body"
+					},
+					"403": {
+						"description": "No response body"
+					},
+					"404": {
+						"description": "No response body"
+					}
+				},
+				"security": [
+					{
+						"PaperelessBasicAuthentication": []
+					},
+					{
+						"tokenAuth": []
+					},
+					{
+						"cookieAuth": []
+					}
+				],
+				"tags": [
+					"documents"
+				]
+			}
+		},
+		"/api/storage_paths/": {
+			"get": {
+				"description": "Mixin to add document count to queryset, permissions-aware if needed",
+				"operationId": "storage_paths_list",
+				"parameters": [
+					{
+						"in": "query",
+						"name": "full_perms",
+						"schema": {
+							"type": "boolean"
+						}
+					},
+					{
+						"in": "query",
+						"name": "id",
+						"schema": {
+							"type": "integer"
+						}
+					},
+					{
+						"description": "Multiple values may be separated by commas.",
+						"explode": false,
+						"in": "query",
+						"name": "id__in",
+						"schema": {
+							"items": {
+								"type": "integer"
+							},
+							"type": "array"
+						},
+						"style": "form"
+					},
+					{
+						"in": "query",
+						"name": "name__icontains",
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "name__iendswith",
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "name__iexact",
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "name__istartswith",
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"description": "Which field to use when ordering the results.",
+						"in": "query",
+						"name": "ordering",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"description": "A page number within the paginated result set.",
+						"in": "query",
+						"name": "page",
+						"required": false,
+						"schema": {
+							"type": "integer"
+						}
+					},
+					{
+						"description": "Number of results to return per page.",
+						"in": "query",
+						"name": "page_size",
+						"required": false,
+						"schema": {
+							"type": "integer"
+						}
+					},
+					{
+						"in": "query",
+						"name": "path__icontains",
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "path__iendswith",
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "path__iexact",
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "path__istartswith",
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/PaginatedStoragePathList"
+								}
+							}
+						},
+						"description": ""
+					}
+				},
+				"security": [
+					{
+						"PaperelessBasicAuthentication": []
+					},
+					{
+						"tokenAuth": []
+					},
+					{
+						"cookieAuth": []
+					}
+				],
+				"tags": [
+					"storage_paths"
+				]
+			},
+			"post": {
+				"description": "Mixin to add document count to queryset, permissions-aware if needed",
+				"operationId": "storage_paths_create",
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/StoragePathRequest"
+							}
+						},
+						"application/x-www-form-urlencoded": {
+							"schema": {
+								"$ref": "#/components/schemas/StoragePathRequest"
+							}
+						},
+						"multipart/form-data": {
+							"schema": {
+								"$ref": "#/components/schemas/StoragePathRequest"
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"201": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/StoragePath"
+								}
+							}
+						},
+						"description": ""
+					}
+				},
+				"security": [
+					{
+						"PaperelessBasicAuthentication": []
+					},
+					{
+						"tokenAuth": []
+					},
+					{
+						"cookieAuth": []
+					}
+				],
+				"tags": [
+					"storage_paths"
+				]
+			}
+		},
+		"/api/storage_paths/{id}/": {
+			"delete": {
+				"description": "When a storage path is deleted, see if documents\nusing it require a rename/move",
+				"operationId": "storage_paths_destroy",
+				"parameters": [
+					{
+						"description": "A unique integer value identifying this storage path.",
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "integer"
+						}
+					}
+				],
+				"responses": {
+					"204": {
+						"description": "No response body"
+					}
+				},
+				"security": [
+					{
+						"PaperelessBasicAuthentication": []
+					},
+					{
+						"tokenAuth": []
+					},
+					{
+						"cookieAuth": []
+					}
+				],
+				"tags": [
+					"storage_paths"
+				]
+			},
+			"get": {
+				"description": "Mixin to add document count to queryset, permissions-aware if needed",
+				"operationId": "storage_paths_retrieve",
+				"parameters": [
+					{
+						"in": "query",
+						"name": "full_perms",
+						"schema": {
+							"type": "boolean"
+						}
+					},
+					{
+						"description": "A unique integer value identifying this storage path.",
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "integer"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/StoragePath"
+								}
+							}
+						},
+						"description": ""
+					}
+				},
+				"security": [
+					{
+						"PaperelessBasicAuthentication": []
+					},
+					{
+						"tokenAuth": []
+					},
+					{
+						"cookieAuth": []
+					}
+				],
+				"tags": [
+					"storage_paths"
+				]
+			},
+			"patch": {
+				"description": "Mixin to add document count to queryset, permissions-aware if needed",
+				"operationId": "storage_paths_partial_update",
+				"parameters": [
+					{
+						"description": "A unique integer value identifying this storage path.",
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "integer"
+						}
+					}
+				],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/PatchedStoragePathRequest"
+							}
+						},
+						"application/x-www-form-urlencoded": {
+							"schema": {
+								"$ref": "#/components/schemas/PatchedStoragePathRequest"
+							}
+						},
+						"multipart/form-data": {
+							"schema": {
+								"$ref": "#/components/schemas/PatchedStoragePathRequest"
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/StoragePath"
+								}
+							}
+						},
+						"description": ""
+					}
+				},
+				"security": [
+					{
+						"PaperelessBasicAuthentication": []
+					},
+					{
+						"tokenAuth": []
+					},
+					{
+						"cookieAuth": []
+					}
+				],
+				"tags": [
+					"storage_paths"
+				]
+			},
+			"put": {
+				"description": "Mixin to add document count to queryset, permissions-aware if needed",
+				"operationId": "storage_paths_update",
+				"parameters": [
+					{
+						"description": "A unique integer value identifying this storage path.",
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "integer"
+						}
+					}
+				],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/StoragePathRequest"
+							}
+						},
+						"application/x-www-form-urlencoded": {
+							"schema": {
+								"$ref": "#/components/schemas/StoragePathRequest"
+							}
+						},
+						"multipart/form-data": {
+							"schema": {
+								"$ref": "#/components/schemas/StoragePathRequest"
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/StoragePath"
+								}
+							}
+						},
+						"description": ""
+					}
+				},
+				"security": [
+					{
+						"PaperelessBasicAuthentication": []
+					},
+					{
+						"tokenAuth": []
+					},
+					{
+						"cookieAuth": []
+					}
+				],
+				"tags": [
+					"storage_paths"
+				]
+			}
+		},
 		"/api/tags/": {
 			"get": {
 				"description": "Build a children map once to avoid per-parent queries in the serializer.",
@@ -4114,6 +5648,184 @@
 				],
 				"tags": [
 					"tags"
+				]
+			}
+		},
+		"/api/tasks/": {
+			"get": {
+				"operationId": "tasks_list",
+				"parameters": [
+					{
+						"description": "Acknowledged",
+						"in": "query",
+						"name": "acknowledged",
+						"schema": {
+							"type": "boolean"
+						}
+					},
+					{
+						"description": "Created After",
+						"in": "query",
+						"name": "date_created_after",
+						"schema": {
+							"format": "date-time",
+							"type": "string"
+						}
+					},
+					{
+						"description": "Created Before",
+						"in": "query",
+						"name": "date_created_before",
+						"schema": {
+							"format": "date-time",
+							"type": "string"
+						}
+					},
+					{
+						"description": "Is Complete",
+						"in": "query",
+						"name": "is_complete",
+						"schema": {
+							"type": "boolean"
+						}
+					},
+					{
+						"description": "Which field to use when ordering the results.",
+						"in": "query",
+						"name": "ordering",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "owner",
+						"schema": {
+							"type": "integer"
+						}
+					},
+					{
+						"description": "A page number within the paginated result set.",
+						"in": "query",
+						"name": "page",
+						"required": false,
+						"schema": {
+							"type": "integer"
+						}
+					},
+					{
+						"description": "Number of results to return per page.",
+						"in": "query",
+						"name": "page_size",
+						"required": false,
+						"schema": {
+							"type": "integer"
+						}
+					},
+					{
+						"description": "Status\n\n* `pending` - Pending\n* `started` - Started\n* `success` - Success\n* `failure` - Failure\n* `revoked` - Revoked",
+						"explode": true,
+						"in": "query",
+						"name": "status",
+						"schema": {
+							"items": {
+								"enum": [
+									"failure",
+									"pending",
+									"revoked",
+									"started",
+									"success"
+								],
+								"type": "string"
+							},
+							"type": "array"
+						},
+						"style": "form"
+					},
+					{
+						"description": "Filter tasks by Celery UUID",
+						"in": "query",
+						"name": "task_id",
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"description": "Task Type\n\n* `consume_file` - Consume File\n* `train_classifier` - Train Classifier\n* `sanity_check` - Sanity Check\n* `index_optimize` - Index Optimize\n* `mail_fetch` - Mail Fetch\n* `llm_index` - LLM Index\n* `empty_trash` - Empty Trash\n* `check_workflows` - Check Workflows\n* `bulk_update` - Bulk Update\n* `reprocess_document` - Reprocess Document\n* `build_share_link` - Build Share Link\n* `bulk_delete` - Bulk Delete",
+						"explode": true,
+						"in": "query",
+						"name": "task_type",
+						"schema": {
+							"items": {
+								"enum": [
+									"build_share_link",
+									"bulk_delete",
+									"bulk_update",
+									"check_workflows",
+									"consume_file",
+									"empty_trash",
+									"index_optimize",
+									"llm_index",
+									"mail_fetch",
+									"reprocess_document",
+									"sanity_check",
+									"train_classifier"
+								],
+								"type": "string"
+							},
+							"type": "array"
+						},
+						"style": "form"
+					},
+					{
+						"description": "Trigger Source\n\n* `scheduled` - Scheduled\n* `web_ui` - Web UI\n* `api_upload` - API Upload\n* `folder_consume` - Folder Consume\n* `email_consume` - Email Consume\n* `system` - System\n* `manual` - Manual",
+						"explode": true,
+						"in": "query",
+						"name": "trigger_source",
+						"schema": {
+							"items": {
+								"enum": [
+									"api_upload",
+									"email_consume",
+									"folder_consume",
+									"manual",
+									"scheduled",
+									"system",
+									"web_ui"
+								],
+								"type": "string"
+							},
+							"type": "array"
+						},
+						"style": "form"
+					}
+				],
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/PaginatedTaskSerializerV10List"
+								}
+							}
+						},
+						"description": ""
+					}
+				},
+				"security": [
+					{
+						"PaperelessBasicAuthentication": []
+					},
+					{
+						"tokenAuth": []
+					},
+					{
+						"cookieAuth": []
+					}
+				],
+				"tags": [
+					"tasks"
 				]
 			}
 		}

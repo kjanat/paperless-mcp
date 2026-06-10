@@ -18,6 +18,22 @@ export function registerDocumentTypeTools(server: McpServer, api: PaperlessAPI):
 	);
 
 	server.registerTool(
+		'get_document_type',
+		{
+			description:
+				"Get a single document type by ID: name and matching rules. Cheaper than list_document_types when you already know the ID (e.g. from a document's document_type field).",
+			inputSchema: {
+				id: z.number().describe(
+					"Document type ID, e.g. from a document's document_type field or list_document_types.",
+				),
+			},
+		},
+		async ({ id }, _extra) => {
+			return jsonResult(await api.getDocumentType(id));
+		},
+	);
+
+	server.registerTool(
 		'create_document_type',
 		{
 			description:

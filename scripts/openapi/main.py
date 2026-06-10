@@ -102,12 +102,18 @@ PATHS_WE_USE: tuple[str, ...] = (
     "/api/documents/post_document/",
     "/api/documents/{id}/",
     "/api/documents/{id}/download/",
+    "/api/documents/{id}/notes/",
     "/api/tags/",
     "/api/tags/{id}/",
     "/api/correspondents/",
     "/api/correspondents/{id}/",
     "/api/document_types/",
     "/api/document_types/{id}/",
+    "/api/storage_paths/",
+    "/api/storage_paths/{id}/",
+    "/api/custom_fields/",
+    "/api/custom_fields/{id}/",
+    "/api/tasks/",
     "/api/bulk_edit_objects/",
 )
 
