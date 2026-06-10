@@ -234,6 +234,58 @@ export interface PaperlessTask {
  * real instance, no server-side pagination at `version=6`), so the client
  * always sorts newest-first server-side and applies `limit` client-side.
  */
+// ---------------------------------------------------------------------------
+// Mail (derived, with documented divergences)
+// ---------------------------------------------------------------------------
+
+/**
+ * Mail account as returned by GET /mail_accounts/.
+ *
+ * Divergences: `password` is stripped client-side (the client projects an
+ * explicit allowlist of fields, so credentials can never reach a tool
+ * response, including any future secret field a schema sync introduces);
+ * `imap_port` widened from the schema's bigint to number (raw JSON carries a
+ * number and responses are never zod-parsed).
+ */
+export type MailAccount = Override<
+	Omit<z.infer<typeof schemas.zMailAccount>, 'password'>,
+	{ imap_port?: number | null }
+>;
+
+/** Result of POST /mail_accounts/{id}/process/. */
+export type MailProcessResult = z.infer<typeof schemas.zMailAccountProcessResponse>;
+
+/**
+ * Mail rule as returned by GET /mail_rules/.
+ *
+ * Divergence: `maximum_age` widened from the schema's bigint to number — the
+ * raw JSON carries a number and responses are never zod-parsed.
+ */
+export type MailRule = Override<
+	z.infer<typeof schemas.zMailRule>,
+	{ maximum_age?: number }
+>;
+
+/**
+ * Request body for POST /mail_rules/.
+ *
+ * Narrowed: `owner`/`set_permissions` excluded (consistent with the other
+ * create tools); `maximum_age` widened from the schema's bigint to a plain
+ * number (JSON carries it as a number and the value is days, far inside the
+ * safe integer range); `action_parameter` made optional (the schema's
+ * `.default('')` turns the inferred output into a required field).
+ */
+export type CreateMailRuleRequest = Override<
+	Omit<z.infer<typeof schemas.zMailRuleRequestWritable>, 'owner' | 'set_permissions'>,
+	{ maximum_age?: number; action_parameter?: string | null }
+>;
+
+/** Request body for PATCH /mail_rules/{id}/ (same narrowing). */
+export type UpdateMailRuleRequest = Override<
+	Omit<z.infer<typeof schemas.zPatchedMailRuleRequestWritable>, 'owner' | 'set_permissions'>,
+	{ maximum_age?: number; action_parameter?: string | null }
+>;
+
 /**
  * Response from POST /trash/ (restore/empty actions).
  *

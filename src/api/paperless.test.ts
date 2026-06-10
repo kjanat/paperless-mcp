@@ -751,6 +751,88 @@ describe('PaperlessAPI.listTasks', () => {
 });
 
 // ---------------------------------------------------------------------------
+// Mail operations
+// ---------------------------------------------------------------------------
+
+describe('PaperlessAPI.getMailAccounts', () => {
+	test('fetches /mail_accounts/ and strips credentials', async () => {
+		stubFetch({
+			count: 1,
+			next: null,
+			previous: null,
+			all: [1],
+			results: [{ id: 1, name: 'Inbox', username: 'me@example.com', password: 'hunter2' }],
+		});
+		const result = await api.getMailAccounts();
+
+		expect(lastRequestUrl()).toBe(`${BASE_URL}/api/mail_accounts/?page=1&page_size=100`);
+		expect(result.results[0]?.id).toBe(1);
+		expect(result.results[0]?.username).toBe('me@example.com');
+		expect(result.results[0]).not.toHaveProperty('password');
+	});
+});
+
+describe('PaperlessAPI.processMailAccount', () => {
+	test('POSTs to /mail_accounts/{id}/process/', async () => {
+		stubFetch({ result: 'OK' });
+		const result = await api.processMailAccount(1);
+
+		expect(lastRequestUrl()).toBe(`${BASE_URL}/api/mail_accounts/1/process/`);
+		expect(lastRequestInit().method).toBe('POST');
+		expect(result.result).toBe('OK');
+	});
+});
+
+describe('PaperlessAPI.getMailRules', () => {
+	test('fetches /mail_rules/ with pagination', async () => {
+		stubFetch({ count: 0, next: null, previous: null, all: [], results: [] });
+		await api.getMailRules();
+
+		expect(lastRequestUrl()).toBe(`${BASE_URL}/api/mail_rules/?page=1&page_size=100`);
+	});
+});
+
+describe('PaperlessAPI.createMailRule', () => {
+	test('POSTs rule data and omits undefined fields', async () => {
+		stubFetch({ id: 5, name: 'Vendor invoices', account: 1 });
+		await api.createMailRule({
+			account: 1,
+			name: 'Vendor invoices',
+			filter_from: 'billing@vendor.com',
+			filter_subject: undefined,
+		});
+
+		expect(lastRequestInit().method).toBe('POST');
+		expect(lastRequestBody()).toEqual({
+			account: 1,
+			name: 'Vendor invoices',
+			filter_from: 'billing@vendor.com',
+		});
+	});
+});
+
+describe('PaperlessAPI.updateMailRule', () => {
+	test('PATCHes to /mail_rules/{id}/', async () => {
+		stubFetch({ id: 5, enabled: false });
+		await api.updateMailRule(5, { enabled: false });
+
+		expect(lastRequestUrl()).toBe(`${BASE_URL}/api/mail_rules/5/`);
+		expect(lastRequestInit().method).toBe('PATCH');
+		expect(lastRequestBody()).toEqual({ enabled: false });
+	});
+});
+
+describe('PaperlessAPI.deleteMailRule', () => {
+	test('DELETEs /mail_rules/{id}/ and handles 204', async () => {
+		stubFetchRaw('', {}, 204);
+		await api.deleteMailRule(5);
+
+		expect(lastRequestUrl()).toBe(`${BASE_URL}/api/mail_rules/5/`);
+		expect(lastRequestInit().method).toBe('DELETE');
+	});
+});
+
+// ---------------------------------------------------------------------------
 // Trash operations
 // ---------------------------------------------------------------------------
 

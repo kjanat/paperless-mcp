@@ -798,6 +798,90 @@ empty_trash({
 ```
 
 </details>
+<details>
+<summary>Mail Operations</summary>
+
+### Mail Operations
+
+#### `list_mail_accounts`
+
+List mail accounts that Paperless polls for ingestion. Credentials are
+stripped; account setup stays in the web UI.
+
+```typescript
+list_mail_accounts();
+```
+
+#### `process_mail_account`
+
+Trigger an immediate mail poll for one account.
+
+Parameters:
+
+- `id`: Mail account ID
+
+```typescript
+process_mail_account({ id: 1 });
+```
+
+#### `list_mail_rules`
+
+List mail rules (filters that decide which emails get imported and how).
+
+```typescript
+list_mail_rules();
+```
+
+#### `create_mail_rule`
+
+Create a rule that imports matching emails: filter on sender/subject/body/
+attachment, assign tags/correspondent/type, and control what happens to the
+email afterwards. Affects future ingestion runs.
+
+Parameters (subset):
+
+- `account`: Mail account ID
+- `name`: Unique rule name
+- `filter_from`, `filter_to`, `filter_subject`, `filter_body` (optional): substring filters
+- `filter_attachment_filename_include` / `_exclude` (optional): wildcard patterns
+- `maximum_age` (optional): only emails younger than this many days
+- `action`, `action_parameter` (optional): what happens to the email (delete, move, mark_read, flag, tag)
+- `assign_tags`, `assign_correspondent`, `assign_document_type` (optional): metadata for consumed documents
+- `enabled`, `order`, `stop_processing` (optional): rule chain control
+
+```typescript
+create_mail_rule({
+  account: 1,
+  name: "Vendor invoices",
+  filter_from: "billing@vendor.com",
+  filter_subject: "invoice",
+  assign_tags: [12],
+  action: 3, // mark_read
+});
+```
+
+#### `update_mail_rule`
+
+Modify an existing mail rule. Same fields as create, all optional, plus `id`.
+Pause a rule with `enabled: false` instead of deleting it.
+
+```typescript
+update_mail_rule({
+  id: 5,
+  enabled: false,
+});
+```
+
+#### `delete_mail_rule`
+
+Permanently delete a mail rule. Affects future ingestion only; already
+consumed documents are untouched.
+
+```typescript
+delete_mail_rule({ id: 5 });
+```
+
+</details>
 
 ## Error Handling
 

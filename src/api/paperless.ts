@@ -5,6 +5,7 @@ import type {
 	BulkEditResult,
 	Correspondent,
 	CorrespondentRequest,
+	CreateMailRuleRequest,
 	CreateStoragePathRequest,
 	CustomField,
 	CustomFieldRequest,
@@ -12,6 +13,9 @@ import type {
 	DocumentType,
 	DocumentTypeRequest,
 	ListTasksFilters,
+	MailAccount,
+	MailProcessResult,
+	MailRule,
 	Note,
 	PaginatedDocumentList,
 	PaginatedList,
@@ -25,6 +29,7 @@ import type {
 	UpdateCustomFieldRequest,
 	UpdateDocumentRequest,
 	UpdateDocumentTypeRequest,
+	UpdateMailRuleRequest,
 	UpdateStoragePathRequest,
 } from '#types';
 
@@ -376,6 +381,64 @@ export class PaperlessAPI {
 		>(`/tasks/?${params.toString()}`);
 		const tasks = 'results' in response ? response.results : response;
 		return tasks.slice(0, filters.limit ?? 25);
+	}
+
+	// Mail operations
+
+	async getMailAccounts(): Promise<PaginatedList<MailAccount>> {
+		const response = await this.getAllPages<MailAccount>('/mail_accounts/');
+		// Allowlist projection, not a password denylist: credentials must never
+		// reach a tool response, including any future secret field the weekly
+		// schema sync might introduce.
+		return {
+			...response,
+			results: response.results.map((account) => ({
+				id: account.id,
+				name: account.name,
+				imap_server: account.imap_server,
+				imap_port: account.imap_port,
+				imap_security: account.imap_security,
+				username: account.username,
+				account_type: account.account_type,
+				is_token: account.is_token,
+				expiration: account.expiration,
+				character_set: account.character_set,
+				owner: account.owner,
+				user_can_change: account.user_can_change,
+			})),
+		};
+	}
+
+	async processMailAccount(id: number): Promise<MailProcessResult> {
+		// The OpenAPI schema declares a required MailAccountRequest body here,
+		// but that is a serializer artifact: the view ignores the body, so the
+		// client sends an empty object instead of echoing account credentials.
+		return this.request<MailProcessResult>(`/mail_accounts/${id}/process/`, {
+			method: 'POST',
+			body: JSON.stringify({}),
+		});
+	}
+
+	async getMailRules(): Promise<PaginatedList<MailRule>> {
+		return this.getAllPages<MailRule>('/mail_rules/');
+	}
+
+	async createMailRule(data: CreateMailRuleRequest): Promise<MailRule> {
+		return this.request<MailRule>('/mail_rules/', {
+			method: 'POST',
+			body: JSON.stringify(omitUndefined(data)),
+		});
+	}
+
+	async updateMailRule(id: number, data: UpdateMailRuleRequest): Promise<MailRule> {
+		return this.request<MailRule>(`/mail_rules/${id}/`, {
+			method: 'PATCH',
+			body: JSON.stringify(omitUndefined(data)),
+		});
+	}
+
+	async deleteMailRule(id: number): Promise<void> {
+		await this.request(`/mail_rules/${id}/`, { method: 'DELETE' });
 	}
 
 	// Trash operations

@@ -2,6 +2,57 @@
 
 import * as z from 'zod';
 
+/**
+ * * `1` - IMAP
+ * * `2` - Gmail OAuth
+ * * `3` - Outlook OAuth
+ */
+export const zAccountTypeEnum = z.union([
+	z.literal(1),
+	z.literal(2),
+	z.literal(3),
+]).register(z.globalRegistry, {
+	description: '* `1` - IMAP\n* `2` - Gmail OAuth\n* `3` - Outlook OAuth',
+});
+
+/**
+ * * `1` - Do not assign a correspondent
+ * * `2` - Use mail address
+ * * `3` - Use name (or mail address if not available)
+ * * `4` - Use correspondent selected below
+ */
+export const zAssignCorrespondentFromEnum = z.union([
+	z.literal(1),
+	z.literal(2),
+	z.literal(3),
+	z.literal(4),
+]).register(z.globalRegistry, {
+	description:
+		'* `1` - Do not assign a correspondent\n* `2` - Use mail address\n* `3` - Use name (or mail address if not available)\n* `4` - Use correspondent selected below',
+});
+
+/**
+ * * `1` - Use subject as title
+ * * `2` - Use attachment filename as title
+ * * `3` - Do not assign title from rule
+ */
+export const zAssignTitleFromEnum = z.union([
+	z.literal(1),
+	z.literal(2),
+	z.literal(3),
+]).register(z.globalRegistry, {
+	description:
+		'* `1` - Use subject as title\n* `2` - Use attachment filename as title\n* `3` - Do not assign title from rule',
+});
+
+/**
+ * * `1` - Only process attachments.
+ * * `2` - Process all files, including 'inline' attachments.
+ */
+export const zAttachmentTypeEnum = z.union([z.literal(1), z.literal(2)]).register(z.globalRegistry, {
+	description: "* `1` - Only process attachments.\n* `2` - Process all files, including 'inline' attachments.",
+});
+
 export const zBasicUser = z.object({
 	first_name: z.string().max(150).optional(),
 	id: z.int().readonly(),
@@ -25,6 +76,20 @@ export const zBulkEditRequest = z.object({
 
 export const zBulkEditResult = z.object({
 	result: z.string(),
+});
+
+/**
+ * * `1` - Only process attachments.
+ * * `2` - Process full Mail (with embedded attachments in file) as .eml
+ * * `3` - Process full Mail (with embedded attachments in file) as .eml + process attachments as separate documents
+ */
+export const zConsumptionScopeEnum = z.union([
+	z.literal(1),
+	z.literal(2),
+	z.literal(3),
+]).register(z.globalRegistry, {
+	description:
+		'* `1` - Only process attachments.\n* `2` - Process full Mail (with embedded attachments in file) as .eml\n* `3` - Process full Mail (with embedded attachments in file) as .eml + process attachments as separate documents',
 });
 
 export const zCustomFieldInstance = z.object({
@@ -127,6 +192,75 @@ export const zDuplicateDocumentSummary = z.object({
 	deleted_at: z.iso.datetime().nullable(),
 	id: z.int(),
 	title: z.string(),
+});
+
+/**
+ * * `1` - No encryption
+ * * `2` - Use SSL
+ * * `3` - Use STARTTLS
+ */
+export const zImapSecurityEnum = z.union([
+	z.literal(1),
+	z.literal(2),
+	z.literal(3),
+]).register(z.globalRegistry, {
+	description: '* `1` - No encryption\n* `2` - Use SSL\n* `3` - Use STARTTLS',
+});
+
+export const zMailAccount = z.object({
+	account_type: zAccountTypeEnum.optional(),
+	character_set: z.string().max(256).register(z.globalRegistry, {
+		description: "The character set to use when communicating with the mail server, such as 'UTF-8' or 'US-ASCII'.",
+	}).optional(),
+	expiration: z.iso.datetime().nullish(),
+	id: z.int().readonly(),
+	imap_port: z.coerce.bigint().gte(BigInt(0)).lte(BigInt(9223372036854776000)).nullish(),
+	imap_security: zImapSecurityEnum.optional(),
+	imap_server: z.string().max(256),
+	is_token: z.boolean().optional(),
+	name: z.string().max(256),
+	owner: z.int().nullish(),
+	password: z.string(),
+	user_can_change: z.boolean().readonly(),
+	username: z.string().max(256),
+});
+
+export const zMailAccountProcessResponse = z.object({
+	result: z.string().optional().default('OK'),
+});
+
+export const zMailAccountRequest = z.object({
+	account_type: zAccountTypeEnum.optional(),
+	character_set: z.string().min(1).max(256).register(z.globalRegistry, {
+		description: "The character set to use when communicating with the mail server, such as 'UTF-8' or 'US-ASCII'.",
+	}).optional(),
+	expiration: z.iso.datetime().nullish(),
+	imap_port: z.coerce.bigint().gte(BigInt(0)).lte(BigInt(9223372036854776000)).nullish(),
+	imap_security: zImapSecurityEnum.optional(),
+	imap_server: z.string().min(1).max(256),
+	is_token: z.boolean().optional(),
+	name: z.string().min(1).max(256),
+	owner: z.int().nullish(),
+	password: z.string().min(1),
+	username: z.string().min(1).max(256),
+});
+
+/**
+ * * `1` - Delete
+ * * `2` - Move to specified folder
+ * * `3` - Mark as read, don't process read mails
+ * * `4` - Flag the mail, don't process flagged mails
+ * * `5` - Tag the mail with specified tag, don't process tagged mails
+ */
+export const zMailRuleActionEnum = z.union([
+	z.literal(1),
+	z.literal(2),
+	z.literal(3),
+	z.literal(4),
+	z.literal(5),
+]).register(z.globalRegistry, {
+	description:
+		"* `1` - Delete\n* `2` - Move to specified folder\n* `3` - Mark as read, don't process read mails\n* `4` - Flag the mail, don't process flagged mails\n* `5` - Tag the mail with specified tag, don't process tagged mails",
 });
 
 /**
@@ -362,6 +496,13 @@ export const zPaginatedDocumentTypeList = z.object({
 	results: z.array(zDocumentType),
 });
 
+export const zPaginatedMailAccountList = z.object({
+	count: z.int(),
+	next: z.url().nullish(),
+	previous: z.url().nullish(),
+	results: z.array(zMailAccount),
+});
+
 export const zPatchedCorrespondentRequest = z.object({
 	is_insensitive: z.boolean().optional(),
 	match: z.string().max(256).optional(),
@@ -428,6 +569,138 @@ export const zPatchedTagRequest = z.object({
 	name: z.string().min(1).max(128).optional(),
 	owner: z.int().nullish(),
 	parent: z.int().nullish(),
+});
+
+/**
+ * * `0` - System default
+ * * `1` - Text, then HTML
+ * * `2` - HTML, then text
+ * * `3` - HTML only
+ * * `4` - Text only
+ */
+export const zPdfLayoutEnum = z.union([
+	z.literal(0),
+	z.literal(1),
+	z.literal(2),
+	z.literal(3),
+	z.literal(4),
+]).register(z.globalRegistry, {
+	description:
+		'* `0` - System default\n* `1` - Text, then HTML\n* `2` - HTML, then text\n* `3` - HTML only\n* `4` - Text only',
+});
+
+export const zMailRule = z.object({
+	account: z.int(),
+	action: zMailRuleActionEnum.optional(),
+	action_parameter: z.string().nullish().default(''),
+	assign_correspondent: z.int().nullish(),
+	assign_correspondent_from: zAssignCorrespondentFromEnum.optional(),
+	assign_document_type: z.int().nullish(),
+	assign_owner_from_rule: z.boolean().optional(),
+	assign_tags: z.array(z.int().nullable()).optional(),
+	assign_title_from: zAssignTitleFromEnum.optional(),
+	attachment_type: zAttachmentTypeEnum.optional(),
+	consumption_scope: zConsumptionScopeEnum.optional(),
+	enabled: z.boolean().optional(),
+	filter_attachment_filename_exclude: z.string().max(256).nullish(),
+	filter_attachment_filename_include: z.string().max(256).nullish(),
+	filter_body: z.string().max(256).nullish(),
+	filter_from: z.string().max(256).nullish(),
+	filter_subject: z.string().max(256).nullish(),
+	filter_to: z.string().max(256).nullish(),
+	folder: z.string().max(256).register(z.globalRegistry, {
+		description:
+			"Subfolders must be separated by a delimiter, often a dot ('.') or slash ('/'), but it varies by mail server.",
+	}).optional(),
+	id: z.int().readonly(),
+	maximum_age: z.coerce.bigint().gte(BigInt(0)).lte(BigInt(9223372036854776000)).register(z.globalRegistry, {
+		description: 'Specified in days.',
+	}).optional(),
+	name: z.string().max(256),
+	order: z.int().optional(),
+	owner: z.int().nullish(),
+	pdf_layout: zPdfLayoutEnum.optional(),
+	stop_processing: z.boolean().register(z.globalRegistry, {
+		description: 'If True, no further rules will be processed after this one if any document is queued.',
+	}).optional(),
+	user_can_change: z.boolean().readonly(),
+});
+
+export const zMailRuleRequest = z.object({
+	account: z.int(),
+	action: zMailRuleActionEnum.optional(),
+	action_parameter: z.string().min(1).nullish().default(''),
+	assign_correspondent: z.int().nullish(),
+	assign_correspondent_from: zAssignCorrespondentFromEnum.optional(),
+	assign_document_type: z.int().nullish(),
+	assign_owner_from_rule: z.boolean().optional(),
+	assign_tags: z.array(z.int().nullable()).optional(),
+	assign_title_from: zAssignTitleFromEnum.optional(),
+	attachment_type: zAttachmentTypeEnum.optional(),
+	consumption_scope: zConsumptionScopeEnum.optional(),
+	enabled: z.boolean().optional(),
+	filter_attachment_filename_exclude: z.string().max(256).nullish(),
+	filter_attachment_filename_include: z.string().max(256).nullish(),
+	filter_body: z.string().max(256).nullish(),
+	filter_from: z.string().max(256).nullish(),
+	filter_subject: z.string().max(256).nullish(),
+	filter_to: z.string().max(256).nullish(),
+	folder: z.string().min(1).max(256).register(z.globalRegistry, {
+		description:
+			"Subfolders must be separated by a delimiter, often a dot ('.') or slash ('/'), but it varies by mail server.",
+	}).optional(),
+	maximum_age: z.coerce.bigint().gte(BigInt(0)).lte(BigInt(9223372036854776000)).register(z.globalRegistry, {
+		description: 'Specified in days.',
+	}).optional(),
+	name: z.string().min(1).max(256),
+	order: z.int().optional(),
+	owner: z.int().nullish(),
+	pdf_layout: zPdfLayoutEnum.optional(),
+	stop_processing: z.boolean().register(z.globalRegistry, {
+		description: 'If True, no further rules will be processed after this one if any document is queued.',
+	}).optional(),
+});
+
+export const zPaginatedMailRuleList = z.object({
+	count: z.int(),
+	next: z.url().nullish(),
+	previous: z.url().nullish(),
+	results: z.array(zMailRule),
+});
+
+export const zPatchedMailRuleRequest = z.object({
+	account: z.int().optional(),
+	action: zMailRuleActionEnum.optional(),
+	action_parameter: z.string().min(1).nullish().default(''),
+	assign_correspondent: z.int().nullish(),
+	assign_correspondent_from: zAssignCorrespondentFromEnum.optional(),
+	assign_document_type: z.int().nullish(),
+	assign_owner_from_rule: z.boolean().optional(),
+	assign_tags: z.array(z.int().nullable()).optional(),
+	assign_title_from: zAssignTitleFromEnum.optional(),
+	attachment_type: zAttachmentTypeEnum.optional(),
+	consumption_scope: zConsumptionScopeEnum.optional(),
+	enabled: z.boolean().optional(),
+	filter_attachment_filename_exclude: z.string().max(256).nullish(),
+	filter_attachment_filename_include: z.string().max(256).nullish(),
+	filter_body: z.string().max(256).nullish(),
+	filter_from: z.string().max(256).nullish(),
+	filter_subject: z.string().max(256).nullish(),
+	filter_to: z.string().max(256).nullish(),
+	folder: z.string().min(1).max(256).register(z.globalRegistry, {
+		description:
+			"Subfolders must be separated by a delimiter, often a dot ('.') or slash ('/'), but it varies by mail server.",
+	}).optional(),
+	maximum_age: z.coerce.bigint().gte(BigInt(0)).lte(BigInt(9223372036854776000)).register(z.globalRegistry, {
+		description: 'Specified in days.',
+	}).optional(),
+	name: z.string().min(1).max(256).optional(),
+	order: z.int().optional(),
+	owner: z.int().nullish(),
+	pdf_layout: zPdfLayoutEnum.optional(),
+	stop_processing: z.boolean().register(z.globalRegistry, {
+		description: 'If True, no further rules will be processed after this one if any document is queued.',
+	}).optional(),
 });
 
 export const zPostDocumentRequest = z.object({
@@ -778,6 +1051,128 @@ export const zDocumentTypeRequestWritable = z.object({
 	}).optional(),
 });
 
+export const zMailAccountWritable = z.object({
+	account_type: zAccountTypeEnum.optional(),
+	character_set: z.string().max(256).register(z.globalRegistry, {
+		description: "The character set to use when communicating with the mail server, such as 'UTF-8' or 'US-ASCII'.",
+	}).optional(),
+	expiration: z.iso.datetime().nullish(),
+	imap_port: z.coerce.bigint().gte(BigInt(0)).lte(BigInt(9223372036854776000)).nullish(),
+	imap_security: zImapSecurityEnum.optional(),
+	imap_server: z.string().max(256),
+	is_token: z.boolean().optional(),
+	name: z.string().max(256),
+	owner: z.int().nullish(),
+	password: z.string(),
+	username: z.string().max(256),
+});
+
+export const zMailAccountRequestWritable = z.object({
+	account_type: zAccountTypeEnum.optional(),
+	character_set: z.string().min(1).max(256).register(z.globalRegistry, {
+		description: "The character set to use when communicating with the mail server, such as 'UTF-8' or 'US-ASCII'.",
+	}).optional(),
+	expiration: z.iso.datetime().nullish(),
+	imap_port: z.coerce.bigint().gte(BigInt(0)).lte(BigInt(9223372036854776000)).nullish(),
+	imap_security: zImapSecurityEnum.optional(),
+	imap_server: z.string().min(1).max(256),
+	is_token: z.boolean().optional(),
+	name: z.string().min(1).max(256),
+	owner: z.int().nullish(),
+	password: z.string().min(1),
+	set_permissions: z.object({
+		change: z.object({
+			groups: z.array(z.int()).optional(),
+			users: z.array(z.int()).optional(),
+		}).optional(),
+		view: z.object({
+			groups: z.array(z.int()).optional(),
+			users: z.array(z.int()).optional(),
+		}).optional(),
+	}).optional(),
+	username: z.string().min(1).max(256),
+});
+
+export const zMailRuleWritable = z.object({
+	account: z.int(),
+	action: zMailRuleActionEnum.optional(),
+	action_parameter: z.string().nullish().default(''),
+	assign_correspondent: z.int().nullish(),
+	assign_correspondent_from: zAssignCorrespondentFromEnum.optional(),
+	assign_document_type: z.int().nullish(),
+	assign_owner_from_rule: z.boolean().optional(),
+	assign_tags: z.array(z.int().nullable()).optional(),
+	assign_title_from: zAssignTitleFromEnum.optional(),
+	attachment_type: zAttachmentTypeEnum.optional(),
+	consumption_scope: zConsumptionScopeEnum.optional(),
+	enabled: z.boolean().optional(),
+	filter_attachment_filename_exclude: z.string().max(256).nullish(),
+	filter_attachment_filename_include: z.string().max(256).nullish(),
+	filter_body: z.string().max(256).nullish(),
+	filter_from: z.string().max(256).nullish(),
+	filter_subject: z.string().max(256).nullish(),
+	filter_to: z.string().max(256).nullish(),
+	folder: z.string().max(256).register(z.globalRegistry, {
+		description:
+			"Subfolders must be separated by a delimiter, often a dot ('.') or slash ('/'), but it varies by mail server.",
+	}).optional(),
+	maximum_age: z.coerce.bigint().gte(BigInt(0)).lte(BigInt(9223372036854776000)).register(z.globalRegistry, {
+		description: 'Specified in days.',
+	}).optional(),
+	name: z.string().max(256),
+	order: z.int().optional(),
+	owner: z.int().nullish(),
+	pdf_layout: zPdfLayoutEnum.optional(),
+	stop_processing: z.boolean().register(z.globalRegistry, {
+		description: 'If True, no further rules will be processed after this one if any document is queued.',
+	}).optional(),
+});
+
+export const zMailRuleRequestWritable = z.object({
+	account: z.int(),
+	action: zMailRuleActionEnum.optional(),
+	action_parameter: z.string().min(1).nullish().default(''),
+	assign_correspondent: z.int().nullish(),
+	assign_correspondent_from: zAssignCorrespondentFromEnum.optional(),
+	assign_document_type: z.int().nullish(),
+	assign_owner_from_rule: z.boolean().optional(),
+	assign_tags: z.array(z.int().nullable()).optional(),
+	assign_title_from: zAssignTitleFromEnum.optional(),
+	attachment_type: zAttachmentTypeEnum.optional(),
+	consumption_scope: zConsumptionScopeEnum.optional(),
+	enabled: z.boolean().optional(),
+	filter_attachment_filename_exclude: z.string().max(256).nullish(),
+	filter_attachment_filename_include: z.string().max(256).nullish(),
+	filter_body: z.string().max(256).nullish(),
+	filter_from: z.string().max(256).nullish(),
+	filter_subject: z.string().max(256).nullish(),
+	filter_to: z.string().max(256).nullish(),
+	folder: z.string().min(1).max(256).register(z.globalRegistry, {
+		description:
+			"Subfolders must be separated by a delimiter, often a dot ('.') or slash ('/'), but it varies by mail server.",
+	}).optional(),
+	maximum_age: z.coerce.bigint().gte(BigInt(0)).lte(BigInt(9223372036854776000)).register(z.globalRegistry, {
+		description: 'Specified in days.',
+	}).optional(),
+	name: z.string().min(1).max(256),
+	order: z.int().optional(),
+	owner: z.int().nullish(),
+	pdf_layout: zPdfLayoutEnum.optional(),
+	set_permissions: z.object({
+		change: z.object({
+			groups: z.array(z.int()).optional(),
+			users: z.array(z.int()).optional(),
+		}).optional(),
+		view: z.object({
+			groups: z.array(z.int()).optional(),
+			users: z.array(z.int()).optional(),
+		}).optional(),
+	}).optional(),
+	stop_processing: z.boolean().register(z.globalRegistry, {
+		description: 'If True, no further rules will be processed after this one if any document is queued.',
+	}).optional(),
+});
+
 export const zNotesWritable = z.object({
 	created: z.iso.datetime().optional(),
 	note: z.string().register(z.globalRegistry, {
@@ -811,6 +1206,20 @@ export const zPaginatedDocumentTypeListWritable = z.object({
 	next: z.url().nullish(),
 	previous: z.url().nullish(),
 	results: z.array(zDocumentTypeWritable),
+});
+
+export const zPaginatedMailAccountListWritable = z.object({
+	count: z.int(),
+	next: z.url().nullish(),
+	previous: z.url().nullish(),
+	results: z.array(zMailAccountWritable),
+});
+
+export const zPaginatedMailRuleListWritable = z.object({
+	count: z.int(),
+	next: z.url().nullish(),
+	previous: z.url().nullish(),
+	results: z.array(zMailRuleWritable),
 });
 
 export const zPaginatedTaskSerializerV10ListWritable = z.object({
@@ -886,6 +1295,51 @@ export const zPatchedDocumentTypeRequestWritable = z.object({
 			groups: z.array(z.int()).optional(),
 			users: z.array(z.int()).optional(),
 		}).optional(),
+	}).optional(),
+});
+
+export const zPatchedMailRuleRequestWritable = z.object({
+	account: z.int().optional(),
+	action: zMailRuleActionEnum.optional(),
+	action_parameter: z.string().min(1).nullish().default(''),
+	assign_correspondent: z.int().nullish(),
+	assign_correspondent_from: zAssignCorrespondentFromEnum.optional(),
+	assign_document_type: z.int().nullish(),
+	assign_owner_from_rule: z.boolean().optional(),
+	assign_tags: z.array(z.int().nullable()).optional(),
+	assign_title_from: zAssignTitleFromEnum.optional(),
+	attachment_type: zAttachmentTypeEnum.optional(),
+	consumption_scope: zConsumptionScopeEnum.optional(),
+	enabled: z.boolean().optional(),
+	filter_attachment_filename_exclude: z.string().max(256).nullish(),
+	filter_attachment_filename_include: z.string().max(256).nullish(),
+	filter_body: z.string().max(256).nullish(),
+	filter_from: z.string().max(256).nullish(),
+	filter_subject: z.string().max(256).nullish(),
+	filter_to: z.string().max(256).nullish(),
+	folder: z.string().min(1).max(256).register(z.globalRegistry, {
+		description:
+			"Subfolders must be separated by a delimiter, often a dot ('.') or slash ('/'), but it varies by mail server.",
+	}).optional(),
+	maximum_age: z.coerce.bigint().gte(BigInt(0)).lte(BigInt(9223372036854776000)).register(z.globalRegistry, {
+		description: 'Specified in days.',
+	}).optional(),
+	name: z.string().min(1).max(256).optional(),
+	order: z.int().optional(),
+	owner: z.int().nullish(),
+	pdf_layout: zPdfLayoutEnum.optional(),
+	set_permissions: z.object({
+		change: z.object({
+			groups: z.array(z.int()).optional(),
+			users: z.array(z.int()).optional(),
+		}).optional(),
+		view: z.object({
+			groups: z.array(z.int()).optional(),
+			users: z.array(z.int()).optional(),
+		}).optional(),
+	}).optional(),
+	stop_processing: z.boolean().register(z.globalRegistry, {
+		description: 'If True, no further rules will be processed after this one if any document is queued.',
 	}).optional(),
 });
 
@@ -1482,6 +1936,87 @@ export const zDocumentsNotesCreateQuery = z.object({
 });
 
 export const zDocumentsNotesCreateResponse = z.array(zNotes);
+
+export const zMailAccountsListQuery = z.object({
+	page: z.int().register(z.globalRegistry, {
+		description: 'A page number within the paginated result set.',
+	}).optional(),
+	page_size: z.int().register(z.globalRegistry, {
+		description: 'Number of results to return per page.',
+	}).optional(),
+});
+
+export const zMailAccountsListResponse = zPaginatedMailAccountList;
+
+export const zMailAccountsCreateBody = zMailAccountRequestWritable;
+
+export const zMailAccountsCreateResponse = zMailAccount;
+
+export const zMailAccountProcessBody = zMailAccountRequestWritable;
+
+export const zMailAccountProcessPath = z.object({
+	id: z.int().register(z.globalRegistry, {
+		description: 'A unique integer value identifying this mail account.',
+	}),
+});
+
+export const zMailAccountProcessResponse2 = zMailAccountProcessResponse;
+
+export const zMailRulesListQuery = z.object({
+	page: z.int().register(z.globalRegistry, {
+		description: 'A page number within the paginated result set.',
+	}).optional(),
+	page_size: z.int().register(z.globalRegistry, {
+		description: 'Number of results to return per page.',
+	}).optional(),
+});
+
+export const zMailRulesListResponse = zPaginatedMailRuleList;
+
+export const zMailRulesCreateBody = zMailRuleRequestWritable;
+
+export const zMailRulesCreateResponse = zMailRule;
+
+export const zMailRulesDestroyPath = z.object({
+	id: z.int().register(z.globalRegistry, {
+		description: 'A unique integer value identifying this mail rule.',
+	}),
+});
+
+/**
+ * No response body
+ */
+export const zMailRulesDestroyResponse = z.void().register(z.globalRegistry, {
+	description: 'No response body',
+});
+
+export const zMailRulesRetrievePath = z.object({
+	id: z.int().register(z.globalRegistry, {
+		description: 'A unique integer value identifying this mail rule.',
+	}),
+});
+
+export const zMailRulesRetrieveResponse = zMailRule;
+
+export const zMailRulesPartialUpdateBody = zPatchedMailRuleRequestWritable;
+
+export const zMailRulesPartialUpdatePath = z.object({
+	id: z.int().register(z.globalRegistry, {
+		description: 'A unique integer value identifying this mail rule.',
+	}),
+});
+
+export const zMailRulesPartialUpdateResponse = zMailRule;
+
+export const zMailRulesUpdateBody = zMailRuleRequestWritable;
+
+export const zMailRulesUpdatePath = z.object({
+	id: z.int().register(z.globalRegistry, {
+		description: 'A unique integer value identifying this mail rule.',
+	}),
+});
+
+export const zMailRulesUpdateResponse = zMailRule;
 
 export const zStoragePathsListQuery = z.object({
 	full_perms: z.boolean().optional(),

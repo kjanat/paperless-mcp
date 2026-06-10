@@ -1,6 +1,42 @@
 {
 	"components": {
 		"schemas": {
+			"AccountTypeEnum": {
+				"description": "* `1` - IMAP\n* `2` - Gmail OAuth\n* `3` - Outlook OAuth",
+				"enum": [
+					1,
+					2,
+					3
+				],
+				"type": "integer"
+			},
+			"AssignCorrespondentFromEnum": {
+				"description": "* `1` - Do not assign a correspondent\n* `2` - Use mail address\n* `3` - Use name (or mail address if not available)\n* `4` - Use correspondent selected below",
+				"enum": [
+					1,
+					2,
+					3,
+					4
+				],
+				"type": "integer"
+			},
+			"AssignTitleFromEnum": {
+				"description": "* `1` - Use subject as title\n* `2` - Use attachment filename as title\n* `3` - Do not assign title from rule",
+				"enum": [
+					1,
+					2,
+					3
+				],
+				"type": "integer"
+			},
+			"AttachmentTypeEnum": {
+				"description": "* `1` - Only process attachments.\n* `2` - Process all files, including 'inline' attachments.",
+				"enum": [
+					1,
+					2
+				],
+				"type": "integer"
+			},
 			"BasicUser": {
 				"properties": {
 					"first_name": {
@@ -149,6 +185,15 @@
 					"result"
 				],
 				"type": "object"
+			},
+			"ConsumptionScopeEnum": {
+				"description": "* `1` - Only process attachments.\n* `2` - Process full Mail (with embedded attachments in file) as .eml\n* `3` - Process full Mail (with embedded attachments in file) as .eml + process attachments as separate documents",
+				"enum": [
+					1,
+					2,
+					3
+				],
+				"type": "integer"
 			},
 			"Correspondent": {
 				"properties": {
@@ -972,6 +1017,597 @@
 				],
 				"type": "object"
 			},
+			"ImapSecurityEnum": {
+				"description": "* `1` - No encryption\n* `2` - Use SSL\n* `3` - Use STARTTLS",
+				"enum": [
+					1,
+					2,
+					3
+				],
+				"type": "integer"
+			},
+			"MailAccount": {
+				"properties": {
+					"account_type": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/AccountTypeEnum"
+							}
+						],
+						"maximum": 9223372036854775807,
+						"minimum": 0
+					},
+					"character_set": {
+						"description": "The character set to use when communicating with the mail server, such as 'UTF-8' or 'US-ASCII'.",
+						"maxLength": 256,
+						"type": "string"
+					},
+					"expiration": {
+						"description": "The expiration date of the refresh token. ",
+						"format": "date-time",
+						"nullable": true,
+						"type": "string"
+					},
+					"id": {
+						"readOnly": true,
+						"type": "integer"
+					},
+					"imap_port": {
+						"description": "This is usually 143 for unencrypted and STARTTLS connections, and 993 for SSL connections.",
+						"format": "int64",
+						"maximum": 9223372036854775807,
+						"minimum": 0,
+						"nullable": true,
+						"type": "integer"
+					},
+					"imap_security": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/ImapSecurityEnum"
+							}
+						],
+						"maximum": 9223372036854775807,
+						"minimum": 0
+					},
+					"imap_server": {
+						"maxLength": 256,
+						"type": "string"
+					},
+					"is_token": {
+						"title": "Is token authentication",
+						"type": "boolean"
+					},
+					"name": {
+						"maxLength": 256,
+						"type": "string"
+					},
+					"owner": {
+						"nullable": true,
+						"type": "integer"
+					},
+					"password": {
+						"type": "string"
+					},
+					"user_can_change": {
+						"readOnly": true,
+						"type": "boolean"
+					},
+					"username": {
+						"maxLength": 256,
+						"type": "string"
+					}
+				},
+				"required": [
+					"id",
+					"imap_server",
+					"name",
+					"password",
+					"user_can_change",
+					"username"
+				],
+				"type": "object"
+			},
+			"MailAccountProcessResponse": {
+				"properties": {
+					"result": {
+						"default": "OK",
+						"type": "string"
+					}
+				},
+				"type": "object"
+			},
+			"MailAccountRequest": {
+				"properties": {
+					"account_type": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/AccountTypeEnum"
+							}
+						],
+						"maximum": 9223372036854775807,
+						"minimum": 0
+					},
+					"character_set": {
+						"description": "The character set to use when communicating with the mail server, such as 'UTF-8' or 'US-ASCII'.",
+						"maxLength": 256,
+						"minLength": 1,
+						"type": "string"
+					},
+					"expiration": {
+						"description": "The expiration date of the refresh token. ",
+						"format": "date-time",
+						"nullable": true,
+						"type": "string"
+					},
+					"imap_port": {
+						"description": "This is usually 143 for unencrypted and STARTTLS connections, and 993 for SSL connections.",
+						"format": "int64",
+						"maximum": 9223372036854775807,
+						"minimum": 0,
+						"nullable": true,
+						"type": "integer"
+					},
+					"imap_security": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/ImapSecurityEnum"
+							}
+						],
+						"maximum": 9223372036854775807,
+						"minimum": 0
+					},
+					"imap_server": {
+						"maxLength": 256,
+						"minLength": 1,
+						"type": "string"
+					},
+					"is_token": {
+						"title": "Is token authentication",
+						"type": "boolean"
+					},
+					"name": {
+						"maxLength": 256,
+						"minLength": 1,
+						"type": "string"
+					},
+					"owner": {
+						"nullable": true,
+						"type": "integer"
+					},
+					"password": {
+						"minLength": 1,
+						"type": "string"
+					},
+					"set_permissions": {
+						"properties": {
+							"change": {
+								"properties": {
+									"groups": {
+										"items": {
+											"type": "integer"
+										},
+										"type": "array"
+									},
+									"users": {
+										"items": {
+											"type": "integer"
+										},
+										"type": "array"
+									}
+								},
+								"type": "object"
+							},
+							"view": {
+								"properties": {
+									"groups": {
+										"items": {
+											"type": "integer"
+										},
+										"type": "array"
+									},
+									"users": {
+										"items": {
+											"type": "integer"
+										},
+										"type": "array"
+									}
+								},
+								"type": "object"
+							}
+						},
+						"type": "object",
+						"writeOnly": true
+					},
+					"username": {
+						"maxLength": 256,
+						"minLength": 1,
+						"type": "string"
+					}
+				},
+				"required": [
+					"imap_server",
+					"name",
+					"password",
+					"username"
+				],
+				"type": "object"
+			},
+			"MailRule": {
+				"properties": {
+					"account": {
+						"type": "integer"
+					},
+					"action": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/MailRuleActionEnum"
+							}
+						],
+						"maximum": 9223372036854775807,
+						"minimum": 0
+					},
+					"action_parameter": {
+						"default": "",
+						"nullable": true,
+						"type": "string"
+					},
+					"assign_correspondent": {
+						"nullable": true,
+						"type": "integer"
+					},
+					"assign_correspondent_from": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/AssignCorrespondentFromEnum"
+							}
+						],
+						"maximum": 9223372036854775807,
+						"minimum": 0
+					},
+					"assign_document_type": {
+						"nullable": true,
+						"type": "integer"
+					},
+					"assign_owner_from_rule": {
+						"title": "Assign the rule owner to documents",
+						"type": "boolean"
+					},
+					"assign_tags": {
+						"items": {
+							"nullable": true,
+							"type": "integer"
+						},
+						"type": "array"
+					},
+					"assign_title_from": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/AssignTitleFromEnum"
+							}
+						],
+						"maximum": 9223372036854775807,
+						"minimum": 0
+					},
+					"attachment_type": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/AttachmentTypeEnum"
+							}
+						],
+						"description": "Inline attachments include embedded images, so it's best to combine this option with a filename filter.\n\n* `1` - Only process attachments.\n* `2` - Process all files, including 'inline' attachments.",
+						"maximum": 9223372036854775807,
+						"minimum": 0
+					},
+					"consumption_scope": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/ConsumptionScopeEnum"
+							}
+						],
+						"maximum": 9223372036854775807,
+						"minimum": 0
+					},
+					"enabled": {
+						"type": "boolean"
+					},
+					"filter_attachment_filename_exclude": {
+						"description": "Do not consume documents which entirely match this filename if specified. Wildcards such as *.pdf or *invoice* are allowed. Case insensitive.",
+						"maxLength": 256,
+						"nullable": true,
+						"title": "Filter attachment filename exclusive",
+						"type": "string"
+					},
+					"filter_attachment_filename_include": {
+						"description": "Only consume documents which entirely match this filename if specified. Wildcards such as *.pdf or *invoice* are allowed. Case insensitive.",
+						"maxLength": 256,
+						"nullable": true,
+						"title": "Filter attachment filename inclusive",
+						"type": "string"
+					},
+					"filter_body": {
+						"maxLength": 256,
+						"nullable": true,
+						"type": "string"
+					},
+					"filter_from": {
+						"maxLength": 256,
+						"nullable": true,
+						"type": "string"
+					},
+					"filter_subject": {
+						"maxLength": 256,
+						"nullable": true,
+						"type": "string"
+					},
+					"filter_to": {
+						"maxLength": 256,
+						"nullable": true,
+						"type": "string"
+					},
+					"folder": {
+						"description": "Subfolders must be separated by a delimiter, often a dot ('.') or slash ('/'), but it varies by mail server.",
+						"maxLength": 256,
+						"type": "string"
+					},
+					"id": {
+						"readOnly": true,
+						"type": "integer"
+					},
+					"maximum_age": {
+						"description": "Specified in days.",
+						"format": "int64",
+						"maximum": 9223372036854775807,
+						"minimum": 0,
+						"type": "integer"
+					},
+					"name": {
+						"maxLength": 256,
+						"type": "string"
+					},
+					"order": {
+						"type": "integer"
+					},
+					"owner": {
+						"nullable": true,
+						"type": "integer"
+					},
+					"pdf_layout": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/PdfLayoutEnum"
+							}
+						],
+						"maximum": 9223372036854775807,
+						"minimum": 0
+					},
+					"stop_processing": {
+						"description": "If True, no further rules will be processed after this one if any document is queued.",
+						"title": "Stop processing further rules",
+						"type": "boolean"
+					},
+					"user_can_change": {
+						"readOnly": true,
+						"type": "boolean"
+					}
+				},
+				"required": [
+					"account",
+					"id",
+					"name",
+					"user_can_change"
+				],
+				"type": "object"
+			},
+			"MailRuleActionEnum": {
+				"description": "* `1` - Delete\n* `2` - Move to specified folder\n* `3` - Mark as read, don't process read mails\n* `4` - Flag the mail, don't process flagged mails\n* `5` - Tag the mail with specified tag, don't process tagged mails",
+				"enum": [
+					1,
+					2,
+					3,
+					4,
+					5
+				],
+				"type": "integer"
+			},
+			"MailRuleRequest": {
+				"properties": {
+					"account": {
+						"type": "integer"
+					},
+					"action": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/MailRuleActionEnum"
+							}
+						],
+						"maximum": 9223372036854775807,
+						"minimum": 0
+					},
+					"action_parameter": {
+						"default": "",
+						"minLength": 1,
+						"nullable": true,
+						"type": "string"
+					},
+					"assign_correspondent": {
+						"nullable": true,
+						"type": "integer"
+					},
+					"assign_correspondent_from": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/AssignCorrespondentFromEnum"
+							}
+						],
+						"maximum": 9223372036854775807,
+						"minimum": 0
+					},
+					"assign_document_type": {
+						"nullable": true,
+						"type": "integer"
+					},
+					"assign_owner_from_rule": {
+						"title": "Assign the rule owner to documents",
+						"type": "boolean"
+					},
+					"assign_tags": {
+						"items": {
+							"nullable": true,
+							"type": "integer"
+						},
+						"type": "array"
+					},
+					"assign_title_from": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/AssignTitleFromEnum"
+							}
+						],
+						"maximum": 9223372036854775807,
+						"minimum": 0
+					},
+					"attachment_type": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/AttachmentTypeEnum"
+							}
+						],
+						"description": "Inline attachments include embedded images, so it's best to combine this option with a filename filter.\n\n* `1` - Only process attachments.\n* `2` - Process all files, including 'inline' attachments.",
+						"maximum": 9223372036854775807,
+						"minimum": 0
+					},
+					"consumption_scope": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/ConsumptionScopeEnum"
+							}
+						],
+						"maximum": 9223372036854775807,
+						"minimum": 0
+					},
+					"enabled": {
+						"type": "boolean"
+					},
+					"filter_attachment_filename_exclude": {
+						"description": "Do not consume documents which entirely match this filename if specified. Wildcards such as *.pdf or *invoice* are allowed. Case insensitive.",
+						"maxLength": 256,
+						"nullable": true,
+						"title": "Filter attachment filename exclusive",
+						"type": "string"
+					},
+					"filter_attachment_filename_include": {
+						"description": "Only consume documents which entirely match this filename if specified. Wildcards such as *.pdf or *invoice* are allowed. Case insensitive.",
+						"maxLength": 256,
+						"nullable": true,
+						"title": "Filter attachment filename inclusive",
+						"type": "string"
+					},
+					"filter_body": {
+						"maxLength": 256,
+						"nullable": true,
+						"type": "string"
+					},
+					"filter_from": {
+						"maxLength": 256,
+						"nullable": true,
+						"type": "string"
+					},
+					"filter_subject": {
+						"maxLength": 256,
+						"nullable": true,
+						"type": "string"
+					},
+					"filter_to": {
+						"maxLength": 256,
+						"nullable": true,
+						"type": "string"
+					},
+					"folder": {
+						"description": "Subfolders must be separated by a delimiter, often a dot ('.') or slash ('/'), but it varies by mail server.",
+						"maxLength": 256,
+						"minLength": 1,
+						"type": "string"
+					},
+					"maximum_age": {
+						"description": "Specified in days.",
+						"format": "int64",
+						"maximum": 9223372036854775807,
+						"minimum": 0,
+						"type": "integer"
+					},
+					"name": {
+						"maxLength": 256,
+						"minLength": 1,
+						"type": "string"
+					},
+					"order": {
+						"type": "integer"
+					},
+					"owner": {
+						"nullable": true,
+						"type": "integer"
+					},
+					"pdf_layout": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/PdfLayoutEnum"
+							}
+						],
+						"maximum": 9223372036854775807,
+						"minimum": 0
+					},
+					"set_permissions": {
+						"properties": {
+							"change": {
+								"properties": {
+									"groups": {
+										"items": {
+											"type": "integer"
+										},
+										"type": "array"
+									},
+									"users": {
+										"items": {
+											"type": "integer"
+										},
+										"type": "array"
+									}
+								},
+								"type": "object"
+							},
+							"view": {
+								"properties": {
+									"groups": {
+										"items": {
+											"type": "integer"
+										},
+										"type": "array"
+									},
+									"users": {
+										"items": {
+											"type": "integer"
+										},
+										"type": "array"
+									}
+								},
+								"type": "object"
+							}
+						},
+						"type": "object",
+						"writeOnly": true
+					},
+					"stop_processing": {
+						"description": "If True, no further rules will be processed after this one if any document is queued.",
+						"title": "Stop processing further rules",
+						"type": "boolean"
+					}
+				},
+				"required": [
+					"account",
+					"name"
+				],
+				"type": "object"
+			},
 			"MatchingAlgorithm": {
 				"description": "* `0` - None\n* `1` - Any word\n* `2` - All words\n* `3` - Exact match\n* `4` - Regular expression\n* `5` - Fuzzy word\n* `6` - Automatic",
 				"enum": [
@@ -1181,6 +1817,68 @@
 					"results": {
 						"items": {
 							"$ref": "#/components/schemas/DocumentType"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"count",
+					"results"
+				],
+				"type": "object"
+			},
+			"PaginatedMailAccountList": {
+				"properties": {
+					"count": {
+						"example": 123,
+						"type": "integer"
+					},
+					"next": {
+						"example": "http://api.example.org/accounts/?page=4",
+						"format": "uri",
+						"nullable": true,
+						"type": "string"
+					},
+					"previous": {
+						"example": "http://api.example.org/accounts/?page=2",
+						"format": "uri",
+						"nullable": true,
+						"type": "string"
+					},
+					"results": {
+						"items": {
+							"$ref": "#/components/schemas/MailAccount"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"count",
+					"results"
+				],
+				"type": "object"
+			},
+			"PaginatedMailRuleList": {
+				"properties": {
+					"count": {
+						"example": 123,
+						"type": "integer"
+					},
+					"next": {
+						"example": "http://api.example.org/accounts/?page=4",
+						"format": "uri",
+						"nullable": true,
+						"type": "string"
+					},
+					"previous": {
+						"example": "http://api.example.org/accounts/?page=2",
+						"format": "uri",
+						"nullable": true,
+						"type": "string"
+					},
+					"results": {
+						"items": {
+							"$ref": "#/components/schemas/MailRule"
 						},
 						"type": "array"
 					}
@@ -1550,6 +2248,201 @@
 				},
 				"type": "object"
 			},
+			"PatchedMailRuleRequest": {
+				"properties": {
+					"account": {
+						"type": "integer"
+					},
+					"action": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/MailRuleActionEnum"
+							}
+						],
+						"maximum": 9223372036854775807,
+						"minimum": 0
+					},
+					"action_parameter": {
+						"default": "",
+						"minLength": 1,
+						"nullable": true,
+						"type": "string"
+					},
+					"assign_correspondent": {
+						"nullable": true,
+						"type": "integer"
+					},
+					"assign_correspondent_from": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/AssignCorrespondentFromEnum"
+							}
+						],
+						"maximum": 9223372036854775807,
+						"minimum": 0
+					},
+					"assign_document_type": {
+						"nullable": true,
+						"type": "integer"
+					},
+					"assign_owner_from_rule": {
+						"title": "Assign the rule owner to documents",
+						"type": "boolean"
+					},
+					"assign_tags": {
+						"items": {
+							"nullable": true,
+							"type": "integer"
+						},
+						"type": "array"
+					},
+					"assign_title_from": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/AssignTitleFromEnum"
+							}
+						],
+						"maximum": 9223372036854775807,
+						"minimum": 0
+					},
+					"attachment_type": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/AttachmentTypeEnum"
+							}
+						],
+						"description": "Inline attachments include embedded images, so it's best to combine this option with a filename filter.\n\n* `1` - Only process attachments.\n* `2` - Process all files, including 'inline' attachments.",
+						"maximum": 9223372036854775807,
+						"minimum": 0
+					},
+					"consumption_scope": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/ConsumptionScopeEnum"
+							}
+						],
+						"maximum": 9223372036854775807,
+						"minimum": 0
+					},
+					"enabled": {
+						"type": "boolean"
+					},
+					"filter_attachment_filename_exclude": {
+						"description": "Do not consume documents which entirely match this filename if specified. Wildcards such as *.pdf or *invoice* are allowed. Case insensitive.",
+						"maxLength": 256,
+						"nullable": true,
+						"title": "Filter attachment filename exclusive",
+						"type": "string"
+					},
+					"filter_attachment_filename_include": {
+						"description": "Only consume documents which entirely match this filename if specified. Wildcards such as *.pdf or *invoice* are allowed. Case insensitive.",
+						"maxLength": 256,
+						"nullable": true,
+						"title": "Filter attachment filename inclusive",
+						"type": "string"
+					},
+					"filter_body": {
+						"maxLength": 256,
+						"nullable": true,
+						"type": "string"
+					},
+					"filter_from": {
+						"maxLength": 256,
+						"nullable": true,
+						"type": "string"
+					},
+					"filter_subject": {
+						"maxLength": 256,
+						"nullable": true,
+						"type": "string"
+					},
+					"filter_to": {
+						"maxLength": 256,
+						"nullable": true,
+						"type": "string"
+					},
+					"folder": {
+						"description": "Subfolders must be separated by a delimiter, often a dot ('.') or slash ('/'), but it varies by mail server.",
+						"maxLength": 256,
+						"minLength": 1,
+						"type": "string"
+					},
+					"maximum_age": {
+						"description": "Specified in days.",
+						"format": "int64",
+						"maximum": 9223372036854775807,
+						"minimum": 0,
+						"type": "integer"
+					},
+					"name": {
+						"maxLength": 256,
+						"minLength": 1,
+						"type": "string"
+					},
+					"order": {
+						"type": "integer"
+					},
+					"owner": {
+						"nullable": true,
+						"type": "integer"
+					},
+					"pdf_layout": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/PdfLayoutEnum"
+							}
+						],
+						"maximum": 9223372036854775807,
+						"minimum": 0
+					},
+					"set_permissions": {
+						"properties": {
+							"change": {
+								"properties": {
+									"groups": {
+										"items": {
+											"type": "integer"
+										},
+										"type": "array"
+									},
+									"users": {
+										"items": {
+											"type": "integer"
+										},
+										"type": "array"
+									}
+								},
+								"type": "object"
+							},
+							"view": {
+								"properties": {
+									"groups": {
+										"items": {
+											"type": "integer"
+										},
+										"type": "array"
+									},
+									"users": {
+										"items": {
+											"type": "integer"
+										},
+										"type": "array"
+									}
+								},
+								"type": "object"
+							}
+						},
+						"type": "object",
+						"writeOnly": true
+					},
+					"stop_processing": {
+						"description": "If True, no further rules will be processed after this one if any document is queued.",
+						"title": "Stop processing further rules",
+						"type": "boolean"
+					}
+				},
+				"type": "object"
+			},
 			"PatchedStoragePathRequest": {
 				"properties": {
 					"is_insensitive": {
@@ -1706,6 +2599,17 @@
 					}
 				},
 				"type": "object"
+			},
+			"PdfLayoutEnum": {
+				"description": "* `0` - System default\n* `1` - Text, then HTML\n* `2` - HTML, then text\n* `3` - HTML only\n* `4` - Text only",
+				"enum": [
+					0,
+					1,
+					2,
+					3,
+					4
+				],
+				"type": "integer"
 			},
 			"PostDocumentRequest": {
 				"properties": {
@@ -4901,6 +5805,474 @@
 				],
 				"tags": [
 					"documents"
+				]
+			}
+		},
+		"/api/mail_accounts/": {
+			"get": {
+				"description": "Pass a user object to serializer",
+				"operationId": "mail_accounts_list",
+				"parameters": [
+					{
+						"description": "A page number within the paginated result set.",
+						"in": "query",
+						"name": "page",
+						"required": false,
+						"schema": {
+							"type": "integer"
+						}
+					},
+					{
+						"description": "Number of results to return per page.",
+						"in": "query",
+						"name": "page_size",
+						"required": false,
+						"schema": {
+							"type": "integer"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/PaginatedMailAccountList"
+								}
+							}
+						},
+						"description": ""
+					}
+				},
+				"security": [
+					{
+						"PaperelessBasicAuthentication": []
+					},
+					{
+						"tokenAuth": []
+					},
+					{
+						"cookieAuth": []
+					}
+				],
+				"tags": [
+					"mail_accounts"
+				]
+			},
+			"post": {
+				"description": "Pass a user object to serializer",
+				"operationId": "mail_accounts_create",
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/MailAccountRequest"
+							}
+						},
+						"application/x-www-form-urlencoded": {
+							"schema": {
+								"$ref": "#/components/schemas/MailAccountRequest"
+							}
+						},
+						"multipart/form-data": {
+							"schema": {
+								"$ref": "#/components/schemas/MailAccountRequest"
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"201": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/MailAccount"
+								}
+							}
+						},
+						"description": ""
+					}
+				},
+				"security": [
+					{
+						"PaperelessBasicAuthentication": []
+					},
+					{
+						"tokenAuth": []
+					},
+					{
+						"cookieAuth": []
+					}
+				],
+				"tags": [
+					"mail_accounts"
+				]
+			}
+		},
+		"/api/mail_accounts/{id}/process/": {
+			"post": {
+				"description": "Manually process the selected mail account for new messages.",
+				"operationId": "mail_account_process",
+				"parameters": [
+					{
+						"description": "A unique integer value identifying this mail account.",
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "integer"
+						}
+					}
+				],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/MailAccountRequest"
+							}
+						},
+						"application/x-www-form-urlencoded": {
+							"schema": {
+								"$ref": "#/components/schemas/MailAccountRequest"
+							}
+						},
+						"multipart/form-data": {
+							"schema": {
+								"$ref": "#/components/schemas/MailAccountRequest"
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/MailAccountProcessResponse"
+								}
+							}
+						},
+						"description": ""
+					},
+					"404": {
+						"description": "No response body"
+					}
+				},
+				"security": [
+					{
+						"PaperelessBasicAuthentication": []
+					},
+					{
+						"tokenAuth": []
+					},
+					{
+						"cookieAuth": []
+					}
+				],
+				"tags": [
+					"mail_accounts"
+				]
+			}
+		},
+		"/api/mail_rules/": {
+			"get": {
+				"description": "Pass a user object to serializer",
+				"operationId": "mail_rules_list",
+				"parameters": [
+					{
+						"description": "A page number within the paginated result set.",
+						"in": "query",
+						"name": "page",
+						"required": false,
+						"schema": {
+							"type": "integer"
+						}
+					},
+					{
+						"description": "Number of results to return per page.",
+						"in": "query",
+						"name": "page_size",
+						"required": false,
+						"schema": {
+							"type": "integer"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/PaginatedMailRuleList"
+								}
+							}
+						},
+						"description": ""
+					}
+				},
+				"security": [
+					{
+						"PaperelessBasicAuthentication": []
+					},
+					{
+						"tokenAuth": []
+					},
+					{
+						"cookieAuth": []
+					}
+				],
+				"tags": [
+					"mail_rules"
+				]
+			},
+			"post": {
+				"description": "Pass a user object to serializer",
+				"operationId": "mail_rules_create",
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/MailRuleRequest"
+							}
+						},
+						"application/x-www-form-urlencoded": {
+							"schema": {
+								"$ref": "#/components/schemas/MailRuleRequest"
+							}
+						},
+						"multipart/form-data": {
+							"schema": {
+								"$ref": "#/components/schemas/MailRuleRequest"
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"201": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/MailRule"
+								}
+							}
+						},
+						"description": ""
+					}
+				},
+				"security": [
+					{
+						"PaperelessBasicAuthentication": []
+					},
+					{
+						"tokenAuth": []
+					},
+					{
+						"cookieAuth": []
+					}
+				],
+				"tags": [
+					"mail_rules"
+				]
+			}
+		},
+		"/api/mail_rules/{id}/": {
+			"delete": {
+				"description": "Pass a user object to serializer",
+				"operationId": "mail_rules_destroy",
+				"parameters": [
+					{
+						"description": "A unique integer value identifying this mail rule.",
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "integer"
+						}
+					}
+				],
+				"responses": {
+					"204": {
+						"description": "No response body"
+					}
+				},
+				"security": [
+					{
+						"PaperelessBasicAuthentication": []
+					},
+					{
+						"tokenAuth": []
+					},
+					{
+						"cookieAuth": []
+					}
+				],
+				"tags": [
+					"mail_rules"
+				]
+			},
+			"get": {
+				"description": "Pass a user object to serializer",
+				"operationId": "mail_rules_retrieve",
+				"parameters": [
+					{
+						"description": "A unique integer value identifying this mail rule.",
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "integer"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/MailRule"
+								}
+							}
+						},
+						"description": ""
+					}
+				},
+				"security": [
+					{
+						"PaperelessBasicAuthentication": []
+					},
+					{
+						"tokenAuth": []
+					},
+					{
+						"cookieAuth": []
+					}
+				],
+				"tags": [
+					"mail_rules"
+				]
+			},
+			"patch": {
+				"description": "Pass a user object to serializer",
+				"operationId": "mail_rules_partial_update",
+				"parameters": [
+					{
+						"description": "A unique integer value identifying this mail rule.",
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "integer"
+						}
+					}
+				],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/PatchedMailRuleRequest"
+							}
+						},
+						"application/x-www-form-urlencoded": {
+							"schema": {
+								"$ref": "#/components/schemas/PatchedMailRuleRequest"
+							}
+						},
+						"multipart/form-data": {
+							"schema": {
+								"$ref": "#/components/schemas/PatchedMailRuleRequest"
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/MailRule"
+								}
+							}
+						},
+						"description": ""
+					}
+				},
+				"security": [
+					{
+						"PaperelessBasicAuthentication": []
+					},
+					{
+						"tokenAuth": []
+					},
+					{
+						"cookieAuth": []
+					}
+				],
+				"tags": [
+					"mail_rules"
+				]
+			},
+			"put": {
+				"description": "Pass a user object to serializer",
+				"operationId": "mail_rules_update",
+				"parameters": [
+					{
+						"description": "A unique integer value identifying this mail rule.",
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"type": "integer"
+						}
+					}
+				],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/MailRuleRequest"
+							}
+						},
+						"application/x-www-form-urlencoded": {
+							"schema": {
+								"$ref": "#/components/schemas/MailRuleRequest"
+							}
+						},
+						"multipart/form-data": {
+							"schema": {
+								"$ref": "#/components/schemas/MailRuleRequest"
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/MailRule"
+								}
+							}
+						},
+						"description": ""
+					}
+				},
+				"security": [
+					{
+						"PaperelessBasicAuthentication": []
+					},
+					{
+						"tokenAuth": []
+					},
+					{
+						"cookieAuth": []
+					}
+				],
+				"tags": [
+					"mail_rules"
 				]
 			}
 		},
