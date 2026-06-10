@@ -51,7 +51,8 @@ tags/correspondent/type — the bulk endpoint has no `set_title` method.
 | `id`      | number | yes      | Document the note belongs to      |
 | `note_id` | number | yes      | From the document's `notes` array |
 
-Returns the remaining notes.
+Returns the remaining notes. Notes are an append-only log (no edit operation
+exists upstream) — prefer appending a correction note over deleting.
 
 ### post_document
 
