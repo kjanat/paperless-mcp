@@ -56,18 +56,23 @@ exists upstream) — prefer appending a correction note over deleting.
 
 ### post_document
 
-| Param                   | Type     | Required | Notes                           |
-| ----------------------- | -------- | -------- | ------------------------------- |
-| `file`                  | string   | yes      | Base64-encoded file content     |
-| `filename`              | string   | yes      | With extension: `"invoice.pdf"` |
-| `title`                 | string   | no       | Auto-extracted if omitted       |
-| `created`               | string   | no       | ISO date: `YYYY-MM-DD`          |
-| `correspondent`         | number   | no       | Correspondent ID                |
-| `document_type`         | number   | no       | Document type ID                |
-| `storage_path`          | number   | no       | Storage path ID                 |
-| `tags`                  | number[] | no       | Array of tag IDs                |
-| `archive_serial_number` | integer  | no       | External filing reference (≥0)  |
-| `custom_fields`         | number[] | no       | Custom field IDs                |
+| Param                   | Type     | Required | Notes                                                |
+| ----------------------- | -------- | -------- | ---------------------------------------------------- |
+| `file_path`             | string   | no*      | Local path on the MCP server machine; supports `~`   |
+| `file`                  | string   | no*      | Base64-encoded content; small files only             |
+| `filename`              | string   | no       | Required with `file`; defaults to basename otherwise |
+| `title`                 | string   | no       | Auto-extracted if omitted                            |
+| `created`               | string   | no       | ISO date: `YYYY-MM-DD`                               |
+| `correspondent`         | number   | no       | Correspondent ID                                     |
+| `document_type`         | number   | no       | Document type ID                                     |
+| `storage_path`          | number   | no       | Storage path ID                                      |
+| `tags`                  | number[] | no       | Array of tag IDs                                     |
+| `archive_serial_number` | integer  | no       | External filing reference (≥0)                       |
+| `custom_fields`         | number[] | no       | Custom field IDs                                     |
+
+\* Provide exactly one of `file_path` (preferred: server reads from its own
+filesystem, any size; stdio transport only) or `file` (inline base64 through
+the model).
 
 ### download_document
 

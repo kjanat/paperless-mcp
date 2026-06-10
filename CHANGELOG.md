@@ -11,6 +11,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- `post_document` accepts a `file_path` parameter as the preferred alternative
+  to inline base64: the MCP server reads the file from its own filesystem
+  (supports a leading `~`), so large PDFs never pass through the model's
+  context window. `filename` defaults to the path's basename. Inline `file`
+  (base64) remains supported for clients without a shared filesystem; exactly
+  one of the two must be provided. `file_path` is honoured on the stdio
+  transport only; the HTTP transport rejects it, since the path would resolve
+  on the server host and would let any reachable client upload
+  server-readable files.
 - **Storage paths**: `bulk_edit_storage_paths` tool — set permissions on or
   permanently delete multiple storage paths via `/api/bulk_edit_objects/`
   (`object_type: storage_paths`), same shape as `bulk_edit_tags`. Storage

@@ -22,7 +22,7 @@ Orchestrate Paperless-ngx through 32 MCP tools across 7 domains.
 | `get_document`         | Full details     | `id`                                                            |
 | `update_document`      | Patch single doc | `id`, `title`, `archive_serial_number`, `custom_fields`, `note` |
 | `delete_document_note` | Remove a note    | `id`, `note_id`                                                 |
-| `post_document`        | Upload file      | `file` (base64), `filename`, metadata                           |
+| `post_document`        | Upload file      | `file_path` (local) or `file` (base64), metadata                |
 | `download_document`    | Get file base64  | `id`, `original` (bool)                                         |
 | `bulk_edit_documents`  | Batch operations | `documents` (IDs), `method`, params                             |
 
@@ -124,8 +124,9 @@ What operation?
    ├─ list_tags            → find or create_tag
    ├─ list_correspondents  → find or create_correspondent
    └─ list_document_types  → find or create_document_type
-2. post_document(file=<base64>, filename="name.pdf", tags=[...], correspondent=ID, ...)
+2. post_document(file_path="~/Downloads/name.pdf", tags=[...], correspondent=ID, ...)
    → returns a task UUID, not a document ID
+   (file=<base64> + filename also works, but only for small files)
 3. get_task(task_id=<uuid>) until status="SUCCESS"
    → related_document holds the new document ID
 ```
@@ -153,7 +154,10 @@ Need to change metadata objects?
 
 - **search_documents strips `content`** to save tokens. Use `get_document` for
   full OCR text.
-- **post_document requires base64** file content, not file paths.
+- **post_document prefers `file_path`**: the MCP server reads the file from
+  its own filesystem, so size doesn't matter. Inline base64 (`file` +
+  `filename`) passes through the model: small files only. `file_path` works
+  on the stdio transport only; the HTTP transport rejects it.
 - **matching_algorithm** is integer `0-6` across all endpoints (tags,
   correspondents, document types): `0`=none, `1`=any, `2`=all, `3`=exact,
   `4`=regex, `5`=fuzzy, `6`=auto. See [tools.md](references/tools.md).
