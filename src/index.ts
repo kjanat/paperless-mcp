@@ -128,10 +128,10 @@ function tokenArg() {
 }
 
 /** Build a fresh MCP server with every Paperless-ngx tool group registered. */
-function createServer(api: PaperlessAPI): McpServer {
+function createServer(api: PaperlessAPI, options: { allowFilePath: boolean }): McpServer {
 	const server = new McpServer({ name: SERVER_NAME, version: pkg.version });
 
-	registerDocumentTools(server, api);
+	registerDocumentTools(server, api, options);
 	registerTagTools(server, api);
 	registerCorrespondentTools(server, api);
 	registerDocumentTypeTools(server, api);
@@ -157,7 +157,8 @@ async function handleMcpHttpRequest(
 	});
 
 	try {
-		const server = createServer(api);
+		// HTTP: file_path is disabled; paths would resolve on the server host.
+		const server = createServer(api, { allowFilePath: false });
 		await server.connect(transport);
 		await transport.handleRequest(req, res, req.body);
 	} catch (error: unknown) {
@@ -242,7 +243,7 @@ const serve = command('paperless-mcp')
 				clearTimeout(forceClose);
 			});
 		} else {
-			const server = createServer(api);
+			const server = createServer(api, { allowFilePath: true });
 			const transport = new StdioServerTransport();
 			await server.connect(transport);
 

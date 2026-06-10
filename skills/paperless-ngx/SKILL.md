@@ -154,10 +154,10 @@ Need to change metadata objects?
 
 - **search_documents strips `content`** to save tokens. Use `get_document` for
   full OCR text.
-- **post_document prefers `file_path`** — the MCP server reads the file from
+- **post_document prefers `file_path`**: the MCP server reads the file from
   its own filesystem, so size doesn't matter. Inline base64 (`file` +
-  `filename`) passes through the model: small files only. With the HTTP
-  transport, `file_path` resolves on the server host, not the client.
+  `filename`) passes through the model: small files only. `file_path` works
+  on the stdio transport only; the HTTP transport rejects it.
 - **matching_algorithm** is integer `0-6` across all endpoints (tags,
   correspondents, document types): `0`=none, `1`=any, `2`=all, `3`=exact,
   `4`=regex, `5`=fuzzy, `6`=auto. See [tools.md](references/tools.md).

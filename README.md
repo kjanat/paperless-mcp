@@ -251,7 +251,8 @@ PDFs never pass through the model) or as inline base64 (`file`).
 Parameters:
 
 - `file_path`: Path to a file on the machine running the MCP server (supports
-  a leading `~`). With the HTTP transport the path resolves on the server host.
+  a leading `~`). Stdio transport only: the HTTP transport rejects it, since
+  the path would resolve on the server host.
 - `file`: Base64 encoded file content (alternative to `file_path`; only
   practical for small files)
 - `filename`: Name of the file — required with `file`, defaults to the

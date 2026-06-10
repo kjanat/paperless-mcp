@@ -10,7 +10,20 @@ import type { PaperlessAPI } from '#api/paperless';
 import { jsonResult } from '#tools/utils';
 import type { PostDocumentMetadata } from '#types';
 
-export function registerDocumentTools(server: McpServer, api: PaperlessAPI): void {
+export interface DocumentToolOptions {
+	/**
+	 * Whether post_document may read local files via file_path. True on the
+	 * stdio transport (single local user); false on HTTP, where any reachable
+	 * client could exfiltrate server-readable files into Paperless.
+	 */
+	readonly allowFilePath: boolean;
+}
+
+export function registerDocumentTools(
+	server: McpServer,
+	api: PaperlessAPI,
+	options: DocumentToolOptions,
+): void {
 	server.registerTool(
 		'bulk_edit_documents',
 		{
@@ -150,7 +163,7 @@ export function registerDocumentTools(server: McpServer, api: PaperlessAPI): voi
 				'Upload a new document to Paperless-ngx with metadata. Supports PDF, images (PNG/JPG/TIFF), and text files. Automatically processes for OCR and indexing. Provide the file either as a local path (file_path — preferred, the server reads it directly so size does not matter) or as inline base64 (file).',
 			inputSchema: {
 				file_path: z.string().optional().describe(
-					"Path to the file on the machine running this MCP server (with stdio transport: the local machine). Preferred for real files — the server reads it directly, so large PDFs never pass through the model. Supports a leading '~'. Note: with the HTTP transport the path resolves on the server host. Provide either this or file, not both.",
+					"Path to the file on the machine running this MCP server (with stdio transport: the local machine). Preferred for real files: the server reads it directly, so large PDFs never pass through the model. Supports a leading '~'. Only available on the stdio transport; the HTTP transport rejects it. Provide either this or file, not both.",
 				),
 
 				file: z.string().optional().describe(
@@ -195,6 +208,11 @@ export function registerDocumentTools(server: McpServer, api: PaperlessAPI): voi
 			},
 		},
 		async (args, _extra) => {
+			if (args.file_path != null && !options.allowFilePath) {
+				throw new Error(
+					"'file_path' is not available on the HTTP transport (the path would resolve on the server host, letting any client upload server-readable files). Use inline base64 'file' + 'filename', or run the stdio transport.",
+				);
+			}
 			if (args.file_path != null && args.file != null) {
 				throw new Error("Provide either 'file_path' or 'file' (base64), not both.");
 			}

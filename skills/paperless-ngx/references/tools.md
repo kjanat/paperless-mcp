@@ -70,8 +70,9 @@ exists upstream) — prefer appending a correction note over deleting.
 | `archive_serial_number` | integer  | no       | External filing reference (≥0)                       |
 | `custom_fields`         | number[] | no       | Custom field IDs                                     |
 
-\* Provide exactly one of `file_path` (preferred — server reads from its own
-filesystem, any size) or `file` (inline base64 through the model).
+\* Provide exactly one of `file_path` (preferred: server reads from its own
+filesystem, any size; stdio transport only) or `file` (inline base64 through
+the model).
 
 ### download_document
 
