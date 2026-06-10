@@ -18,6 +18,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   (base64) remains supported for clients without a shared filesystem; exactly
   one of the two must be provided. Note: with the HTTP transport, `file_path`
   resolves on the server host.
+- **Storage paths**: `bulk_edit_storage_paths` tool — set permissions on or
+  permanently delete multiple storage paths via `/api/bulk_edit_objects/`
+  (`object_type: storage_paths`), same shape as `bulk_edit_tags`. Storage
+  paths previously had no deletion path at all from MCP
+  ([#18](https://github.com/kjanat/paperless-mcp/issues/18)). Deleting a
+  storage path does not delete documents — they fall back to the default
+  storage location.
+- **Custom fields**: `delete_custom_field` tool wrapping
+  `DELETE /api/custom_fields/{id}/` via the new
+  `PaperlessAPI.deleteCustomField()`. Single-delete only: `custom_fields` is
+  not in the backend's `ObjectTypeEnum`, so a `bulk_edit_custom_fields`
+  consistent with the other taxonomies is impossible upstream. Deletion is
+  permanent and drops the field's values from every document that uses it
+  ([#18](https://github.com/kjanat/paperless-mcp/issues/18)).
 
 ## [2.7.1] - 2026-06-10
 

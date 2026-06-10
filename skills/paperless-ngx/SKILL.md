@@ -10,7 +10,7 @@ metadata:
 
 # Paperless-ngx Document Management
 
-Orchestrate Paperless-ngx through 30 MCP tools across 7 domains.
+Orchestrate Paperless-ngx through 32 MCP tools across 7 domains.
 
 ## Tool Catalog
 
@@ -57,21 +57,23 @@ Orchestrate Paperless-ngx through 30 MCP tools across 7 domains.
 | `update_document_type`     | Modify name/matching rules |
 | `bulk_edit_document_types` | Batch permissions/delete   |
 
-### Storage Paths (3 tools)
+### Storage Paths (4 tools)
 
-| Tool                  | Operation                      |
-| --------------------- | ------------------------------ |
-| `list_storage_paths`  | All storage paths              |
-| `create_storage_path` | New path template + auto-match |
-| `update_storage_path` | Modify name/template/matching  |
+| Tool                      | Operation                      |
+| ------------------------- | ------------------------------ |
+| `list_storage_paths`      | All storage paths              |
+| `create_storage_path`     | New path template + auto-match |
+| `update_storage_path`     | Modify name/template/matching  |
+| `bulk_edit_storage_paths` | Batch permissions/delete       |
 
-### Custom Fields (3 tools)
+### Custom Fields (4 tools)
 
-| Tool                  | Operation                     |
-| --------------------- | ----------------------------- |
-| `list_custom_fields`  | All field definitions + IDs   |
-| `create_custom_field` | New field (name + data type)  |
-| `update_custom_field` | Modify name/data type/options |
+| Tool                  | Operation                                |
+| --------------------- | ---------------------------------------- |
+| `list_custom_fields`  | All field definitions + IDs              |
+| `create_custom_field` | New field (name + data type)             |
+| `update_custom_field` | Modify name/data type/options            |
+| `delete_custom_field` | Delete one field + its values everywhere |
 
 ### Tasks (1 tool)
 
@@ -143,7 +145,9 @@ Need to change metadata objects?
 ├─ Edit type         → update_document_type(id, name, match, matching_algorithm)
 ├─ Edit storage path → update_storage_path(id, name, path, match, matching_algorithm)
 ├─ Edit custom field → update_custom_field(id, name, data_type, extra_data)
-├─ Batch delete/perm → bulk_edit_tags / bulk_edit_correspondents / bulk_edit_document_types
+├─ Batch delete/perm → bulk_edit_tags / bulk_edit_correspondents /
+│                      bulk_edit_document_types / bulk_edit_storage_paths
+└─ Del custom field  → delete_custom_field(id)  !! drops values from all docs !!
 ```
 
 ## Critical Notes
@@ -183,7 +187,11 @@ Need to change metadata objects?
   name → numeric ID there before calling `update_document.custom_fields` or
   `bulk_edit_documents.modify_custom_fields`.
 - **delete_tag is deprecated** (removal in v3.0.0) — use `bulk_edit_tags` with
-  `operation="delete"`, consistent with correspondents and document types.
+  `operation="delete"`, consistent with correspondents, document types, and
+  storage paths.
+- **delete_custom_field is single-delete only** — the backend has no bulk
+  endpoint for custom fields. Deletion is permanent and drops the field's
+  values from every document that uses it.
 
 ## References
 

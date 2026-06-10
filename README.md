@@ -619,6 +619,26 @@ update_storage_path({
 });
 ```
 
+#### `bulk_edit_storage_paths`
+
+Bulk set permissions or delete multiple storage paths. Deleting a storage path
+does not delete documents — they fall back to the default storage location.
+
+Parameters:
+
+- `storage_path_ids`: Array of storage path IDs
+- `operation`: "set_permissions" or "delete"
+- `owner` (optional): User ID (for set_permissions)
+- `permissions` (optional): Object with view/change user and group IDs
+- `merge` (optional): Merge with existing permissions (default false)
+
+```typescript
+bulk_edit_storage_paths({
+  storage_path_ids: [1, 2],
+  operation: "delete",
+});
+```
+
 </details>
 <details>
 <summary>Custom Field Operations</summary>
@@ -668,6 +688,25 @@ Parameters:
 update_custom_field({
   id: 7,
   name: "Invoice No.",
+});
+```
+
+#### `delete_custom_field`
+
+Permanently delete a custom field definition via
+`DELETE /api/custom_fields/{id}/`. Removes the field and all its values from
+every document that uses it. Cannot be undone.
+
+Single-delete only: the backend has no bulk endpoint for custom fields
+(unlike tags, correspondents, document types, and storage paths).
+
+Parameters:
+
+- `id`: Custom field ID
+
+```typescript
+delete_custom_field({
+  id: 7,
 });
 ```
 

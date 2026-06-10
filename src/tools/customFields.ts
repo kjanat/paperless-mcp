@@ -68,4 +68,20 @@ export function registerCustomFieldTools(server: McpServer, api: PaperlessAPI): 
 			return jsonResult(await api.updateCustomField(id, data));
 		},
 	);
+
+	server.registerTool(
+		'delete_custom_field',
+		{
+			description:
+				'Permanently delete a custom field definition. This removes the field and all its values from every document that uses it. Cannot be undone. Single-delete only: the backend has no bulk endpoint for custom fields (unlike tags, correspondents, document types, and storage paths).',
+			inputSchema: {
+				id: z.number().int().min(1).describe(
+					'ID of the custom field to permanently delete. This will drop the field and its values from all documents. Use list_custom_fields to find field IDs.',
+				),
+			},
+		},
+		async ({ id }, _extra) => {
+			return jsonResult(await api.deleteCustomField(id));
+		},
+	);
 }

@@ -343,6 +343,10 @@ export class PaperlessAPI {
 		});
 	}
 
+	async deleteCustomField(id: number): Promise<void> {
+		await this.request(`/custom_fields/${id}/`, { method: 'DELETE' });
+	}
+
 	// Task operations
 
 	async getTask(taskId: string): Promise<readonly PaperlessTask[]> {
