@@ -5,24 +5,25 @@ license: MIT
 compatibility: Requires a running Paperless-ngx instance with API token. MCP server must be connected with mcp_paperless_* tools available.
 metadata:
   author: kjanat
-  version: "2.4.0"
+  version: "2.5.0"
 ---
 
 # Paperless-ngx Document Management
 
-Orchestrate Paperless-ngx through 16 MCP tools across 4 domains.
+Orchestrate Paperless-ngx through 17 MCP tools across 4 domains.
 
 ## Tool Catalog
 
-### Documents (5 tools)
+### Documents (6 tools)
 
-| Tool                  | Operation        | Key Params                            |
-| --------------------- | ---------------- | ------------------------------------- |
-| `search_documents`    | Full-text search | `query`, `page`, `page_size`          |
-| `get_document`        | Full details     | `id`                                  |
-| `post_document`       | Upload file      | `file` (base64), `filename`, metadata |
-| `download_document`   | Get file base64  | `id`, `original` (bool)               |
-| `bulk_edit_documents` | Batch operations | `documents` (IDs), `method`, params   |
+| Tool                  | Operation        | Key Params                                                      |
+| --------------------- | ---------------- | --------------------------------------------------------------- |
+| `search_documents`    | Full-text search | `query`, `page`, `page_size`                                    |
+| `get_document`        | Full details     | `id`                                                            |
+| `update_document`     | Patch single doc | `id`, `title`, `archive_serial_number`, `custom_fields`, `note` |
+| `post_document`       | Upload file      | `file` (base64), `filename`, metadata                           |
+| `download_document`   | Get file base64  | `id`, `original` (bool)                                         |
+| `bulk_edit_documents` | Batch operations | `documents` (IDs), `method`, params                             |
 
 ### Tags (5 tools)
 
@@ -69,6 +70,10 @@ What do you know?
 
 ```txt
 What operation?
+├─ Rename title    → update_document(id=N, title="...")
+├─ Set/clear ASN   → update_document(id=N, archive_serial_number=N|null)
+├─ Custom fields   → update_document(id=N, custom_fields=[{field, value}])
+├─ Add note        → update_document(id=N, note="...")
 ├─ Add tag         → bulk_edit_documents(method="add_tag", tag=ID)
 ├─ Remove tag      → bulk_edit_documents(method="remove_tag", tag=ID)
 ├─ Multi-tag       → bulk_edit_documents(method="modify_tags", add_tags=[...], remove_tags=[...])
@@ -118,6 +123,10 @@ Need to change metadata objects?
 - **bulk_edit_documents** accepts top-level MCP fields, but Paperless receives a
   nested `parameters` object internally. The MCP tool forwards only the fields
   relevant to the selected `method`.
+- **update_document** is single-document only (title/ASN/custom fields/note).
+  The backend bulk endpoint has no `set_title` method — use `update_document`
+  to rename; keep tags/correspondent/type in `bulk_edit_documents`. `note`
+  appends a note (notes live on a separate Paperless endpoint internally).
 
 ## References
 

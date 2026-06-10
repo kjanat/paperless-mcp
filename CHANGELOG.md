@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.5.0] - 2026-06-10
+
+### Added
+
+- `update_document` tool wrapping `PATCH /api/documents/{id}/` — rename a
+  document's title, set or clear its archive serial number, set custom field
+  values, and add a note on a single document. The backend bulk endpoint has no
+  `set_title` method, so titles could previously only be changed in the web UI
+  ([#11](https://github.com/kjanat/paperless-mcp/issues/11)). Input schema is
+  derived from the generated `zPatchedDocumentRequestWritable`; `note` fans out
+  to `POST /api/documents/{id}/notes/` internally since Paperless manages notes
+  on a separate endpoint.
+
 ## [2.4.0] - 2026-06-07
 
 ### Changed
@@ -279,7 +292,8 @@ Major rewrite of internals while preserving the same MCP tool surface.
 - Smithery configuration (broken `smithery.yaml`).
 - Obsolete Cursor rules.
 
-[Unreleased]: https://github.com/kjanat/paperless-mcp/compare/v2.4.0...HEAD
+[Unreleased]: https://github.com/kjanat/paperless-mcp/compare/v2.5.0...HEAD
+[2.5.0]: https://github.com/kjanat/paperless-mcp/compare/v2.4.0...v2.5.0
 [2.4.0]: https://github.com/kjanat/paperless-mcp/compare/v2.3.2...v2.4.0
 [2.3.2]: https://github.com/kjanat/paperless-mcp/compare/v2.3.1...v2.3.2
 [2.3.1]: https://github.com/kjanat/paperless-mcp/compare/v2.3.0...v2.3.1

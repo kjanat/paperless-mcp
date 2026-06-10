@@ -8,11 +8,13 @@ import type {
 	Document,
 	DocumentType,
 	DocumentTypeRequest,
+	Note,
 	PaginatedDocumentList,
 	PaginatedList,
 	PostDocumentMetadata,
 	Tag,
 	TagRequest,
+	UpdateDocumentRequest,
 } from '#types';
 
 export class PaperlessAPI {
@@ -135,6 +137,20 @@ export class PaperlessAPI {
 
 	async getDocument(id: number): Promise<Document> {
 		return this.request<Document>(`/documents/${id}/`);
+	}
+
+	async updateDocument(id: number, data: UpdateDocumentRequest): Promise<Document> {
+		return this.request<Document>(`/documents/${id}/`, {
+			method: 'PATCH',
+			body: JSON.stringify(omitUndefined(data)),
+		});
+	}
+
+	async addDocumentNote(id: number, note: string): Promise<readonly Note[]> {
+		return this.request<readonly Note[]>(`/documents/${id}/notes/`, {
+			method: 'POST',
+			body: JSON.stringify({ note }),
+		});
 	}
 
 	async searchDocuments(

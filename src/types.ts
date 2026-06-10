@@ -113,6 +113,19 @@ export type PostDocumentMetadata = Override<
 	{ custom_fields?: readonly number[] }
 >;
 
+/**
+ * Request body for PATCH /documents/{id}/.
+ *
+ * Narrowed to the fields `update_document` exposes (title, archive serial
+ * number, custom fields). The generated PATCH schema allows more, but
+ * per-document mutation stays scoped to what `bulk_edit_documents` cannot do —
+ * tags/correspondent/type belong there, where the backend bulk-optimises them.
+ */
+export type UpdateDocumentRequest = Pick<
+	z.infer<typeof schemas.zPatchedDocumentRequestWritable>,
+	'title' | 'archive_serial_number' | 'custom_fields'
+>;
+
 // ---------------------------------------------------------------------------
 // Tag / Correspondent / Document Type (derived, no divergences)
 // ---------------------------------------------------------------------------
