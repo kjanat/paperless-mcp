@@ -659,6 +659,16 @@ describe('PaperlessAPI.updateCustomField', () => {
 	});
 });
 
+describe('PaperlessAPI.deleteCustomField', () => {
+	test('DELETEs /custom_fields/{id}/ and handles 204 No Content', async () => {
+		stubFetchRaw('', {}, 204);
+		await api.deleteCustomField(7);
+
+		expect(lastRequestUrl()).toBe(`${BASE_URL}/api/custom_fields/7/`);
+		expect(lastRequestInit().method).toBe('DELETE');
+	});
+});
+
 // ---------------------------------------------------------------------------
 // Task operations
 // ---------------------------------------------------------------------------
@@ -724,6 +734,17 @@ describe('PaperlessAPI.bulkEditObjects', () => {
 		expect(lastRequestBody()).toEqual({
 			objects: [5],
 			object_type: 'correspondents',
+			operation: 'delete',
+		});
+	});
+
+	test('supports storage_paths object type', async () => {
+		stubFetch({ result: 'ok' });
+		await api.bulkEditObjects([2, 4], 'storage_paths', 'delete');
+
+		expect(lastRequestBody()).toEqual({
+			objects: [2, 4],
+			object_type: 'storage_paths',
 			operation: 'delete',
 		});
 	});

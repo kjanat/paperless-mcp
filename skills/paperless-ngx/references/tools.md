@@ -1,6 +1,6 @@
 # MCP Tool Reference
 
-Full parameter signatures for all 30 Paperless-ngx MCP tools.
+Full parameter signatures for all 32 Paperless-ngx MCP tools.
 
 ## Contents
 
@@ -8,8 +8,8 @@ Full parameter signatures for all 30 Paperless-ngx MCP tools.
 - [Tag Tools](#tag-tools) — list, get, create, update, delete (deprecated), bulk_edit
 - [Correspondent Tools](#correspondent-tools) — list, get, create, update, bulk_edit
 - [Document Type Tools](#document-type-tools) — list, get, create, update, bulk_edit
-- [Storage Path Tools](#storage-path-tools) — list, create, update
-- [Custom Field Tools](#custom-field-tools) — list, create, update
+- [Storage Path Tools](#storage-path-tools) — list, create, update, bulk_edit
+- [Custom Field Tools](#custom-field-tools) — list, create, update, delete
 - [Task Tools](#task-tools) — get
 
 ## Document Tools
@@ -277,6 +277,22 @@ resolve a document's `storage_path` ID to a name.
 | `matching_algorithm` | int     | no       | `0`-`6` (same as create)           |
 | `is_insensitive`     | boolean | no       | Case-insensitive matching          |
 
+Single-path `PATCH /api/storage_paths/{id}/`. Use `bulk_edit_storage_paths`
+for permissions/deletion.
+
+### bulk_edit_storage_paths
+
+| Param              | Type     | Required | Notes                             |
+| ------------------ | -------- | -------- | --------------------------------- |
+| `storage_path_ids` | number[] | yes      | Storage path IDs                  |
+| `operation`        | enum     | yes      | `"set_permissions"` or `"delete"` |
+| `owner`            | number   | no       | For `set_permissions`             |
+| `permissions`      | object   | no       | Same shape as tags                |
+| `merge`            | boolean  | no       | Merge or replace permissions      |
+
+Deleting a storage path does not delete documents — they fall back to the
+default storage location.
+
 ## Custom Field Tools
 
 ### list_custom_fields
@@ -300,6 +316,15 @@ No parameters. Returns all field definitions with the numeric IDs that
 | `name`       | string | no       | New name                                     |
 | `data_type`  | enum   | no       | Changing type may invalidate existing values |
 | `extra_data` | object | no       | New options/config                           |
+
+### delete_custom_field
+
+| Param | Type   | Required | Notes                                               |
+| ----- | ------ | -------- | --------------------------------------------------- |
+| `id`  | number | yes      | Drops field + values from all documents. Permanent. |
+
+Single-delete only — the backend has no bulk endpoint for custom fields
+(`custom_fields` is not in `/api/bulk_edit_objects/`'s object types).
 
 ## Task Tools
 
