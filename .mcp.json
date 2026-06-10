@@ -1,0 +1,5 @@
+{
+	"mcpServers": {
+		"paperless": { "type": "stdio", "command": "bun", "args": ["mcp"] }
+	}
+}
