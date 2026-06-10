@@ -14,6 +14,7 @@ import type {
 	PostDocumentMetadata,
 	Tag,
 	TagRequest,
+	UpdateCorrespondentRequest,
 	UpdateDocumentRequest,
 } from '#types';
 
@@ -234,6 +235,16 @@ export class PaperlessAPI {
 		return this.request<Correspondent>('/correspondents/', {
 			method: 'POST',
 			body: JSON.stringify(data),
+		});
+	}
+
+	async updateCorrespondent(
+		id: number,
+		data: UpdateCorrespondentRequest,
+	): Promise<Correspondent> {
+		return this.request<Correspondent>(`/correspondents/${id}/`, {
+			method: 'PATCH',
+			body: JSON.stringify(omitUndefined(data)),
 		});
 	}
 

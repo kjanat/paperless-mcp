@@ -479,6 +479,25 @@ describe('PaperlessAPI.createCorrespondent', () => {
 	});
 });
 
+describe('PaperlessAPI.updateCorrespondent', () => {
+	test('PATCHes to /correspondents/{id}/', async () => {
+		stubFetch({ id: 9, name: 'ACME Corp', matching_algorithm: 3 });
+		const result = await api.updateCorrespondent(9, { match: 'ACME Corp Inc', matching_algorithm: 3 });
+
+		expect(lastRequestUrl()).toBe(`${BASE_URL}/api/correspondents/9/`);
+		expect(lastRequestInit().method).toBe('PATCH');
+		expect(lastRequestBody()).toEqual({ match: 'ACME Corp Inc', matching_algorithm: 3 });
+		expect(result.matching_algorithm).toBe(3);
+	});
+
+	test('omits undefined fields', async () => {
+		stubFetch({ id: 9 });
+		await api.updateCorrespondent(9, { name: 'Renamed', match: undefined });
+
+		expect(lastRequestBody()).toEqual({ name: 'Renamed' });
+	});
+});
+
 // ---------------------------------------------------------------------------
 // Document type operations
 // ---------------------------------------------------------------------------

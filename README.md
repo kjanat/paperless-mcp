@@ -389,6 +389,27 @@ create_correspondent({
 });
 ```
 
+#### `update_correspondent`
+
+Update an existing correspondent's name or matching rules via
+`PATCH /api/correspondents/{id}/`.
+
+Parameters:
+
+- `id`: Correspondent ID
+- `name` (optional): New correspondent name
+- `match` (optional): Text pattern to match (empty string removes auto-matching)
+- `matching_algorithm` (optional): Integer 0-6 (0=none, 1=any, 2=all, 3=exact, 4=regex, 5=fuzzy, 6=auto)
+- `is_insensitive` (optional): Whether matching is case-insensitive
+
+```typescript
+update_correspondent({
+  id: 9,
+  match: "ACME Corp Inc",
+  matching_algorithm: 3,
+});
+```
+
 #### `bulk_edit_correspondents`
 
 Bulk set permissions or delete multiple correspondents.

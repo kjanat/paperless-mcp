@@ -1,7 +1,7 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
 
-import { zMatchingAlgorithm, zOperationEnum } from '#api/generated/zod.gen';
+import { zMatchingAlgorithm, zOperationEnum, zPatchedCorrespondentRequestWritable } from '#api/generated/zod.gen';
 import type { PaperlessAPI } from '#api/paperless';
 import { jsonResult, permissionsInput } from '#tools/utils';
 
@@ -40,6 +40,36 @@ export function registerCorrespondentTools(server: McpServer, api: PaperlessAPI)
 		},
 		async (args, _extra) => {
 			return jsonResult(await api.createCorrespondent(args));
+		},
+	);
+
+	server.registerTool(
+		'update_correspondent',
+		{
+			description:
+				"Modify an existing correspondent's name or automatic matching rules. Useful for fixing an over-matching correspondent: narrow the match pattern or switch the matching algorithm. Use bulk_edit_correspondents for permissions or deletion.",
+			inputSchema: {
+				id: z.number().describe(
+					'ID of the correspondent to update. Use list_correspondents to find existing correspondent IDs.',
+				),
+
+				name: zPatchedCorrespondentRequestWritable.shape.name.describe(
+					'New correspondent name. Must be unique among all correspondents.',
+				),
+
+				match: zPatchedCorrespondentRequestWritable.shape.match.describe(
+					'Text pattern for automatic assignment. Empty string removes auto-matching. Use keywords, phrases, or regex depending on matching_algorithm.',
+				),
+
+				matching_algorithm: zMatchingAlgorithm.optional(),
+
+				is_insensitive: zPatchedCorrespondentRequestWritable.shape.is_insensitive.describe(
+					'Whether matching is case-insensitive.',
+				),
+			},
+		},
+		async ({ id, ...data }, _extra) => {
+			return jsonResult(await api.updateCorrespondent(id, data));
 		},
 	);
 
