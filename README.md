@@ -975,4 +975,21 @@ bun start --http --host 0.0.0.0 --allowed-hosts paperless.example.com,localhost
 - The server shuts down gracefully on `SIGINT`/`SIGTERM`, draining in-flight
   requests before exiting.
 
+#### Per-request Bearer auth (multi-user)
+
+With `--per-request-token` (or `PAPERLESS_MCP_PER_REQUEST_TOKEN=1`), the server
+holds no Paperless credentials. Every MCP request must carry that user's own
+token, which is forwarded to Paperless as-is, so Paperless permissions stay
+per-user behind one hosted MCP server:
+
+```bash
+# No token argument needed; clients authenticate themselves
+paperless-mcp http://localhost:8000 --http --per-request-token
+```
+
+Clients send `Authorization: Bearer <paperless-api-token>` on each request.
+Requests without it get a `401` with `WWW-Authenticate: Bearer`. There is no
+fallback to a shared token. Run this behind TLS (a reverse proxy): tokens
+travel in headers.
+
 <!--markdownlint-disable-file no-hard-tabs no-inline-html no-bare-urls-->
