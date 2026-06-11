@@ -1,6 +1,6 @@
 # MCP Tool Reference
 
-Full parameter signatures for all 36 Paperless-ngx MCP tools.
+Full parameter signatures for all 42 Paperless-ngx MCP tools.
 
 ## Contents
 
@@ -12,6 +12,7 @@ Full parameter signatures for all 36 Paperless-ngx MCP tools.
 - [Custom Field Tools](#custom-field-tools) — list, create, update, delete
 - [Task Tools](#task-tools) — get, list
 - [Trash Tools](#trash-tools) — list, restore, empty
+- [Mail Tools](#mail-tools) — accounts: list, process; rules: list, create, update, delete
 
 ## Document Tools
 
@@ -380,3 +381,60 @@ Restores documents to the archive with metadata intact.
 | `documents` | number[] | no       | Omit to purge the ENTIRE trash |
 
 **Permanent and irreversible.** This is the step that actually deletes files.
+
+## Mail Tools
+
+### list_mail_accounts
+
+No parameters. Returns polled mail accounts with credentials stripped.
+Account setup/credentials stay in the web UI.
+
+### process_mail_account
+
+| Param | Type   | Required | Notes                   |
+| ----- | ------ | -------- | ----------------------- |
+| `id`  | number | yes      | From list_mail_accounts |
+
+Triggers an immediate poll; resulting consume tasks appear in `list_tasks`.
+
+### list_mail_rules
+
+No parameters. Rules run in `order`; a rule can `stop_processing`.
+
+### create_mail_rule
+
+| Param                                | Type     | Required | Notes                                      |
+| ------------------------------------ | -------- | -------- | ------------------------------------------ |
+| `account`                            | number   | yes      | From list_mail_accounts                    |
+| `name`                               | string   | yes      | Unique rule name                           |
+| `folder`                             | string   | no       | Mailbox folder to watch                    |
+| `filter_from`                        | string   | no       | Sender contains                            |
+| `filter_to`                          | string   | no       | Recipient contains                         |
+| `filter_subject`                     | string   | no       | Subject contains                           |
+| `filter_body`                        | string   | no       | Body contains                              |
+| `filter_attachment_filename_include` | string   | no       | Wildcard pattern, e.g. `*.pdf`             |
+| `filter_attachment_filename_exclude` | string   | no       | Wildcard pattern                           |
+| `maximum_age`                        | int      | no       | Days; 0 = no limit                         |
+| `action`                             | enum     | no       | What happens to the email after processing |
+| `action_parameter`                   | string   | no       | E.g. target folder for move                |
+| `assign_tags`                        | number[] | no       | Tag IDs for consumed documents             |
+| `assign_correspondent`               | number   | no       | With assign_correspondent_from=from_custom |
+| `assign_document_type`               | number   | no       | Document type ID                           |
+| `enabled`                            | boolean  | no       | Disabled rules are skipped                 |
+| `order`                              | int      | no       | Lower runs first                           |
+| `stop_processing`                    | boolean  | no       | Stop rule chain after match                |
+
+Plus `assign_title_from`, `assign_correspondent_from`, `assign_owner_from_rule`,
+`consumption_scope`, `attachment_type`, `pdf_layout` (enums from the schema).
+New rules affect FUTURE mail polls only.
+
+### update_mail_rule
+
+Same fields as create, all optional, plus required `id`. Pause a rule with
+`enabled=false` instead of deleting it.
+
+### delete_mail_rule
+
+| Param | Type   | Required | Notes                                                          |
+| ----- | ------ | -------- | -------------------------------------------------------------- |
+| `id`  | number | yes      | Permanent. Future ingestion only; consumed docs are untouched. |

@@ -5,12 +5,12 @@ license: MIT
 compatibility: Requires a running Paperless-ngx instance with API token. MCP server must be connected with mcp_paperless_* tools available.
 metadata:
   author: kjanat
-  version: "2.10.0"
+  version: "2.11.0"
 ---
 
 # Paperless-ngx Document Management
 
-Orchestrate Paperless-ngx through 36 MCP tools across 8 domains.
+Orchestrate Paperless-ngx through 42 MCP tools across 9 domains.
 
 ## Tool Catalog
 
@@ -89,6 +89,17 @@ Orchestrate Paperless-ngx through 36 MCP tools across 8 domains.
 | `list_trash`         | Soft-deleted documents awaiting purge     |
 | `restore_from_trash` | Bring documents back with metadata intact |
 | `empty_trash`        | PERMANENTLY purge (all, or specific IDs)  |
+
+### Mail (6 tools)
+
+| Tool                   | Operation                               |
+| ---------------------- | --------------------------------------- |
+| `list_mail_accounts`   | Polled accounts (credentials stripped)  |
+| `process_mail_account` | Trigger an immediate mail poll          |
+| `list_mail_rules`      | Filters that decide what gets imported  |
+| `create_mail_rule`     | New import rule (filters + assignments) |
+| `update_mail_rule`     | Modify filters/assignments/enabled      |
+| `delete_mail_rule`     | Remove a rule (future ingestion only)   |
 
 ## Decision Trees
 
@@ -175,6 +186,10 @@ Need to change metadata objects?
 - **matching_algorithm** is integer `0-6` across all endpoints (tags,
   correspondents, document types): `0`=none, `1`=any, `2`=all, `3`=exact,
   `4`=regex, `5`=fuzzy, `6`=auto. See [tools.md](references/tools.md).
+- **Mail rules shape FUTURE ingestion.** create/update/delete_mail_rule change
+  what the next mail polls import; already-consumed documents are untouched.
+  Pause with `enabled=false` instead of deleting. Mail account credentials
+  never appear in responses and cannot be set via MCP (web UI only).
 - **Document delete is a soft-delete**: `bulk_edit_documents(method="delete")`
   moves documents to the trash, restorable via `restore_from_trash` until the
   retention period expires or `empty_trash` purges them. Taxonomy deletes

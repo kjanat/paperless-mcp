@@ -3,7 +3,9 @@ import { z } from 'zod';
 
 /** Wrap a JSON-serializable value in a CallToolResult. */
 export function jsonResult(data: unknown): CallToolResult {
-	return { content: [{ type: 'text' as const, text: JSON.stringify(data, null, 2) }] };
+	// JSON.stringify(undefined) is undefined, which the MCP SDK rejects as an
+	// invalid text block: serialize void results as null instead.
+	return { content: [{ type: 'text' as const, text: JSON.stringify(data, null, 2) ?? 'null' }] };
 }
 
 /**
