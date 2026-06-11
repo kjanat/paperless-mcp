@@ -5,7 +5,7 @@ license: MIT
 compatibility: Requires a running Paperless-ngx instance with API token. MCP server must be connected with mcp_paperless_* tools available.
 metadata:
   author: kjanat
-  version: "2.10.0"
+  version: "2.13.0"
 ---
 
 # Paperless-ngx Document Management
@@ -175,6 +175,11 @@ Need to change metadata objects?
 - **matching_algorithm** is integer `0-6` across all endpoints (tags,
   correspondents, document types): `0`=none, `1`=any, `2`=all, `3`=exact,
   `4`=regex, `5`=fuzzy, `6`=auto. See [tools.md](references/tools.md).
+- **Document binaries are MCP resources**: read
+  `paperless://documents/{id}/archive|original|thumbnail` via resources/read
+  instead of pulling base64 through download_document; pass
+  `as_resource_link=true` to download_document to get the link. Thumbnail =
+  cheap preview without the full file.
 - **Document delete is a soft-delete**: `bulk_edit_documents(method="delete")`
   moves documents to the trash, restorable via `restore_from_trash` until the
   retention period expires or `empty_trash` purges them. Taxonomy deletes

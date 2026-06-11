@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.13.0] - 2026-06-11
+
+### Added
+
+- **Document binaries as MCP resources**:
+  `paperless://documents/{id}/{variant}` with variants `archive`
+  (processed/OCR), `original` (as uploaded), and `thumbnail` (preview image).
+  Clients fetch bytes via `resources/read` instead of receiving base64 through
+  a tool response, matching MCP's resource model and keeping large files out
+  of the conversation. The thumbnail variant gives agents a cheap preview
+  without downloading the document.
+- `download_document` accepts `as_resource_link`: returns a `resource_link`
+  content block pointing at the matching `paperless://` URI instead of inline
+  base64. Default behavior unchanged.
+- `PaperlessAPI.downloadThumbnail(id)` wrapping `GET /documents/{id}/thumb/`.
+
 ## [2.10.0] - 2026-06-10
 
 ### Added
@@ -410,7 +426,8 @@ Major rewrite of internals while preserving the same MCP tool surface.
 - Smithery configuration (broken `smithery.yaml`).
 - Obsolete Cursor rules.
 
-[Unreleased]: https://github.com/kjanat/paperless-mcp/compare/v2.10.0...HEAD
+[Unreleased]: https://github.com/kjanat/paperless-mcp/compare/v2.13.0...HEAD
+[2.13.0]: https://github.com/kjanat/paperless-mcp/compare/v2.12.0...v2.13.0
 [2.10.0]: https://github.com/kjanat/paperless-mcp/compare/v2.9.0...v2.10.0
 [2.9.0]: https://github.com/kjanat/paperless-mcp/compare/v2.8.0...v2.9.0
 [2.8.0]: https://github.com/kjanat/paperless-mcp/compare/v2.7.1...v2.8.0

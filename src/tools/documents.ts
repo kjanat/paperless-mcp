@@ -362,9 +362,26 @@ export function registerDocumentTools(
 				original: z.boolean().optional().describe(
 					'Whether to download the original uploaded file (true) or the processed/archived version (false, default). Original files preserve exact formatting but may not include OCR improvements.',
 				),
+
+				as_resource_link: z.boolean().optional().describe(
+					'Return a paperless:// resource link instead of inline base64. The client then fetches the bytes via resources/read, keeping large files out of the conversation. A thumbnail variant is also available as paperless://documents/{id}/thumbnail.',
+				),
 			},
 		},
-		async ({ id, original }, _extra) => {
+		async ({ id, original, as_resource_link }, _extra) => {
+			const variant = original === true ? 'original' : 'archive';
+
+			if (as_resource_link === true) {
+				return {
+					content: [{
+						type: 'resource_link' as const,
+						uri: `paperless://documents/${id}/${variant}`,
+						name: `document-${id}-${variant}`,
+						description: 'Paperless document file. Fetch the bytes via resources/read.',
+					}],
+				};
+			}
+
 			const response = await api.downloadDocument(id, original);
 			const filename = response.headers
 				.get('content-disposition')

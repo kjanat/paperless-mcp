@@ -77,12 +77,15 @@ the model).
 
 ### download_document
 
-| Param      | Type    | Required | Notes                                       |
-| ---------- | ------- | -------- | ------------------------------------------- |
-| `id`       | number  | yes      | Document ID                                 |
-| `original` | boolean | no       | `true`=original upload, `false`=OCR version |
+| Param              | Type    | Required | Notes                                                  |
+| ------------------ | ------- | -------- | ------------------------------------------------------ |
+| `id`               | number  | yes      | Document ID                                            |
+| `original`         | boolean | no       | `true`=original upload, `false`=OCR version            |
+| `as_resource_link` | boolean | no       | Return a `paperless://` link; bytes via resources/read |
 
-Returns `{ blob: string, filename: string }`.
+Returns `{ blob: string, filename: string }`, or a `resource_link` content
+block when `as_resource_link=true`. Resource URIs:
+`paperless://documents/{id}/archive|original|thumbnail`.
 
 ### bulk_edit_documents
 

@@ -217,6 +217,25 @@ export class PaperlessAPI {
 		return response;
 	}
 
+	async downloadThumbnail(id: number): Promise<Response> {
+		const path = `/documents/${id}/thumb/`;
+		const response = await fetch(`${this.baseUrl}/api${path}`, {
+			headers: {
+				Authorization: `Token ${this.token}`,
+				Accept: 'application/json; version=6',
+			},
+		});
+
+		if (!response.ok) {
+			const body = await response.text().catch(() => '');
+			throw new Error(
+				`HTTP ${response.status} from ${path}: ${body}`,
+			);
+		}
+
+		return response;
+	}
+
 	// Tag operations
 
 	async getTags(nameContains?: string): Promise<PaginatedList<Tag>> {

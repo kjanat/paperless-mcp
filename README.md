@@ -151,6 +151,8 @@ Parameters:
 
 - `id`: Document ID
 - `original` (optional): If true, downloads original file instead of archived version
+- `as_resource_link` (optional): Return a `paperless://` resource link instead
+  of inline base64; the client fetches the bytes via `resources/read`
 
 ```typescript
 download_document({
@@ -796,6 +798,25 @@ empty_trash({
   documents: [123],
 });
 ```
+
+</details>
+<details>
+<summary>MCP Resources</summary>
+
+### MCP Resources
+
+Document binaries are exposed as MCP resources, so clients can fetch bytes via
+`resources/read` instead of receiving base64 through a tool response:
+
+```text
+paperless://documents/{id}/archive     # processed/OCR version
+paperless://documents/{id}/original    # file as uploaded
+paperless://documents/{id}/thumbnail   # preview image (webp)
+```
+
+`download_document` returns such a link when called with
+`as_resource_link: true`. The thumbnail variant lets agents preview a document
+without downloading it.
 
 </details>
 

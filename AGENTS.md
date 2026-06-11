@@ -14,6 +14,7 @@ API types derived from OpenAPI schema v6.0.0.
 src/
 ├── index.ts                 # Entry: dreamcli CLI, server factory, dual transport
 ├── types.ts                 # Typed interfaces from OpenAPI schema (v6.0.0)
+├── resources.ts             # MCP resources: paperless://documents/{id}/{variant}
 ├── api/
 │   ├── paperless.ts     # HTTP client wrapping Paperless-ngx REST API
 │   └── paperless.test.ts
@@ -55,7 +56,7 @@ enums (`BulkEditMethod`, `MatchingAlgorithm`), and nested types (`ObjectPermissi
 
 ### `PaperlessAPI` (src/api/paperless.ts)
 
-Single class, 35 methods. All return typed responses (not `Promise<unknown>`).
+Single class, 36 methods. All return typed responses (not `Promise<unknown>`).
 `request<T>()` is generic base — adds token auth (`version=6`), JSON content type,
 throws on non-OK. Most methods delegate to it.
 
@@ -75,6 +76,7 @@ must update both paths.
 | `deleteDocumentNote`  | `/documents/{id}/notes/`    | DELETE |
 | `searchDocuments`     | `/documents/?query=...`     | GET    |
 | `downloadDocument`    | `/documents/{id}/download/` | GET    |
+| `downloadThumbnail`   | `/documents/{id}/thumb/`    | GET    |
 | `getTags`             | `/tags/`                    | GET    |
 | `getTag`              | `/tags/{id}/`               | GET    |
 | `createTag`           | `/tags/`                    | POST   |
