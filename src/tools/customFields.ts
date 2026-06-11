@@ -88,7 +88,8 @@ export function registerCustomFieldTools(server: McpServer, api: PaperlessAPI): 
 			},
 		},
 		async ({ id }, _extra) => {
-			return jsonResult(await api.deleteCustomField(id));
+			await api.deleteCustomField(id);
+			return jsonResult({ deleted: id });
 		},
 	);
 }

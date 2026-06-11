@@ -13,6 +13,7 @@ import { registerCorrespondentTools } from '#tools/correspondents';
 import { registerCustomFieldTools } from '#tools/customFields';
 import { registerDocumentTools } from '#tools/documents';
 import { registerDocumentTypeTools } from '#tools/documentTypes';
+import { registerMailTools } from '#tools/mail';
 import { registerStoragePathTools } from '#tools/storagePaths';
 import { registerTagTools } from '#tools/tags';
 import { registerTaskTools } from '#tools/tasks';
@@ -188,6 +189,7 @@ function createServer(api: PaperlessAPI, options: { allowFilePath: boolean }): M
 	registerCustomFieldTools(server, api);
 	registerTaskTools(server, api);
 	registerTrashTools(server, api);
+	registerMailTools(server, api);
 
 	return server;
 }
