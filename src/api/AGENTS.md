@@ -1,6 +1,6 @@
 # src/api/ — Paperless-ngx HTTP Client
 
-Single class `PaperlessAPI` in `paperless.ts`. 41 methods wrapping the
+Single class `PaperlessAPI` in `paperless.ts`. 42 methods wrapping the
 Paperless-ngx REST API via `fetch()`. All methods return typed responses
 (interfaces from `src/types.ts`), not `Promise<unknown>`.
 
@@ -43,7 +43,7 @@ Paperless-ngx REST API via `fetch()`. All methods return typed responses
 
 ## TESTING
 
-`paperless.test.ts` (77 tests) covers all 41 methods via
+`paperless.test.ts` (78 tests) covers all 42 methods via
 `spyOn(globalThis, 'fetch')`. Helpers: `stubFetch()`, `stubFetchRaw()`,
 `lastRequestBody()`, `lastRequestUrl()`, `lastRequestInit()`.
 

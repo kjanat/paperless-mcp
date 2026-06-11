@@ -5,7 +5,7 @@ license: MIT
 compatibility: Requires a running Paperless-ngx instance with API token. MCP server must be connected with mcp_paperless_* tools available.
 metadata:
   author: kjanat
-  version: "2.12.0"
+  version: "2.13.0"
 ---
 
 # Paperless-ngx Document Management
@@ -190,6 +190,11 @@ Need to change metadata objects?
   what the next mail polls import; already-consumed documents are untouched.
   Pause with `enabled=false` instead of deleting. Mail account credentials
   never appear in responses and cannot be set via MCP (web UI only).
+- **Document binaries are MCP resources**: read
+  `paperless://documents/{id}/archive|original|thumbnail` via resources/read
+  instead of pulling base64 through download_document; pass
+  `as_resource_link=true` to download_document to get the link. Thumbnail =
+  cheap preview without the full file.
 - **Document delete is a soft-delete**: `bulk_edit_documents(method="delete")`
   moves documents to the trash, restorable via `restore_from_trash` until the
   retention period expires or `empty_trash` purges them. Taxonomy deletes

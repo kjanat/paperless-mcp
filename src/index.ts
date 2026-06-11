@@ -9,6 +9,7 @@ import type { JSONRPCErrorResponse } from '@modelcontextprotocol/sdk/types.js';
 
 import { PaperlessAPI } from '#api/paperless';
 import pkg from '#pkg';
+import { registerDocumentResources } from '#resources';
 import { registerCorrespondentTools } from '#tools/correspondents';
 import { registerCustomFieldTools } from '#tools/customFields';
 import { registerDocumentTools } from '#tools/documents';
@@ -190,6 +191,8 @@ function createServer(api: PaperlessAPI, options: { allowFilePath: boolean }): M
 	registerTaskTools(server, api);
 	registerTrashTools(server, api);
 	registerMailTools(server, api);
+
+	registerDocumentResources(server, api);
 
 	return server;
 }

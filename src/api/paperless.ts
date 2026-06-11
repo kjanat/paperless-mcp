@@ -201,16 +201,21 @@ export class PaperlessAPI {
 
 	async downloadDocument(id: number, asOriginal = false): Promise<Response> {
 		const query = asOriginal ? '?original=true' : '';
-		const path = `/documents/${id}/download/`;
-		const response = await fetch(
-			`${this.baseUrl}/api${path}${query}`,
-			{
-				headers: {
-					Authorization: `Token ${this.token}`,
-					Accept: 'application/json; version=6',
-				},
+		return this.downloadBinary(`/documents/${id}/download/`, query);
+	}
+
+	async downloadThumbnail(id: number): Promise<Response> {
+		return this.downloadBinary(`/documents/${id}/thumb/`);
+	}
+
+	/** Shared raw-Response GET for binary endpoints (downloads, thumbnails). */
+	private async downloadBinary(path: string, query = ''): Promise<Response> {
+		const response = await fetch(`${this.baseUrl}/api${path}${query}`, {
+			headers: {
+				Authorization: `Token ${this.token}`,
+				Accept: 'application/json; version=6',
 			},
-		);
+		});
 
 		if (!response.ok) {
 			const body = await response.text().catch(() => '');

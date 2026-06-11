@@ -376,6 +376,17 @@ describe('PaperlessAPI.downloadDocument', () => {
 	});
 });
 
+describe('PaperlessAPI.downloadThumbnail', () => {
+	test('fetches /documents/{id}/thumb/ and returns the raw response', async () => {
+		stubFetchRaw('webp-bytes', { 'content-type': 'image/webp' });
+		const response = await api.downloadThumbnail(42);
+
+		expect(lastRequestUrl()).toBe(`${BASE_URL}/api/documents/42/thumb/`);
+		expect(response.headers.get('content-type')).toBe('image/webp');
+		expect(await response.text()).toBe('webp-bytes');
+	});
+});
+
 // ---------------------------------------------------------------------------
 // Tag operations
 // ---------------------------------------------------------------------------
