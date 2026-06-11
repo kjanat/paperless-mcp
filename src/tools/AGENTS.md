@@ -1,8 +1,8 @@
 # src/tools/ — MCP Tool Registrations
 
-Eight tool files + shared `utils.ts`. Each tool file exports
+Nine tool files + shared `utils.ts`. Each tool file exports
 `register*Tools(server: McpServer, api: PaperlessAPI)`.
-36 tools total across 8 domains. Called from `createServer()` in `src/index.ts`.
+42 tools total across 9 domains. Called from `createServer()` in `src/index.ts`.
 
 ## PATTERN
 
@@ -47,6 +47,7 @@ server.registerTool(
 | `customFields.ts`   | 4     | `registerCustomFieldTools`           |
 | `tasks.ts`          | 2     | `registerTaskTools`                  |
 | `trash.ts`          | 3     | `registerTrashTools`                 |
+| `mail.ts`           | 6     | `registerMailTools`                  |
 
 ## GOTCHAS
 

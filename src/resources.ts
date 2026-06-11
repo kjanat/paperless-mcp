@@ -8,7 +8,7 @@ const VARIANTS = ['archive', 'original', 'thumbnail'] as const;
 type Variant = (typeof VARIANTS)[number];
 
 function isVariant(value: string): value is Variant {
-	return (VARIANTS as readonly string[]).includes(value);
+	return VARIANTS.some((variant) => variant === value);
 }
 
 /**

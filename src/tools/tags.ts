@@ -132,7 +132,8 @@ export function registerTagTools(server: McpServer, api: PaperlessAPI): void {
 			},
 		},
 		async ({ id }, _extra) => {
-			return jsonResult(await api.deleteTag(id));
+			await api.deleteTag(id);
+			return jsonResult({ deleted: id });
 		},
 	);
 

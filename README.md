@@ -801,6 +801,88 @@ empty_trash({
 
 </details>
 <details>
+<summary>Mail Operations</summary>
+
+### Mail Operations
+
+#### `list_mail_accounts`
+
+List mail accounts that Paperless polls for ingestion. Credentials are
+stripped; account setup stays in the web UI.
+
+```typescript
+list_mail_accounts();
+```
+
+#### `process_mail_account`
+
+Trigger an immediate mail poll for one account.
+
+Parameters:
+
+- `id`: Mail account ID
+
+```typescript
+process_mail_account({ id: 1 });
+```
+
+#### `list_mail_rules`
+
+List mail rules (filters that decide which emails get imported and how).
+
+```typescript
+list_mail_rules();
+```
+
+#### `create_mail_rule`
+
+Create a rule that imports matching emails: filter on sender/subject/body/
+attachment, assign tags/correspondent/type, and control what happens to the
+email afterwards. Affects future ingestion runs.
+
+Parameters (subset):
+
+- `account`: Mail account ID
+- `name`: Unique rule name
+- `filter_from`, `filter_to`, `filter_subject`, `filter_body` (optional): substring filters
+- `filter_attachment_filename_include` / `_exclude` (optional): wildcard patterns
+- `maximum_age` (optional): only emails younger than this many days
+- `action`, `action_parameter` (optional): what happens to the email (delete, move, mark_read, flag, tag)
+- `assign_tags`, `assign_correspondent`, `assign_document_type` (optional): metadata for consumed documents
+- `enabled`, `order`, `stop_processing` (optional): rule chain control
+
+```typescript
+create_mail_rule({
+  account: 1,
+  name: "Vendor invoices",
+  filter_from: "billing@vendor.com",
+  filter_subject: "invoice",
+  assign_tags: [12],
+  action: 3, // mark_read
+});
+```
+
+#### `update_mail_rule`
+
+Modify an existing mail rule. Same fields as create, all optional, plus `id`.
+Pause a rule with `enabled: false` instead of deleting it.
+
+```typescript
+update_mail_rule({
+  id: 5,
+  enabled: false,
+});
+```
+
+#### `delete_mail_rule`
+
+Permanently delete a mail rule. Affects future ingestion only; already
+consumed documents are untouched.
+
+```typescript
+delete_mail_rule({ id: 5 });
+```
+
 <summary>MCP Resources</summary>
 
 ### MCP Resources
@@ -911,5 +993,22 @@ bun start --http --host 0.0.0.0 --allowed-hosts paperless.example.com,localhost
   otherwise the SDK applies no DNS-rebinding protection and logs a warning.
 - The server shuts down gracefully on `SIGINT`/`SIGTERM`, draining in-flight
   requests before exiting.
+
+#### Per-request Bearer auth (multi-user)
+
+With `--per-request-token` (or `PAPERLESS_MCP_PER_REQUEST_TOKEN=1`), the server
+holds no Paperless credentials. Every MCP request must carry that user's own
+token, which is forwarded to Paperless as-is, so Paperless permissions stay
+per-user behind one hosted MCP server:
+
+```bash
+# No token argument needed; clients authenticate themselves
+paperless-mcp http://localhost:8000 --http --per-request-token
+```
+
+Clients send `Authorization: Bearer <paperless-api-token>` on each request.
+Requests without it get a `401` with `WWW-Authenticate: Bearer`. There is no
+fallback to a shared token. Run this behind TLS (a reverse proxy): tokens
+travel in headers.
 
 <!--markdownlint-disable-file no-hard-tabs no-inline-html no-bare-urls-->

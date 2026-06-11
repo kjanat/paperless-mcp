@@ -115,6 +115,10 @@ PATHS_WE_USE: tuple[str, ...] = (
     "/api/custom_fields/{id}/",
     "/api/tasks/",
     "/api/trash/",
+    "/api/mail_accounts/",
+    "/api/mail_accounts/{id}/process/",
+    "/api/mail_rules/",
+    "/api/mail_rules/{id}/",
     "/api/bulk_edit_objects/",
 )
 

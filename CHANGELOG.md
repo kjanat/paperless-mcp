@@ -23,6 +23,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   base64. Default behavior unchanged.
 - `PaperlessAPI.downloadThumbnail(id)` wrapping `GET /documents/{id}/thumb/`.
 
+## [2.12.0] - 2026-06-11
+
+### Added
+
+- **Per-request Bearer auth for the HTTP transport** (`--per-request-token` /
+  `PAPERLESS_MCP_PER_REQUEST_TOKEN`): every MCP request must carry its own
+  `Authorization: Bearer <paperless-api-token>` header, forwarded to Paperless
+  as that user's token. One hosted MCP server can serve multiple users while
+  Paperless permissions stay per-user. The server holds no Paperless
+  credentials in this mode (the token argument becomes optional) and there is
+  no fallback to a shared token: requests without a Bearer header get a 401
+  with `WWW-Authenticate: Bearer`. The flag requires `--http`.
+
+## [2.11.0] - 2026-06-11
+
+### Added
+
+- **Mail tools** (new 9th domain): `list_mail_accounts` (credentials stripped
+  client-side, never reach the model), `process_mail_account` (trigger an
+  immediate poll; consume tasks land in `list_tasks`), and full mail-rule CRUD
+  (`list_mail_rules`, `create_mail_rule`, `update_mail_rule`,
+  `delete_mail_rule`). Rule inputs derive from the generated
+  `zMailRuleRequestWritable` schemas, so filters, actions, and enums stay in
+  lockstep with upstream. An agent can now do "import invoice emails from
+  vendor X, tag them Bills, mark the email read" end-to-end. Mail account
+  creation/credentials intentionally stay in the web UI. Rule mutations shape
+  future ingestion only and the descriptions say so; pausing
+  (`enabled=false`) is suggested over deleting.
+
 ## [2.10.0] - 2026-06-10
 
 ### Added
@@ -428,6 +457,8 @@ Major rewrite of internals while preserving the same MCP tool surface.
 
 [Unreleased]: https://github.com/kjanat/paperless-mcp/compare/v2.13.0...HEAD
 [2.13.0]: https://github.com/kjanat/paperless-mcp/compare/v2.12.0...v2.13.0
+[2.12.0]: https://github.com/kjanat/paperless-mcp/compare/v2.11.0...v2.12.0
+[2.11.0]: https://github.com/kjanat/paperless-mcp/compare/v2.10.0...v2.11.0
 [2.10.0]: https://github.com/kjanat/paperless-mcp/compare/v2.9.0...v2.10.0
 [2.9.0]: https://github.com/kjanat/paperless-mcp/compare/v2.8.0...v2.9.0
 [2.8.0]: https://github.com/kjanat/paperless-mcp/compare/v2.7.1...v2.8.0

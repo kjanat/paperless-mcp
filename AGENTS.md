@@ -27,7 +27,8 @@ src/
     ├── storagePaths.ts      # 4 tools: list, create, update, bulk_edit
     ├── customFields.ts      # 4 tools: list, create, update, delete
     ├── tasks.ts             # 2 tools: get_task, list_tasks
-    └── trash.ts             # 3 tools: list, restore, empty
+    ├── trash.ts             # 3 tools: list, restore, empty
+    └── mail.ts              # 6 tools: accounts (list, process), rules (list, create, update, delete)
 ```
 
 No barrel files. No cross-imports between leaf modules.
@@ -56,7 +57,7 @@ enums (`BulkEditMethod`, `MatchingAlgorithm`), and nested types (`ObjectPermissi
 
 ### `PaperlessAPI` (src/api/paperless.ts)
 
-Single class, 36 methods. All return typed responses (not `Promise<unknown>`).
+Single class, 42 methods. All return typed responses (not `Promise<unknown>`).
 `request<T>()` is generic base — adds token auth (`version=6`), JSON content type,
 throws on non-OK. Most methods delegate to it.
 
@@ -64,45 +65,51 @@ throws on non-OK. Most methods delegate to it.
 `fetch()` directly (FormData and raw Response respectively). Auth header changes
 must update both paths.
 
-| Method                | API Path                    | HTTP   |
-| --------------------- | --------------------------- | ------ |
-| `request<T>`          | `/api${path}`               | varies |
-| `bulkEditDocuments`   | `/documents/bulk_edit/`     | POST   |
-| `postDocument`        | `/documents/post_document/` | POST   |
-| `getDocuments`        | `/documents/{query}`        | GET    |
-| `getDocument`         | `/documents/{id}/`          | GET    |
-| `updateDocument`      | `/documents/{id}/`          | PATCH  |
-| `addDocumentNote`     | `/documents/{id}/notes/`    | POST   |
-| `deleteDocumentNote`  | `/documents/{id}/notes/`    | DELETE |
-| `searchDocuments`     | `/documents/?query=...`     | GET    |
-| `downloadDocument`    | `/documents/{id}/download/` | GET    |
-| `downloadThumbnail`   | `/documents/{id}/thumb/`    | GET    |
-| `getTags`             | `/tags/`                    | GET    |
-| `getTag`              | `/tags/{id}/`               | GET    |
-| `createTag`           | `/tags/`                    | POST   |
-| `updateTag`           | `/tags/{id}/`               | PATCH  |
-| `deleteTag`           | `/tags/{id}/`               | DELETE |
-| `getCorrespondents`   | `/correspondents/`          | GET    |
-| `getCorrespondent`    | `/correspondents/{id}/`     | GET    |
-| `createCorrespondent` | `/correspondents/`          | POST   |
-| `updateCorrespondent` | `/correspondents/{id}/`     | PATCH  |
-| `getDocumentTypes`    | `/document_types/`          | GET    |
-| `getDocumentType`     | `/document_types/{id}/`     | GET    |
-| `createDocumentType`  | `/document_types/`          | POST   |
-| `updateDocumentType`  | `/document_types/{id}/`     | PATCH  |
-| `getStoragePaths`     | `/storage_paths/`           | GET    |
-| `createStoragePath`   | `/storage_paths/`           | POST   |
-| `updateStoragePath`   | `/storage_paths/{id}/`      | PATCH  |
-| `getCustomFields`     | `/custom_fields/`           | GET    |
-| `createCustomField`   | `/custom_fields/`           | POST   |
-| `updateCustomField`   | `/custom_fields/{id}/`      | PATCH  |
-| `deleteCustomField`   | `/custom_fields/{id}/`      | DELETE |
-| `getTask`             | `/tasks/?task_id=...`       | GET    |
-| `listTasks`           | `/tasks/?ordering=...`      | GET    |
-| `getTrash`            | `/trash/`                   | GET    |
-| `restoreFromTrash`    | `/trash/`                   | POST   |
-| `emptyTrash`          | `/trash/`                   | POST   |
-| `bulkEditObjects`     | `/bulk_edit_objects/`       | POST   |
+| Method                | API Path                       | HTTP   |
+| --------------------- | ------------------------------ | ------ |
+| `request<T>`          | `/api${path}`                  | varies |
+| `bulkEditDocuments`   | `/documents/bulk_edit/`        | POST   |
+| `postDocument`        | `/documents/post_document/`    | POST   |
+| `getDocuments`        | `/documents/{query}`           | GET    |
+| `getDocument`         | `/documents/{id}/`             | GET    |
+| `updateDocument`      | `/documents/{id}/`             | PATCH  |
+| `addDocumentNote`     | `/documents/{id}/notes/`       | POST   |
+| `deleteDocumentNote`  | `/documents/{id}/notes/`       | DELETE |
+| `searchDocuments`     | `/documents/?query=...`        | GET    |
+| `downloadDocument`    | `/documents/{id}/download/`    | GET    |
+| `downloadThumbnail`   | `/documents/{id}/thumb/`       | GET    |
+| `getTags`             | `/tags/`                       | GET    |
+| `getTag`              | `/tags/{id}/`                  | GET    |
+| `createTag`           | `/tags/`                       | POST   |
+| `updateTag`           | `/tags/{id}/`                  | PATCH  |
+| `deleteTag`           | `/tags/{id}/`                  | DELETE |
+| `getCorrespondents`   | `/correspondents/`             | GET    |
+| `getCorrespondent`    | `/correspondents/{id}/`        | GET    |
+| `createCorrespondent` | `/correspondents/`             | POST   |
+| `updateCorrespondent` | `/correspondents/{id}/`        | PATCH  |
+| `getDocumentTypes`    | `/document_types/`             | GET    |
+| `getDocumentType`     | `/document_types/{id}/`        | GET    |
+| `createDocumentType`  | `/document_types/`             | POST   |
+| `updateDocumentType`  | `/document_types/{id}/`        | PATCH  |
+| `getStoragePaths`     | `/storage_paths/`              | GET    |
+| `createStoragePath`   | `/storage_paths/`              | POST   |
+| `updateStoragePath`   | `/storage_paths/{id}/`         | PATCH  |
+| `getCustomFields`     | `/custom_fields/`              | GET    |
+| `createCustomField`   | `/custom_fields/`              | POST   |
+| `updateCustomField`   | `/custom_fields/{id}/`         | PATCH  |
+| `deleteCustomField`   | `/custom_fields/{id}/`         | DELETE |
+| `getTask`             | `/tasks/?task_id=...`          | GET    |
+| `listTasks`           | `/tasks/?ordering=...`         | GET    |
+| `getTrash`            | `/trash/`                      | GET    |
+| `restoreFromTrash`    | `/trash/`                      | POST   |
+| `emptyTrash`          | `/trash/`                      | POST   |
+| `getMailAccounts`     | `/mail_accounts/`              | GET    |
+| `processMailAccount`  | `/mail_accounts/{id}/process/` | POST   |
+| `getMailRules`        | `/mail_rules/`                 | GET    |
+| `createMailRule`      | `/mail_rules/`                 | POST   |
+| `updateMailRule`      | `/mail_rules/{id}/`            | PATCH  |
+| `deleteMailRule`      | `/mail_rules/{id}/`            | DELETE |
+| `bulkEditObjects`     | `/bulk_edit_objects/`          | POST   |
 
 ### Tool Registration (src/tools/)
 
@@ -120,10 +127,11 @@ exits the process, so the action awaits `runUntilShutdown()` (SIGINT/SIGTERM) to
 keep the server alive and shut it down gracefully.
 
 - **args**: `<baseUrl>` (validated http(s), trailing slash stripped) `<token>`
-- **flags**: `--http`, `--port` (1-65535), `--host` (default loopback
+- **flags**: `--http`, `--port` (1-65535), `--per-request-token` (HTTP
+  Bearer-per-request, multi-user), `--host` (default loopback
   `127.0.0.1`), `--allowed-hosts` (Host-header allowlist)
 - **env**: `PAPERLESS_URL`, `PAPERLESS_API_KEY` (+ legacy `API_KEY`),
-  `PAPERLESS_MCP_HOST`, `PAPERLESS_MCP_ALLOWED_HOSTS`
+  `PAPERLESS_MCP_HOST`, `PAPERLESS_MCP_ALLOWED_HOSTS`, `PAPERLESS_MCP_PER_REQUEST_TOKEN`
 - **stdio** (default): single `McpServer` + `StdioServerTransport`
 - **HTTP** (`--http`): `createMcpExpressApp()` on `host:port`; fresh `McpServer`
   per request (stateless `StreamableHTTPServerTransport`). DNS-rebinding

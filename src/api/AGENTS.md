@@ -1,6 +1,6 @@
 # src/api/ — Paperless-ngx HTTP Client
 
-Single class `PaperlessAPI` in `paperless.ts`. 36 methods wrapping the
+Single class `PaperlessAPI` in `paperless.ts`. 42 methods wrapping the
 Paperless-ngx REST API via `fetch()`. All methods return typed responses
 (interfaces from `src/types.ts`), not `Promise<unknown>`.
 
@@ -11,11 +11,14 @@ Paperless-ngx REST API via `fetch()`. All methods return typed responses
 - **`matching_algorithm` is integer (0-6)** across all endpoints.
 - **`searchDocuments` returns immutable copy** — strips `content`, `download_url`,
   `thumbnail_url` from results to reduce token usage. `getTrash` strips
-  `content` the same way.
+  `content` the same way. `getMailAccounts` goes further: it projects an
+  explicit field allowlist so credentials (`password`) can never reach a tool
+  response.
 - **All PATCH methods** (`updateDocument`, `updateTag`, `updateCorrespondent`,
-  `updateDocumentType`, `updateStoragePath`, `updateCustomField`) strip
-  `undefined` fields before serializing, via the module-level `omitUndefined()`
-  helper at the bottom of `paperless.ts`.
+  `updateDocumentType`, `updateStoragePath`, `updateCustomField`,
+  `updateMailRule`) strip `undefined` fields before serializing, via the
+  module-level `omitUndefined()` helper at the bottom of `paperless.ts`;
+  `createMailRule` (POST) uses it too.
 - **`getTask` queries by Celery UUID** — `GET /tasks/?task_id=...` (filter, not
   path param). The numeric task `id` is a different field. With `version=6` the
   endpoint returns a plain array (legacy serializer: uppercase `status`,
@@ -40,7 +43,7 @@ Paperless-ngx REST API via `fetch()`. All methods return typed responses
 
 ## TESTING
 
-`paperless.test.ts` (72 tests) covers all 36 methods via
+`paperless.test.ts` (78 tests) covers all 42 methods via
 `spyOn(globalThis, 'fetch')`. Helpers: `stubFetch()`, `stubFetchRaw()`,
 `lastRequestBody()`, `lastRequestUrl()`, `lastRequestInit()`.
 
