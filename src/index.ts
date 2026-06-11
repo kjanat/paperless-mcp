@@ -42,9 +42,18 @@ function sendJsonRpcError(
 	httpStatus: number,
 	rpcCode: number,
 	message: string,
+	headers: Record<string, string> = {},
 ): void {
-	res.writeHead(httpStatus, { 'Content-Type': 'application/json' });
+	res.writeHead(httpStatus, { 'Content-Type': 'application/json', ...headers });
 	res.end(JSON.stringify(jsonRpcError(rpcCode, message)));
+}
+
+/** Extract the token from an `Authorization: Bearer <token>` header, if any. */
+function bearerToken(req: ParsedRequest): string | undefined {
+	const header = req.headers.authorization;
+	if (header == null) return undefined;
+	const match = /^Bearer\s+(\S+)$/i.exec(header);
+	return match?.[1];
 }
 
 /** HTTP transport port flag: coerces and validates an integer in 1-65535. */
@@ -84,6 +93,39 @@ const allowedHostsFlag = flag
 	.string()
 	.env('PAPERLESS_MCP_ALLOWED_HOSTS')
 	.describe('Comma-separated Host header allowlist for DNS-rebinding protection.');
+
+/**
+ * Per-request token mode for the HTTP transport: every request must carry its
+ * own `Authorization: Bearer <paperless-api-token>` header, which is forwarded
+ * to Paperless as that user's token. One hosted MCP server can then serve
+ * multiple users while Paperless permissions stay per-user. No fallback to a
+ * shared token: requests without a Bearer header get a 401.
+ */
+const perRequestTokenFlag = flag
+	.boolean()
+	.env('PAPERLESS_MCP_PER_REQUEST_TOKEN')
+	.describe(
+		"HTTP only: forward each request's Authorization: Bearer token to Paperless instead of one shared server token.",
+	);
+
+/**
+ * Whether per-request token mode is being requested, detectable before the CLI
+ * parses. Used to relax the otherwise-required token argument: in this mode
+ * the server itself holds no Paperless credentials.
+ */
+function isPerRequestTokenMode(): boolean {
+	// Mirror dreamcli's own truthiness rules so this pre-parse sniff cannot
+	// disagree with the parsed flag (the action re-validates either way).
+	const env = process.env['PAPERLESS_MCP_PER_REQUEST_TOKEN']?.toLowerCase();
+	if (env != null && ['true', '1', 'yes'].includes(env)) return true;
+
+	const cliFlag = process.argv.find(
+		(a) => a === '--per-request-token' || a.startsWith('--per-request-token='),
+	);
+	if (cliFlag == null) return false;
+	const value = cliFlag.split('=')[1]?.toLowerCase();
+	return value == null || !['false', '0', 'no'].includes(value);
+}
 
 /** Paperless-ngx base URL: validates the input and strips any trailing slash. */
 const baseUrlArg = arg
@@ -125,9 +167,13 @@ function tokenArg() {
 		.string()
 		.env('PAPERLESS_API_KEY')
 		.describe('Paperless-ngx API token (or set $PAPERLESS_API_KEY / legacy $API_KEY)');
-	const legacyApiKey = process.env['API_KEY'];
 
-	return legacyApiKey == null ? token : token.default(legacyApiKey);
+	// In per-request token mode the server needs no credential of its own: an
+	// empty-string default makes the arg optional (re-validated in the action).
+	// Legacy $API_KEY keeps precedence so a sniff misfire cannot break it.
+	const legacyApiKey = process.env['API_KEY'];
+	const fallback = legacyApiKey ?? (isPerRequestTokenMode() ? '' : undefined);
+	return fallback == null ? token : token.default(fallback);
 }
 
 /** Build a fresh MCP server with every Paperless-ngx tool group registered. */
@@ -212,10 +258,30 @@ const serve = command(CLI_NAME)
 	.flag('port', portFlag)
 	.flag('host', hostFlag)
 	.flag('allowed-hosts', allowedHostsFlag)
+	.flag('per-request-token', perRequestTokenFlag)
 	.example('paperless-mcp http://localhost:8000 your-api-token', 'Serve over stdio')
 	.example('paperless-mcp --http --port 8080', 'Serve over HTTP using env credentials')
+	.example(
+		'paperless-mcp http://localhost:8000 --http --per-request-token',
+		'Multi-user HTTP: clients send Authorization: Bearer <their-paperless-token>',
+	)
 	.action(async ({ args, flags, out }) => {
-		const api = new PaperlessAPI(args.baseUrl, args.token);
+		const perRequestToken = flags['per-request-token'] === true;
+
+		if (perRequestToken && !flags.http) {
+			throw new ParseError('--per-request-token requires --http.', {
+				code: 'INVALID_VALUE',
+				suggest: 'Per-request Bearer tokens only exist on the HTTP transport; add --http.',
+				details: { flag: 'per-request-token' },
+			});
+		}
+		if (!perRequestToken && args.token === '') {
+			throw new ParseError('Missing Paperless-ngx API token.', {
+				code: 'MISSING_VALUE',
+				suggest: 'Pass the token argument or set $PAPERLESS_API_KEY.',
+				details: { arg: 'token' },
+			});
+		}
 
 		if (flags.http) {
 			const allowedHosts = parseAllowedHosts(flags['allowed-hosts']);
@@ -224,9 +290,29 @@ const serve = command(CLI_NAME)
 				...(allowedHosts.length > 0 ? { allowedHosts } : {}),
 			});
 
-			app.post('/mcp', (req: ParsedRequest, res: ServerResponse) => {
-				void handleMcpHttpRequest(req, res, api);
-			});
+			if (perRequestToken) {
+				// Per-request mode: the caller's Bearer token IS the Paperless
+				// token. No shared PaperlessAPI exists in this mode at all.
+				app.post('/mcp', (req: ParsedRequest, res: ServerResponse) => {
+					const token = bearerToken(req);
+					if (token == null) {
+						sendJsonRpcError(
+							res,
+							401,
+							-32001,
+							'Missing or malformed Authorization header. Send: Authorization: Bearer <paperless-api-token>.',
+							{ 'WWW-Authenticate': 'Bearer' },
+						);
+						return;
+					}
+					void handleMcpHttpRequest(req, res, new PaperlessAPI(args.baseUrl, token));
+				});
+			} else {
+				const api = new PaperlessAPI(args.baseUrl, args.token);
+				app.post('/mcp', (req: ParsedRequest, res: ServerResponse) => {
+					void handleMcpHttpRequest(req, res, api);
+				});
+			}
 
 			app.all('/mcp', (_req: ParsedRequest, res: ServerResponse) => {
 				sendJsonRpcError(res, 405, -32000, 'Method not allowed.');
@@ -247,6 +333,7 @@ const serve = command(CLI_NAME)
 				clearTimeout(forceClose);
 			});
 		} else {
+			const api = new PaperlessAPI(args.baseUrl, args.token);
 			const server = createServer(api, { allowFilePath: true });
 			const transport = new StdioServerTransport();
 			await server.connect(transport);

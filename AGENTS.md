@@ -118,10 +118,11 @@ exits the process, so the action awaits `runUntilShutdown()` (SIGINT/SIGTERM) to
 keep the server alive and shut it down gracefully.
 
 - **args**: `<baseUrl>` (validated http(s), trailing slash stripped) `<token>`
-- **flags**: `--http`, `--port` (1-65535), `--host` (default loopback
+- **flags**: `--http`, `--port` (1-65535), `--per-request-token` (HTTP
+  Bearer-per-request, multi-user), `--host` (default loopback
   `127.0.0.1`), `--allowed-hosts` (Host-header allowlist)
 - **env**: `PAPERLESS_URL`, `PAPERLESS_API_KEY` (+ legacy `API_KEY`),
-  `PAPERLESS_MCP_HOST`, `PAPERLESS_MCP_ALLOWED_HOSTS`
+  `PAPERLESS_MCP_HOST`, `PAPERLESS_MCP_ALLOWED_HOSTS`, `PAPERLESS_MCP_PER_REQUEST_TOKEN`
 - **stdio** (default): single `McpServer` + `StdioServerTransport`
 - **HTTP** (`--http`): `createMcpExpressApp()` on `host:port`; fresh `McpServer`
   per request (stateless `StreamableHTTPServerTransport`). DNS-rebinding
