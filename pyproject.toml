@@ -31,7 +31,7 @@ venv          = ".venv"
 venvPath      = "."
 
 [tool.uv.sources]
-paperless-ngx = { git = "https://github.com/paperless-ngx/paperless-ngx.git", branch = "dev" }
+paperless-ngx.git = "https://github.com/paperless-ngx/paperless-ngx.git"
 
 [tool.uv.build-backend]
 module-name = "openapi"

@@ -2120,7 +2120,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "django", specifier = ">=5.2.11" },
-    { name = "paperless-ngx", git = "https://github.com/paperless-ngx/paperless-ngx.git?branch=dev" },
+    { name = "paperless-ngx", git = "https://github.com/paperless-ngx/paperless-ngx.git" },
     { name = "pyyaml", specifier = ">=6.0.3" },
 ]
 
@@ -2144,7 +2144,7 @@ wheels = [
 [[package]]
 name = "paperless-ngx"
 version = "3.0.0"
-source = { git = "https://github.com/paperless-ngx/paperless-ngx.git?branch=dev#f56f29111c77d9b9cc865266ab148d0a6bed9a08" }
+source = { git = "https://github.com/paperless-ngx/paperless-ngx.git#82aefe5870722aea468c3e1ea7b3bc066c5c47f6" }
 dependencies = [
     { name = "azure-ai-documentintelligence" },
     { name = "babel" },
