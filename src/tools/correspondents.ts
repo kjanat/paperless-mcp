@@ -11,13 +11,13 @@ export function registerCorrespondentTools(server: McpServer, api: PaperlessAPI)
 		{
 			description:
 				'Retrieve all available correspondents (people, companies, organizations that send/receive documents). Returns names and automatic matching patterns for document assignment.',
-			// Full schema with .default({}) so clients that omit arguments entirely
-			// (allowed by the MCP spec) still pass validation.
-			inputSchema: z.object({
+			// Raw shape, NOT z.object(...).default({}): the SDK advertises wrapped
+			// schemas as an empty object, hiding the params from every client.
+			inputSchema: {
 				name: z.string().optional().describe(
 					'Case-insensitive substring filter on the name. Omit to list all correspondents.',
 				),
-			}).default({}),
+			},
 		},
 		async ({ name }, _extra) => {
 			return jsonResult(await api.getCorrespondents(name));
