@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.13.1] - 2026-06-11
+
+### Fixed
+
+- Six tools advertised an **empty input schema** to clients, hiding their
+  parameters: the five `list_*` tools' `name` filter and `empty_trash`'s
+  `documents` array were invisible in `tools/list` since v2.10.0. Cause: the
+  `z.object(...).default({})` wrapper (added so clients that omit `arguments`
+  entirely still pass validation) is converted by the MCP SDK to a bare
+  `{"type":"object","properties":{}}`. Without the advertised `documents`
+  param, a client purging specific trash IDs could fall back to the
+  purge-everything call. Schemas are back to raw shapes; the
+  omitted-`arguments` spec edge returns as a known limitation, the far
+  smaller problem. Found live when `empty_trash` rejected its own documented
+  argument.
+
 ## [2.13.0] - 2026-06-11
 
 ### Added
@@ -455,7 +471,8 @@ Major rewrite of internals while preserving the same MCP tool surface.
 - Smithery configuration (broken `smithery.yaml`).
 - Obsolete Cursor rules.
 
-[Unreleased]: https://github.com/kjanat/paperless-mcp/compare/v2.13.0...HEAD
+[Unreleased]: https://github.com/kjanat/paperless-mcp/compare/v2.13.1...HEAD
+[2.13.1]: https://github.com/kjanat/paperless-mcp/compare/v2.13.0...v2.13.1
 [2.13.0]: https://github.com/kjanat/paperless-mcp/compare/v2.12.0...v2.13.0
 [2.12.0]: https://github.com/kjanat/paperless-mcp/compare/v2.11.0...v2.12.0
 [2.11.0]: https://github.com/kjanat/paperless-mcp/compare/v2.10.0...v2.11.0

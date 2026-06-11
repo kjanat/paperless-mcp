@@ -37,11 +37,13 @@ export function registerTrashTools(server: McpServer, api: PaperlessAPI): void {
 		{
 			description:
 				'PERMANENTLY delete documents from the trash. This is the irreversible step: once emptied, documents and their files are gone. Omit documents to empty the entire trash.',
-			inputSchema: z.object({
+			// Raw shape, NOT z.object(...).default({}): the SDK advertises wrapped
+			// schemas as an empty object, hiding the params from every client.
+			inputSchema: {
 				documents: z.array(z.number().int().min(1)).min(1).optional().describe(
 					'Document IDs to purge from the trash (at least one when given). Omit entirely to permanently delete EVERYTHING in the trash.',
 				),
-			}).default({}),
+			},
 		},
 		async ({ documents }, _extra) => {
 			return jsonResult(await api.emptyTrash(documents));

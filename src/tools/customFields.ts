@@ -11,13 +11,13 @@ export function registerCustomFieldTools(server: McpServer, api: PaperlessAPI): 
 		{
 			description:
 				'Retrieve all custom field definitions (name, data type, options). Use this to resolve field names to the numeric IDs that update_document.custom_fields and bulk_edit_documents.modify_custom_fields require.',
-			// Full schema with .default({}) so clients that omit arguments entirely
-			// (allowed by the MCP spec) still pass validation.
-			inputSchema: z.object({
+			// Raw shape, NOT z.object(...).default({}): the SDK advertises wrapped
+			// schemas as an empty object, hiding the params from every client.
+			inputSchema: {
 				name: z.string().optional().describe(
 					'Case-insensitive substring filter on the name. Omit to list all custom fields.',
 				),
-			}).default({}),
+			},
 		},
 		async ({ name }, _extra) => {
 			return jsonResult(await api.getCustomFields(name));

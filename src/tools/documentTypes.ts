@@ -11,13 +11,13 @@ export function registerDocumentTypeTools(server: McpServer, api: PaperlessAPI):
 		{
 			description:
 				'Retrieve all available document types for categorizing documents by purpose or format (Invoice, Receipt, Contract, etc.). Returns names and automatic matching rules.',
-			// Full schema with .default({}) so clients that omit arguments entirely
-			// (allowed by the MCP spec) still pass validation.
-			inputSchema: z.object({
+			// Raw shape, NOT z.object(...).default({}): the SDK advertises wrapped
+			// schemas as an empty object, hiding the params from every client.
+			inputSchema: {
 				name: z.string().optional().describe(
 					'Case-insensitive substring filter on the name. Omit to list all document types.',
 				),
-			}).default({}),
+			},
 		},
 		async ({ name }, _extra) => {
 			return jsonResult(await api.getDocumentTypes(name));
