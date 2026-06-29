@@ -98,6 +98,11 @@
 			},
 			"AcknowledgeTasksViewRequest": {
 				"properties": {
+					"all": {
+						"default": false,
+						"type": "boolean",
+						"writeOnly": true
+					},
 					"tasks": {
 						"items": {
 							"type": "integer"
@@ -106,9 +111,6 @@
 						"writeOnly": true
 					}
 				},
-				"required": [
-					"tasks"
-				],
 				"type": "object"
 			},
 			"Actor": {
@@ -346,6 +348,14 @@
 						"nullable": true,
 						"title": "Sets the LLM output language",
 						"type": "string"
+					},
+					"llm_request_timeout": {
+						"format": "int64",
+						"maximum": 9223372036854775807,
+						"minimum": 1,
+						"nullable": true,
+						"title": "Sets the LLM timeout in seconds",
+						"type": "integer"
 					},
 					"max_image_pixels": {
 						"format": "double",
@@ -647,6 +657,14 @@
 						"nullable": true,
 						"title": "Sets the LLM output language",
 						"type": "string"
+					},
+					"llm_request_timeout": {
+						"format": "int64",
+						"maximum": 9223372036854775807,
+						"minimum": 1,
+						"nullable": true,
+						"title": "Sets the LLM timeout in seconds",
+						"type": "integer"
 					},
 					"max_image_pixels": {
 						"format": "double",
@@ -4107,6 +4125,14 @@
 						"title": "Sets the LLM output language",
 						"type": "string"
 					},
+					"llm_request_timeout": {
+						"format": "int64",
+						"maximum": 9223372036854775807,
+						"minimum": 1,
+						"nullable": true,
+						"title": "Sets the LLM timeout in seconds",
+						"type": "integer"
+					},
 					"max_image_pixels": {
 						"format": "double",
 						"minimum": 0.0,
@@ -7199,6 +7225,29 @@
 					"revoked"
 				],
 				"type": "string"
+			},
+			"TaskStatusCounts": {
+				"properties": {
+					"all": {
+						"type": "integer"
+					},
+					"completed": {
+						"type": "integer"
+					},
+					"in_progress": {
+						"type": "integer"
+					},
+					"needs_attention": {
+						"type": "integer"
+					}
+				},
+				"required": [
+					"all",
+					"completed",
+					"in_progress",
+					"needs_attention"
+				],
+				"type": "object"
 			},
 			"TaskSummary": {
 				"properties": {
@@ -16701,6 +16750,14 @@
 						}
 					},
 					{
+						"description": "Name",
+						"in": "query",
+						"name": "name",
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
 						"description": "Which field to use when ordering the results.",
 						"in": "query",
 						"name": "ordering",
@@ -16732,6 +16789,14 @@
 						"required": false,
 						"schema": {
 							"type": "integer"
+						}
+					},
+					{
+						"description": "Result",
+						"in": "query",
+						"name": "result",
+						"schema": {
+							"type": "string"
 						}
 					},
 					{
@@ -16842,7 +16907,7 @@
 		},
 		"/api/tasks/acknowledge/": {
 			"post": {
-				"description": "Acknowledge a list of tasks",
+				"description": "Acknowledge a list of tasks, or all visible unacknowledged tasks",
 				"operationId": "acknowledge_tasks",
 				"requestBody": {
 					"content": {
@@ -16861,8 +16926,7 @@
 								"$ref": "#/components/schemas/AcknowledgeTasksViewRequest"
 							}
 						}
-					},
-					"required": true
+					}
 				},
 				"responses": {
 					"200": {
@@ -16932,6 +16996,14 @@
 						}
 					},
 					{
+						"description": "Name",
+						"in": "query",
+						"name": "name",
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
 						"description": "Which field to use when ordering the results.",
 						"in": "query",
 						"name": "ordering",
@@ -16945,6 +17017,14 @@
 						"name": "owner",
 						"schema": {
 							"type": "integer"
+						}
+					},
+					{
+						"description": "Result",
+						"in": "query",
+						"name": "result",
+						"schema": {
+							"type": "string"
 						}
 					},
 					{
@@ -17110,6 +17190,38 @@
 				]
 			}
 		},
+		"/api/tasks/status_counts/": {
+			"get": {
+				"description": "Aggregated task counts for task UI sections.",
+				"operationId": "tasks_status_counts_retrieve",
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/TaskStatusCounts"
+								}
+							}
+						},
+						"description": ""
+					}
+				},
+				"security": [
+					{
+						"PaperelessBasicAuthentication": []
+					},
+					{
+						"tokenAuth": []
+					},
+					{
+						"cookieAuth": []
+					}
+				],
+				"tags": [
+					"tasks"
+				]
+			}
+		},
 		"/api/tasks/summary/": {
 			"get": {
 				"description": "Aggregated task statistics per task_type over the last N days (default 30).",
@@ -17161,6 +17273,14 @@
 						}
 					},
 					{
+						"description": "Name",
+						"in": "query",
+						"name": "name",
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
 						"description": "Which field to use when ordering the results.",
 						"in": "query",
 						"name": "ordering",
@@ -17174,6 +17294,14 @@
 						"name": "owner",
 						"schema": {
 							"type": "integer"
+						}
+					},
+					{
+						"description": "Result",
+						"in": "query",
+						"name": "result",
+						"schema": {
+							"type": "string"
 						}
 					},
 					{

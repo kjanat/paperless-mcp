@@ -2182,6 +2182,9 @@ export const zTasksListQuery = z.object({
 	is_complete: z.boolean().register(z.globalRegistry, {
 		description: 'Is Complete',
 	}).optional(),
+	name: z.string().register(z.globalRegistry, {
+		description: 'Name',
+	}).optional(),
 	ordering: z.string().register(z.globalRegistry, {
 		description: 'Which field to use when ordering the results.',
 	}).optional(),
@@ -2191,6 +2194,9 @@ export const zTasksListQuery = z.object({
 	}).optional(),
 	page_size: z.int().register(z.globalRegistry, {
 		description: 'Number of results to return per page.',
+	}).optional(),
+	result: z.string().register(z.globalRegistry, {
+		description: 'Result',
 	}).optional(),
 	status: z.array(z.enum([
 		'failure',
