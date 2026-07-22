@@ -12,7 +12,7 @@
  * tooling rely on (see each section). Everything else is generated.
  */
 
-import * as schemas from '#api/generated/zod.gen';
+import type * as schemas from '#api/generated/zod.gen';
 import type { z } from 'zod';
 
 /** Replace the keys of `T` present in `O` with the variants declared in `O`. */
@@ -208,7 +208,7 @@ export type UpdateCustomFieldRequest = z.infer<typeof schemas.zPatchedCustomFiel
  *
  * Hand-written divergence: the OpenAPI schema documents the newest API
  * version's `TaskSerializerV10` (lowercase `status`, `related_document_ids`
- * array, paginated list), but with the client's pinned `version=6` Accept
+ * array, paginated list), but with the client's pinned `version=9` Accept
  * header Paperless serves the legacy serializer — uppercase `status`, a
  * singular `related_document` string, and a plain (non-paginated) array.
  */
@@ -231,7 +231,7 @@ export interface PaperlessTask {
  * Filters for listTasks.
  *
  * The endpoint returns every task ever recorded as one plain array (12k+ on a
- * real instance, no server-side pagination at `version=6`), so the client
+ * real instance, no server-side pagination at `version=9`), so the client
  * always sorts newest-first server-side and applies `limit` client-side.
  */
 // ---------------------------------------------------------------------------

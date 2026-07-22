@@ -12,6 +12,8 @@ on:
       - scripts/openapi/**
       - package.json
       - bun.lock
+      - pyproject.toml
+      - uv.lock
   push:
     branches: [master]
     paths:
@@ -22,6 +24,8 @@ on:
       - scripts/openapi/**
       - package.json
       - bun.lock
+      - pyproject.toml
+      - uv.lock
   workflow_dispatch: {}
 
 concurrency: { group: "schema-check-${{ github.ref }}", cancel-in-progress: true }

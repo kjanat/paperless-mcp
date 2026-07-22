@@ -34,20 +34,27 @@ function stubFetchRaw(body: string, headers: Record<string, string> = {}, status
 	);
 }
 
+/** Arguments of the most recent fetch call; throws if fetch was never called. */
+function lastCall(): Parameters<typeof globalThis.fetch> {
+	const call = fetchSpy.mock.calls[0];
+	if (!call) throw new Error('fetch was not called');
+	return call;
+}
+
 /** Extract the parsed JSON body from the most recent fetch call. */
 function lastRequestBody(): Record<string, unknown> {
-	const [, init] = fetchSpy.mock.calls[0]!;
+	const [, init] = lastCall();
 	return JSON.parse(init?.body as string) as Record<string, unknown>;
 }
 
 /** Extract the URL string from the most recent fetch call. */
 function lastRequestUrl(): string {
-	return String(fetchSpy.mock.calls[0]![0]);
+	return String(lastCall()[0]);
 }
 
 /** Extract request init from the most recent fetch call. */
 function lastRequestInit(): RequestInit {
-	return fetchSpy.mock.calls[0]![1] ?? {};
+	return lastCall()[1] ?? {};
 }
 
 // ---------------------------------------------------------------------------
@@ -64,7 +71,7 @@ describe('PaperlessAPI.request', () => {
 		const headers = lastRequestInit().headers as Record<string, string>;
 		expect(headers['Authorization']).toBe(`Token ${TOKEN}`);
 		expect(headers['Accept']).toContain('application/json');
-		expect(headers['Accept']).toContain('version=6');
+		expect(headers['Accept']).toContain('version=9');
 		expect(headers['Content-Type']).toBe('application/json');
 	});
 
@@ -205,7 +212,7 @@ describe('PaperlessAPI.postDocument', () => {
 
 		const headers = lastRequestInit().headers as Record<string, string>;
 		expect(headers['Authorization']).toBe(`Token ${TOKEN}`);
-		expect(headers['Accept']).toContain('version=6');
+		expect(headers['Accept']).toContain('version=9');
 		expect(headers).not.toHaveProperty('Content-Type');
 	});
 });
@@ -372,7 +379,7 @@ describe('PaperlessAPI.downloadDocument', () => {
 
 		const headers = lastRequestInit().headers as Record<string, string>;
 		expect(headers['Authorization']).toBe(`Token ${TOKEN}`);
-		expect(headers['Accept']).toContain('version=6');
+		expect(headers['Accept']).toContain('version=9');
 	});
 });
 
@@ -685,7 +692,7 @@ describe('PaperlessAPI.deleteCustomField', () => {
 // ---------------------------------------------------------------------------
 
 describe('PaperlessAPI.getTask', () => {
-	test('queries /tasks/ by task_id and returns the plain array (version=6 shape)', async () => {
+	test('queries /tasks/ by task_id and returns the plain array (version=9 shape)', async () => {
 		stubFetch([
 			{
 				id: 12055,
@@ -745,7 +752,7 @@ describe('PaperlessAPI.listTasks', () => {
 	});
 
 	test('defensively unwraps results if the response ever arrives paginated', async () => {
-		// Dead branch at the pinned version=6 (always a plain array); kept so an
+		// Dead branch at the pinned version=9 (always a plain array); kept so an
 		// upstream change to pagination degrades gracefully instead of crashing.
 		stubFetch({
 			count: 1,

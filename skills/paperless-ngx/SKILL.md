@@ -2,10 +2,10 @@
 name: paperless-ngx
 description: Manages documents in Paperless-ngx via MCP tools. Searches, uploads, tags, organizes, and bulk-edits documents, correspondents, and document types. Use when working with Paperless-ngx, document management, OCR, or any mcp_paperless_* tool task.
 license: MIT
-compatibility: Requires a running Paperless-ngx instance with API token. MCP server must be connected with mcp_paperless_* tools available.
+compatibility: Requires a running Paperless-ngx instance (API version 9 or newer, i.e. recent 2.x or any 3.x) with an API token. MCP server must be connected with mcp_paperless_* tools available.
 metadata:
   author: kjanat
-  version: "2.13.1"
+  version: "3.0.0"
 ---
 
 # Paperless-ngx Document Management

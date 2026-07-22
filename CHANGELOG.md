@@ -7,6 +7,50 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.0.0] - 2026-07-22
+
+### Changed
+
+- **BREAKING: the API version header is now `version=9`** (was `version=6`).
+  Paperless-ngx v3.0.0 removed every API version below 9, so `version=6` gets
+  `406 Not Acceptable` on every endpoint. This cuts both ways: a Paperless-ngx
+  too old to serve version 9 will now reject this client. Applied to
+  `request()`, `postDocument`, `downloadDocument`, and `test-connection.sh`.
+
+  Task shapes are unaffected. `version=9` still serves the pre-V10 serializer
+  (uppercase `status`, singular `related_document`, unpaginated array), so
+  `getTask` and `listTasks` behave as before.
+- `@kjanat/dreamcli` v2 to v3, installed under the `dreamcli` alias. CLI name,
+  version, and repository links now come from `.manifest()` instead of the
+  `CLI_NAME` and `REPOSITORY_URL` constants, which are gone.
+- The CLI runs only under an `import.meta.main` guard, so `src/index.ts` can be
+  imported without starting a server or exiting the process.
+- `typecheck` runs `bunx @typescript/native --noEmit`. `typescript` stays
+  pinned `<7` because `@hey-api/openapi-ts` codegen needs the classic compiler.
+- `src/types.ts` imports the generated Zod module with `import type`. Every use
+  is a `z.infer<>` lookup, so this guarantees erasure at build time.
+- `dprint` 0.54.0 to 0.55.2. `fmt` and `fmt:check` pass an explicit
+  `-c="${PWD}/.dprint.jsonc"`, and the prettier association is scoped to
+  `["!**", "README.md"]`.
+- `@hey-api/openapi-ts` ^0.98.2 to ^0.99.0, `pkg-pr-new` ^0.0.75 to ^0.0.79,
+  `runner-run` ^0.13.1 to ^0.21.0, `tombi` ^1.1.3 to ^1.2.4.
+
+### Added
+
+- **Biome as a linter** (`bun run lint`, `biome.json`). Lint only; the
+  formatter stays disabled so dprint owns formatting.
+- `dreamcli` and `ansispeck` package keywords.
+
+### Fixed
+
+- `schema-check` now triggers on `pyproject.toml` and `uv.lock`, which decide
+  which upstream commit `gen:schema` reads. Changing the source without
+  regenerating previously touched no watched path and ran no check.
+- The fetch accessors in `src/api/paperless.test.ts` share a `lastCall()`
+  helper that throws a named error, replacing three `!` assertions.
+- Regenerated `schemas/openapi.json`. Its `info.version` is still `6.0.0`,
+  which is the schema document's version, not the API version.
+
 ## [2.13.1] - 2026-06-11
 
 ### Fixed
@@ -471,7 +515,8 @@ Major rewrite of internals while preserving the same MCP tool surface.
 - Smithery configuration (broken `smithery.yaml`).
 - Obsolete Cursor rules.
 
-[Unreleased]: https://github.com/kjanat/paperless-mcp/compare/v2.13.1...HEAD
+[Unreleased]: https://github.com/kjanat/paperless-mcp/compare/v3.0.0...HEAD
+[3.0.0]: https://github.com/kjanat/paperless-mcp/compare/v2.13.1...v3.0.0
 [2.13.1]: https://github.com/kjanat/paperless-mcp/compare/v2.13.0...v2.13.1
 [2.13.0]: https://github.com/kjanat/paperless-mcp/compare/v2.12.0...v2.13.0
 [2.12.0]: https://github.com/kjanat/paperless-mcp/compare/v2.11.0...v2.12.0

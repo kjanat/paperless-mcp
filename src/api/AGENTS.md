@@ -6,7 +6,9 @@ Paperless-ngx REST API via `fetch()`. All methods return typed responses
 
 ## KEY DETAILS
 
-- **API version**: `version=6` header on all requests (matches OpenAPI schema v6.0.0).
+- **API version**: `version=9` header on all requests. Paperless-ngx v3 dropped
+  API versions < 9, so `version=6` now 406s on every endpoint. This is the
+  Accept-header version, unrelated to the schema's `info.version` (6.0.0).
 - **`updateTag` uses PATCH** (not PUT) — per `PatchedTagRequest` in schema.
 - **`matching_algorithm` is integer (0-6)** across all endpoints.
 - **`searchDocuments` returns immutable copy** — strips `content`, `download_url`,
@@ -20,13 +22,14 @@ Paperless-ngx REST API via `fetch()`. All methods return typed responses
   module-level `omitUndefined()` helper at the bottom of `paperless.ts`;
   `createMailRule` (POST) uses it too.
 - **`getTask` queries by Celery UUID** — `GET /tasks/?task_id=...` (filter, not
-  path param). The numeric task `id` is a different field. With `version=6` the
+  path param). The numeric task `id` is a different field. With `version=9` the
   endpoint returns a plain array (legacy serializer: uppercase `status`,
   singular `related_document`), not the paginated `TaskSerializerV10` the
   OpenAPI schema documents — `getTask`/`listTasks` accept both shapes.
   `listTasks` caps the unpaginated array client-side (default 25, max 100);
   its `task_name` filter and uppercase `status` values exist only in the
-  legacy `version=6` filterset, so the schema-drift CI cannot guard them.
+  pre-V10 filterset that `version=9` still serves, so the schema-drift CI
+  cannot guard them.
 - **Notes are a sub-resource**: `addDocumentNote` (POST) and `deleteDocumentNote`
   (DELETE with `?id=` query) both return the document's remaining notes array.
 

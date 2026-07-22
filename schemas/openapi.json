@@ -4813,8 +4813,16 @@
 			"PatchedProfileRequest": {
 				"properties": {
 					"email": {
-						"format": "email",
-						"type": "string"
+						"oneOf": [
+							{
+								"format": "email",
+								"type": "string"
+							},
+							{
+								"maxLength": 0,
+								"type": "string"
+							}
+						]
 					},
 					"first_name": {
 						"maxLength": 150,
@@ -5112,10 +5120,18 @@
 						"type": "string"
 					},
 					"email": {
-						"format": "email",
-						"maxLength": 254,
-						"title": "Email address",
-						"type": "string"
+						"oneOf": [
+							{
+								"format": "email",
+								"maxLength": 254,
+								"type": "string"
+							},
+							{
+								"maxLength": 0,
+								"type": "string"
+							}
+						],
+						"title": "Email address"
 					},
 					"first_name": {
 						"maxLength": 150,
@@ -5735,8 +5751,16 @@
 						"type": "string"
 					},
 					"email": {
-						"format": "email",
-						"type": "string"
+						"oneOf": [
+							{
+								"format": "email",
+								"type": "string"
+							},
+							{
+								"maxLength": 0,
+								"type": "string"
+							}
+						]
 					},
 					"first_name": {
 						"maxLength": 150,
@@ -7493,10 +7517,18 @@
 						"type": "string"
 					},
 					"email": {
-						"format": "email",
-						"maxLength": 254,
-						"title": "Email address",
-						"type": "string"
+						"oneOf": [
+							{
+								"format": "email",
+								"maxLength": 254,
+								"type": "string"
+							},
+							{
+								"maxLength": 0,
+								"type": "string"
+							}
+						],
+						"title": "Email address"
 					},
 					"first_name": {
 						"maxLength": 150,
@@ -7574,10 +7606,18 @@
 						"type": "string"
 					},
 					"email": {
-						"format": "email",
-						"maxLength": 254,
-						"title": "Email address",
-						"type": "string"
+						"oneOf": [
+							{
+								"format": "email",
+								"maxLength": 254,
+								"type": "string"
+							},
+							{
+								"maxLength": 0,
+								"type": "string"
+							}
+						],
+						"title": "Email address"
 					},
 					"first_name": {
 						"maxLength": 150,

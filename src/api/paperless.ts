@@ -43,7 +43,7 @@ export class PaperlessAPI {
 		const url = `${this.baseUrl}/api${path}`;
 		const headers = {
 			Authorization: `Token ${this.token}`,
-			Accept: 'application/json; version=6',
+			Accept: 'application/json; version=9',
 			'Content-Type': 'application/json',
 			'Accept-Language': 'en-US,en;q=0.9',
 		};
@@ -130,7 +130,7 @@ export class PaperlessAPI {
 				method: 'POST',
 				headers: {
 					Authorization: `Token ${this.token}`,
-					Accept: 'application/json; version=6',
+					Accept: 'application/json; version=9',
 				},
 				body: formData,
 			},
@@ -213,7 +213,7 @@ export class PaperlessAPI {
 		const response = await fetch(`${this.baseUrl}/api${path}${query}`, {
 			headers: {
 				Authorization: `Token ${this.token}`,
-				Accept: 'application/json; version=6',
+				Accept: 'application/json; version=9',
 			},
 		});
 
@@ -363,7 +363,7 @@ export class PaperlessAPI {
 
 	async getTask(taskId: string): Promise<readonly PaperlessTask[]> {
 		const params = new URLSearchParams({ task_id: taskId });
-		// version=6 serves a plain array; newer API versions paginate. Accept both.
+		// version=9 serves a plain array; version=10+ paginates. Accept both.
 		const response = await this.request<
 			readonly PaperlessTask[] | PaginatedList<PaperlessTask>
 		>(`/tasks/?${params.toString()}`);
@@ -371,10 +371,10 @@ export class PaperlessAPI {
 	}
 
 	async listTasks(filters: ListTasksFilters = {}): Promise<readonly PaperlessTask[]> {
-		// The endpoint returns ALL tasks as one array at version=6 (no server
+		// The endpoint returns ALL tasks as one array at version=9 (no server
 		// pagination): sort newest-first server-side, cap client-side. The
 		// task_name param and uppercase status values exist only in this legacy
-		// version=6 filterset (the OpenAPI schema documents task_type and
+		// version=9 filterset (the OpenAPI schema documents the v10 task_type and
 		// lowercase statuses), so the schema-drift CI cannot guard them.
 		const params = new URLSearchParams({ ordering: '-date_created' });
 		if (filters.status != null) params.set('status', filters.status);

@@ -8,6 +8,10 @@ MCP server bridging AI assistants to Paperless-ngx document management. TypeScri
 `@modelcontextprotocol/sdk`, Zod v4, dual transport: stdio + Streamable HTTP.
 API types derived from OpenAPI schema v6.0.0.
 
+**Two unrelated "versions", do not conflate them**: the Accept-header API
+version (`version=9`) and the OpenAPI document's `info.version` (`6.0.0`).
+Requires Paperless-ngx new enough to serve API version 9.
+
 ## STRUCTURE
 
 ```tree
@@ -58,7 +62,7 @@ enums (`BulkEditMethod`, `MatchingAlgorithm`), and nested types (`ObjectPermissi
 ### `PaperlessAPI` (src/api/paperless.ts)
 
 Single class, 42 methods. All return typed responses (not `Promise<unknown>`).
-`request<T>()` is generic base — adds token auth (`version=6`), JSON content type,
+`request<T>()` is generic base: adds token auth (`version=9`), JSON content type,
 throws on non-OK. Most methods delegate to it.
 
 **Exceptions**: `postDocument` and `downloadDocument` bypass `request()` — they call
@@ -120,11 +124,16 @@ All callbacks accept `_extra` parameter (SDK requirement).
 
 ### Entry Point (src/index.ts)
 
-CLI defined with [`@kjanat/dreamcli`](https://dreamcli.kjanat.com) (schema-first,
-typed): the `serve` command resolves args/flags → `PaperlessAPI` →
-`createServer()` factory → transport. `cli().run()` owns help/version/errors and
-exits the process, so the action awaits `runUntilShutdown()` (SIGINT/SIGTERM) to
-keep the server alive and shut it down gracefully.
+CLI defined with [`@kjanat/dreamcli`](https://dreamcli.kjanat.com) v3, installed
+under the `dreamcli` alias (schema-first, typed): the `serve` command resolves
+args/flags → `PaperlessAPI` → `createServer()` factory → transport. `cli().run()`
+owns help/version/errors and exits the process, so the action awaits
+`runUntilShutdown()` (SIGINT/SIGTERM) to keep the server alive and shut it down
+gracefully.
+
+`cli()` sits behind an `import.meta.main` guard, so importing `src/index.ts`
+gives you `createServer()` without starting a server. Name, version, and repo
+links come from `.manifest()`, not hand-derived constants.
 
 - **args**: `<baseUrl>` (validated http(s), trailing slash stripped) `<token>`
 - **flags**: `--http`, `--port` (1-65535), `--per-request-token` (HTTP
@@ -148,7 +157,12 @@ keep the server alive and shut it down gracefully.
 - **kebab-case filenames**: `paperless.ts`, not `PaperlessAPI.ts`.
 - **Bun-first**: `bun` for runtime, bundling (`bun bd`), and testing (`bun test`).
 - **dprint** for formatting (`bun run fmt`). Tab indentation, single quotes.
-- **tsgo** for typechecking (`bun run typecheck`). Not `tsc`.
+  Biome is linter-only (`bun run lint`); its formatter is disabled on purpose.
+- **Two typescript versions on purpose.** `@typescript/native` is an alias for
+  `npm:typescript@^7` (currently 7.0.2, bin `tsc`); `bun run typecheck` runs it
+  via `bunx`. The plain `typescript` devDependency stays pinned `<7` because
+  `@hey-api/openapi-ts` codegen needs the classic compiler. The alias exists
+  only so both can be installed at once. Do not "upgrade" `<7` to match.
 - **Strict TypeScript**: `strict: true` + `noUncheckedIndexedAccess` +
   `noPropertyAccessFromIndexSignature` + all `noUnused*`/`noImplicit*` flags.
 - **No `any`, no `as` casts, no `!` assertions**.
@@ -167,16 +181,18 @@ keep the server alive and shut it down gracefully.
 - `as` casts exist in `paperless.ts` (response JSON cast to generic `T`
   without runtime validation) despite project convention forbidding them.
 - ~~Server version hardcoded as `'1.0.0'`~~ — now imported from `package.json`.
-- CI only runs `bun test` — no typecheck or format check in pipeline.
+- `bun run lint` (biome) runs in no workflow, the only unenforced check.
+  `npm-publish` does run `fmt:check typecheck test`.
 
 ## COMMANDS
 
 ```bash
 bun run start                # Dev: bun src/index.ts
 bun run bd                   # Bundle to dist/ via bun build
-bun run typecheck            # tsgo --noEmit
-bun run fmt                  # dprint fmt .
-bun run fmt:check            # dprint check .
+bun run typecheck            # bunx @typescript/native --noEmit
+bun run lint                 # biome lint
+bun run fmt                  # dprint fmt -c=.dprint.jsonc
+bun run fmt:check            # dprint check -c=.dprint.jsonc
 bun test                     # Run tests (auto-discovers *.test.ts)
 bun run inspect              # Launch MCP inspector
 ```
@@ -200,4 +216,8 @@ bun run inspect              # Launch MCP inspector
 - `scripts/openapi/` is a Python (3.14+) `uv` project — separate toolchain. Its
   `pyproject.toml` `[project.scripts].openapi` entry is invoked as `run openapi`
   in the `gen:*` scripts; `run` (runner) resolves a console script to
-  `uv run openapi`, so no extra wiring is needed.
+  `uv run openapi`, so no extra wiring is needed. `[tool.uv.sources]` tracks
+  the paperless-ngx default branch; `uv.lock` records the resolved commit SHA
+  and is the actual pin. Do not add a `.tag` constraint to the manifest: it
+  gains nothing over the lock's SHA and turns `schema-update`'s
+  `uv sync --upgrade-package` into a silent weekly no-op.

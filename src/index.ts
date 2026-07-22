@@ -1,11 +1,11 @@
 import type { IncomingMessage, ServerResponse } from 'node:http';
 
-import { arg, cli, command, flag, ParseError } from '@kjanat/dreamcli';
 import { createMcpExpressApp } from '@modelcontextprotocol/sdk/server/express.js';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
 import type { JSONRPCErrorResponse } from '@modelcontextprotocol/sdk/types.js';
+import { arg, cli, command, flag, ParseError } from 'dreamcli';
 
 import { PaperlessAPI } from '#api/paperless';
 import pkg from '#pkg';
@@ -22,8 +22,6 @@ import { registerTrashTools } from '#tools/trash';
 
 const DEFAULT_PORT = 3000;
 const DEFAULT_HOST = '127.0.0.1';
-const CLI_NAME = Object.keys(pkg.bin)[0]!;
-const REPOSITORY_URL = `https://github.com/${pkg.repository}`;
 const SERVER_NAME = 'paperless-ngx';
 /** Grace period to let in-flight HTTP requests drain before force-closing sockets. */
 const SHUTDOWN_GRACE_MS = 10_000;
@@ -250,7 +248,7 @@ async function runUntilShutdown(cleanup: () => Promise<void> | void): Promise<vo
 	await cleanup();
 }
 
-const serve = command(CLI_NAME)
+const serve = command('paperless-mcp')
 	.description('MCP server for the Paperless-ngx document management system.')
 	.arg('baseUrl', baseUrlArg)
 	.arg('token', tokenArg())
@@ -347,8 +345,10 @@ const serve = command(CLI_NAME)
 		}
 	});
 
-void cli(CLI_NAME)
-	.version(pkg.version)
-	.links({ name: REPOSITORY_URL, version: `${REPOSITORY_URL}/releases/tag/v${pkg.version}` })
-	.default(serve)
-	.run();
+if (import.meta.main) {
+	void cli('paperless-mcp')
+		.manifest({ from: import.meta.url, files: ['package.json'], inferName: true })
+		.links()
+		.default(serve)
+		.run();
+}
