@@ -251,6 +251,13 @@
 						"title": "Enables deskew",
 						"type": "boolean"
 					},
+					"externally_configured_variables": {
+						"items": {
+							"type": "string"
+						},
+						"readOnly": true,
+						"type": "array"
+					},
 					"id": {
 						"readOnly": true,
 						"type": "integer"
@@ -270,6 +277,7 @@
 						"type": "string"
 					},
 					"llm_api_key": {
+						"maxLength": 1024,
 						"nullable": true,
 						"type": "string"
 					},
@@ -402,6 +410,47 @@
 						"title": "Do OCR from page 1 to this value",
 						"type": "integer"
 					},
+					"remote_ocr_api_key": {
+						"maxLength": 1024,
+						"nullable": true,
+						"type": "string"
+					},
+					"remote_ocr_endpoint": {
+						"maxLength": 256,
+						"nullable": true,
+						"title": "Sets the remote OCR endpoint",
+						"type": "string"
+					},
+					"remote_ocr_engine": {
+						"nullable": true,
+						"oneOf": [
+							{
+								"$ref": "#/components/schemas/RemoteOcrEngineEnum"
+							},
+							{
+								"$ref": "#/components/schemas/BlankEnum"
+							},
+							{
+								"$ref": "#/components/schemas/NullEnum"
+							}
+						],
+						"title": "Sets the remote OCR engine"
+					},
+					"remote_ocr_mode": {
+						"nullable": true,
+						"oneOf": [
+							{
+								"$ref": "#/components/schemas/RemoteOcrModeEnum"
+							},
+							{
+								"$ref": "#/components/schemas/BlankEnum"
+							},
+							{
+								"$ref": "#/components/schemas/NullEnum"
+							}
+						],
+						"title": "Sets which documents are sent to the remote OCR engine"
+					},
 					"rotate_pages": {
 						"nullable": true,
 						"title": "Enables page rotation",
@@ -435,6 +484,7 @@
 				},
 				"required": [
 					"barcode_tag_mapping",
+					"externally_configured_variables",
 					"id",
 					"user_args"
 				],
@@ -578,6 +628,7 @@
 						"type": "string"
 					},
 					"llm_api_key": {
+						"maxLength": 1024,
 						"minLength": 1,
 						"nullable": true,
 						"type": "string"
@@ -710,6 +761,48 @@
 						"nullable": true,
 						"title": "Do OCR from page 1 to this value",
 						"type": "integer"
+					},
+					"remote_ocr_api_key": {
+						"maxLength": 1024,
+						"minLength": 1,
+						"nullable": true,
+						"type": "string"
+					},
+					"remote_ocr_endpoint": {
+						"maxLength": 256,
+						"nullable": true,
+						"title": "Sets the remote OCR endpoint",
+						"type": "string"
+					},
+					"remote_ocr_engine": {
+						"nullable": true,
+						"oneOf": [
+							{
+								"$ref": "#/components/schemas/RemoteOcrEngineEnum"
+							},
+							{
+								"$ref": "#/components/schemas/BlankEnum"
+							},
+							{
+								"$ref": "#/components/schemas/NullEnum"
+							}
+						],
+						"title": "Sets the remote OCR engine"
+					},
+					"remote_ocr_mode": {
+						"nullable": true,
+						"oneOf": [
+							{
+								"$ref": "#/components/schemas/RemoteOcrModeEnum"
+							},
+							{
+								"$ref": "#/components/schemas/BlankEnum"
+							},
+							{
+								"$ref": "#/components/schemas/NullEnum"
+							}
+						],
+						"title": "Sets which documents are sent to the remote OCR engine"
 					},
 					"rotate_pages": {
 						"nullable": true,
@@ -1599,6 +1692,7 @@
 					"deleted_at": {
 						"format": "date-time",
 						"nullable": true,
+						"readOnly": true,
 						"type": "string"
 					},
 					"document_type": {
@@ -1724,6 +1818,7 @@
 					"added",
 					"archived_file_name",
 					"correspondent",
+					"deleted_at",
 					"document_type",
 					"duplicate_documents",
 					"id",
@@ -1790,11 +1885,6 @@
 							"$ref": "#/components/schemas/CustomFieldInstanceRequest"
 						},
 						"type": "array"
-					},
-					"deleted_at": {
-						"format": "date-time",
-						"nullable": true,
-						"type": "string"
 					},
 					"document_type": {
 						"nullable": true,
@@ -2329,6 +2419,69 @@
 				],
 				"type": "object"
 			},
+			"IconEnum": {
+				"description": "* `archive` - Archive\n* `bank` - Bank\n* `basket` - Basket\n* `bell` - Bell\n* `bookmark` - Bookmark\n* `boxes` - Boxes\n* `briefcase` - Briefcase\n* `building` - Building\n* `calculator` - Calculator\n* `calendar` - Calendar\n* `camera` - Camera\n* `card-checklist` - Checklist\n* `cash` - Cash\n* `chat-left-text` - Chat\n* `check-circle` - Check\n* `clipboard` - Clipboard\n* `clock-history` - Clock\n* `credit-card` - Credit card\n* `download` - Download\n* `envelope` - Envelope\n* `exclamation-triangle` - Warning\n* `file-earmark` - File\n* `file-earmark-check` - Checked file\n* `file-earmark-lock` - Locked file\n* `file-earmark-medical` - Medical file\n* `file-earmark-person` - Person file\n* `file-earmark-spreadsheet` - Spreadsheet\n* `file-text` - Text file\n* `files` - Files\n* `folder` - Folder\n* `funnel` - Filter\n* `gear` - Gear\n* `globe2` - Globe\n* `hash` - Hash\n* `heart` - Heart\n* `house` - House\n* `inbox` - Inbox\n* `journals` - Journals\n* `list-task` - Task list\n* `newspaper` - Newspaper\n* `paperclip` - Attachment\n* `people` - People\n* `person` - Person\n* `printer` - Printer\n* `receipt` - Receipt\n* `safe` - Safe\n* `search` - Search\n* `send` - Send\n* `shop` - Shop\n* `stack` - Stack\n* `stars` - Stars\n* `tag` - Tag\n* `tags` - Tags\n* `telephone` - Telephone\n* `truck` - Truck\n* `upc-scan` - Barcode\n* `wallet2` - Wallet",
+				"enum": [
+					"archive",
+					"bank",
+					"basket",
+					"bell",
+					"bookmark",
+					"boxes",
+					"briefcase",
+					"building",
+					"calculator",
+					"calendar",
+					"camera",
+					"card-checklist",
+					"cash",
+					"chat-left-text",
+					"check-circle",
+					"clipboard",
+					"clock-history",
+					"credit-card",
+					"download",
+					"envelope",
+					"exclamation-triangle",
+					"file-earmark",
+					"file-earmark-check",
+					"file-earmark-lock",
+					"file-earmark-medical",
+					"file-earmark-person",
+					"file-earmark-spreadsheet",
+					"file-text",
+					"files",
+					"folder",
+					"funnel",
+					"gear",
+					"globe2",
+					"hash",
+					"heart",
+					"house",
+					"inbox",
+					"journals",
+					"list-task",
+					"newspaper",
+					"paperclip",
+					"people",
+					"person",
+					"printer",
+					"receipt",
+					"safe",
+					"search",
+					"send",
+					"shop",
+					"stack",
+					"stars",
+					"tag",
+					"tags",
+					"telephone",
+					"truck",
+					"upc-scan",
+					"wallet2"
+				],
+				"type": "string"
+			},
 			"ImapSecurityEnum": {
 				"description": "* `1` - No encryption\n* `2` - Use SSL\n* `3` - Use STARTTLS",
 				"enum": [
@@ -2431,11 +2584,6 @@
 						"type": "integer"
 					},
 					"imap_port": {
-						"description": "This is usually 143 for unencrypted and STARTTLS connections, and 993 for SSL connections.",
-						"format": "int64",
-						"maximum": 9223372036854775807,
-						"minimum": 0,
-						"nullable": true,
 						"type": "integer"
 					},
 					"imap_security": {
@@ -2477,6 +2625,7 @@
 				},
 				"required": [
 					"id",
+					"imap_port",
 					"imap_server",
 					"name",
 					"password",
@@ -2518,11 +2667,6 @@
 						"type": "string"
 					},
 					"imap_port": {
-						"description": "This is usually 143 for unencrypted and STARTTLS connections, and 993 for SSL connections.",
-						"format": "int64",
-						"maximum": 9223372036854775807,
-						"minimum": 0,
-						"nullable": true,
 						"type": "integer"
 					},
 					"imap_security": {
@@ -2603,6 +2747,7 @@
 					}
 				},
 				"required": [
+					"imap_port",
 					"imap_server",
 					"name",
 					"password",
@@ -3010,6 +3155,41 @@
 				],
 				"type": "integer"
 			},
+			"MergeDocumentsAsVersionsRequest": {
+				"properties": {
+					"documents": {
+						"items": {
+							"type": "integer"
+						},
+						"type": "array",
+						"writeOnly": true
+					},
+					"root_document_id": {
+						"type": "integer"
+					},
+					"version_label": {
+						"maxLength": 64,
+						"nullable": true,
+						"type": "string"
+					}
+				},
+				"required": [
+					"documents",
+					"root_document_id"
+				],
+				"type": "object"
+			},
+			"MergeDocumentsAsVersionsResult": {
+				"properties": {
+					"result": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"result"
+				],
+				"type": "object"
+			},
 			"MergeDocumentsRequest": {
 				"properties": {
 					"archive_fallback": {
@@ -3302,37 +3482,6 @@
 					"results": {
 						"items": {
 							"$ref": "#/components/schemas/Correspondent"
-						},
-						"type": "array"
-					}
-				},
-				"required": [
-					"count",
-					"results"
-				],
-				"type": "object"
-			},
-			"PaginatedCustomFieldList": {
-				"properties": {
-					"count": {
-						"example": 123,
-						"type": "integer"
-					},
-					"next": {
-						"example": "http://api.example.org/accounts/?page=4",
-						"format": "uri",
-						"nullable": true,
-						"type": "string"
-					},
-					"previous": {
-						"example": "http://api.example.org/accounts/?page=2",
-						"format": "uri",
-						"nullable": true,
-						"type": "string"
-					},
-					"results": {
-						"items": {
-							"$ref": "#/components/schemas/CustomField"
 						},
 						"type": "array"
 					}
@@ -4045,6 +4194,7 @@
 						"type": "string"
 					},
 					"llm_api_key": {
+						"maxLength": 1024,
 						"minLength": 1,
 						"nullable": true,
 						"type": "string"
@@ -4177,6 +4327,48 @@
 						"nullable": true,
 						"title": "Do OCR from page 1 to this value",
 						"type": "integer"
+					},
+					"remote_ocr_api_key": {
+						"maxLength": 1024,
+						"minLength": 1,
+						"nullable": true,
+						"type": "string"
+					},
+					"remote_ocr_endpoint": {
+						"maxLength": 256,
+						"nullable": true,
+						"title": "Sets the remote OCR endpoint",
+						"type": "string"
+					},
+					"remote_ocr_engine": {
+						"nullable": true,
+						"oneOf": [
+							{
+								"$ref": "#/components/schemas/RemoteOcrEngineEnum"
+							},
+							{
+								"$ref": "#/components/schemas/BlankEnum"
+							},
+							{
+								"$ref": "#/components/schemas/NullEnum"
+							}
+						],
+						"title": "Sets the remote OCR engine"
+					},
+					"remote_ocr_mode": {
+						"nullable": true,
+						"oneOf": [
+							{
+								"$ref": "#/components/schemas/RemoteOcrModeEnum"
+							},
+							{
+								"$ref": "#/components/schemas/BlankEnum"
+							},
+							{
+								"$ref": "#/components/schemas/NullEnum"
+							}
+						],
+						"title": "Sets which documents are sent to the remote OCR engine"
 					},
 					"rotate_pages": {
 						"nullable": true,
@@ -4331,11 +4523,6 @@
 							"$ref": "#/components/schemas/CustomFieldInstanceRequest"
 						},
 						"type": "array"
-					},
-					"deleted_at": {
-						"format": "date-time",
-						"nullable": true,
-						"type": "string"
 					},
 					"document_type": {
 						"nullable": true,
@@ -4529,11 +4716,6 @@
 						"type": "string"
 					},
 					"imap_port": {
-						"description": "This is usually 143 for unencrypted and STARTTLS connections, and 993 for SSL connections.",
-						"format": "int64",
-						"maximum": 9223372036854775807,
-						"minimum": 0,
-						"nullable": true,
 						"type": "integer"
 					},
 					"imap_security": {
@@ -4866,6 +5048,9 @@
 						},
 						"type": "array"
 					},
+					"icon": {
+						"$ref": "#/components/schemas/IconEnum"
+					},
 					"name": {
 						"maxLength": 128,
 						"minLength": 1,
@@ -4930,28 +5115,6 @@
 					},
 					"sort_reverse": {
 						"type": "boolean"
-					}
-				},
-				"type": "object"
-			},
-			"PatchedShareLinkBundleRequest": {
-				"properties": {
-					"document_ids": {
-						"items": {
-							"minimum": 1,
-							"type": "integer"
-						},
-						"type": "array",
-						"writeOnly": true
-					},
-					"expiration_days": {
-						"minimum": 1,
-						"nullable": true,
-						"type": "integer",
-						"writeOnly": true
-					},
-					"file_version": {
-						"$ref": "#/components/schemas/FileVersionEnum"
 					}
 				},
 				"type": "object"
@@ -5186,6 +5349,20 @@
 			},
 			"PatchedWorkflowActionRequest": {
 				"properties": {
+					"ai_create_missing": {
+						"description": "Create suggested tags, correspondents, document types and storage paths that do not already exist instead of skipping them.",
+						"title": "Create missing objects",
+						"type": "boolean"
+					},
+					"ai_overwrite_existing": {
+						"description": "Apply suggestions even if the document already has a value for that field. Tags are always added to, never replaced.",
+						"title": "Overwrite existing values",
+						"type": "boolean"
+					},
+					"ai_suggestion_fields": {
+						"description": "Which of the AI-suggested fields to apply to the document.",
+						"nullable": true
+					},
 					"assign_change_groups": {
 						"items": {
 							"title": "Grant change permissions to these groups",
@@ -5808,6 +5985,21 @@
 				],
 				"type": "object"
 			},
+			"RemoteOcrEngineEnum": {
+				"description": "* `azureai` - Azure AI Document Intelligence",
+				"enum": [
+					"azureai"
+				],
+				"type": "string"
+			},
+			"RemoteOcrModeEnum": {
+				"description": "* `always` - All supported documents\n* `workflow_only` - Only when a workflow enables it",
+				"enum": [
+					"always",
+					"workflow_only"
+				],
+				"type": "string"
+			},
 			"RemovePasswordDocumentsRequest": {
 				"properties": {
 					"delete_original": {
@@ -5878,6 +6070,10 @@
 						"additionalProperties": {},
 						"type": "object",
 						"writeOnly": true
+					},
+					"remote_ocr": {
+						"default": false,
+						"type": "boolean"
 					}
 				},
 				"type": "object"
@@ -5942,7 +6138,7 @@
 				"type": "object"
 			},
 			"RuleTypeEnum": {
-				"description": "* `0` - title contains\n* `1` - content contains\n* `2` - ASN is\n* `3` - correspondent is\n* `4` - document type is\n* `5` - is in inbox\n* `6` - has tag\n* `7` - has any tag\n* `8` - created before\n* `9` - created after\n* `10` - created year is\n* `11` - created month is\n* `12` - created day is\n* `13` - added before\n* `14` - added after\n* `15` - modified before\n* `16` - modified after\n* `17` - does not have tag\n* `18` - does not have ASN\n* `19` - title or content contains\n* `20` - fulltext query\n* `21` - more like this\n* `22` - has tags in\n* `23` - ASN greater than\n* `24` - ASN less than\n* `25` - storage path is\n* `26` - has correspondent in\n* `27` - does not have correspondent in\n* `28` - has document type in\n* `29` - does not have document type in\n* `30` - has storage path in\n* `31` - does not have storage path in\n* `32` - owner is\n* `33` - has owner in\n* `34` - does not have owner\n* `35` - does not have owner in\n* `36` - has custom field value\n* `37` - is shared by me\n* `38` - has custom fields\n* `39` - has custom field in\n* `40` - does not have custom field in\n* `41` - does not have custom field\n* `42` - custom fields query\n* `43` - created to\n* `44` - created from\n* `45` - added to\n* `46` - added from\n* `47` - mime type is\n* `48` - simple title search\n* `49` - simple text search",
+				"description": "* `0` - title contains\n* `1` - content contains\n* `2` - ASN is\n* `3` - correspondent is\n* `4` - document type is\n* `5` - is in inbox\n* `6` - has tag\n* `7` - has any tag\n* `8` - created before\n* `9` - created after\n* `10` - created year is\n* `11` - created month is\n* `12` - created day is\n* `13` - added before\n* `14` - added after\n* `15` - modified before\n* `16` - modified after\n* `17` - does not have tag\n* `18` - does not have ASN\n* `19` - title or content contains\n* `20` - fulltext query\n* `21` - more like this\n* `22` - has tags in\n* `23` - ASN greater than\n* `24` - ASN less than\n* `25` - storage path is\n* `26` - has correspondent in\n* `27` - does not have correspondent in\n* `28` - has document type in\n* `29` - does not have document type in\n* `30` - has storage path in\n* `31` - does not have storage path in\n* `32` - owner is\n* `33` - has owner in\n* `34` - does not have owner\n* `35` - does not have owner in\n* `36` - has custom field value\n* `37` - is shared by me\n* `38` - has custom fields\n* `39` - has custom field in\n* `40` - does not have custom field in\n* `41` - does not have custom field\n* `42` - custom fields query\n* `43` - created to\n* `44` - created from\n* `45` - added to\n* `46` - added from\n* `47` - mime type is\n* `48` - simple title search\n* `49` - simple text search\n* `50` - has duplicates",
 				"enum": [
 					0,
 					1,
@@ -5993,7 +6189,8 @@
 					46,
 					47,
 					48,
-					49
+					49,
+					50
 				],
 				"type": "integer"
 			},
@@ -6081,6 +6278,9 @@
 							"$ref": "#/components/schemas/SavedViewFilterRule"
 						},
 						"type": "array"
+					},
+					"icon": {
+						"$ref": "#/components/schemas/IconEnum"
 					},
 					"id": {
 						"readOnly": true,
@@ -6234,6 +6434,9 @@
 							"$ref": "#/components/schemas/SavedViewFilterRuleRequest"
 						},
 						"type": "array"
+					},
+					"icon": {
+						"$ref": "#/components/schemas/IconEnum"
 					},
 					"name": {
 						"maxLength": 128,
@@ -7188,7 +7391,7 @@
 								"$ref": "#/components/schemas/TaskTypeEnum"
 							}
 						],
-						"description": "The kind of work being performed\n\n* `consume_file` - Consume File\n* `train_classifier` - Train Classifier\n* `sanity_check` - Sanity Check\n* `index_optimize` - Index Optimize\n* `mail_fetch` - Mail Fetch\n* `llm_index` - LLM Index\n* `empty_trash` - Empty Trash\n* `check_workflows` - Check Workflows\n* `bulk_update` - Bulk Update\n* `reprocess_document` - Reprocess Document\n* `build_share_link` - Build Share Link\n* `bulk_delete` - Bulk Delete",
+						"description": "The kind of work being performed\n\n* `consume_file` - Consume File\n* `train_classifier` - Train Classifier\n* `sanity_check` - Sanity Check\n* `index_optimize` - Index Optimize\n* `mail_fetch` - Mail Fetch\n* `llm_index` - LLM Index\n* `empty_trash` - Empty Trash\n* `check_workflows` - Check Workflows\n* `bulk_update` - Bulk Update\n* `reprocess_document` - Reprocess Document\n* `build_share_link` - Build Share Link\n* `bulk_delete` - Bulk Delete\n* `apply_ai_suggestions` - Apply AI Suggestions",
 						"readOnly": true
 					},
 					"task_type_display": {
@@ -7331,7 +7534,7 @@
 				"type": "object"
 			},
 			"TaskTypeEnum": {
-				"description": "* `consume_file` - Consume File\n* `train_classifier` - Train Classifier\n* `sanity_check` - Sanity Check\n* `index_optimize` - Index Optimize\n* `mail_fetch` - Mail Fetch\n* `llm_index` - LLM Index\n* `empty_trash` - Empty Trash\n* `check_workflows` - Check Workflows\n* `bulk_update` - Bulk Update\n* `reprocess_document` - Reprocess Document\n* `build_share_link` - Build Share Link\n* `bulk_delete` - Bulk Delete",
+				"description": "* `consume_file` - Consume File\n* `train_classifier` - Train Classifier\n* `sanity_check` - Sanity Check\n* `index_optimize` - Index Optimize\n* `mail_fetch` - Mail Fetch\n* `llm_index` - LLM Index\n* `empty_trash` - Empty Trash\n* `check_workflows` - Check Workflows\n* `bulk_update` - Bulk Update\n* `reprocess_document` - Reprocess Document\n* `build_share_link` - Build Share Link\n* `bulk_delete` - Bulk Delete\n* `apply_ai_suggestions` - Apply AI Suggestions",
 				"enum": [
 					"consume_file",
 					"train_classifier",
@@ -7344,7 +7547,8 @@
 					"bulk_update",
 					"reprocess_document",
 					"build_share_link",
-					"bulk_delete"
+					"bulk_delete",
+					"apply_ai_suggestions"
 				],
 				"type": "string"
 			},
@@ -7712,6 +7916,20 @@
 			},
 			"WorkflowAction": {
 				"properties": {
+					"ai_create_missing": {
+						"description": "Create suggested tags, correspondents, document types and storage paths that do not already exist instead of skipping them.",
+						"title": "Create missing objects",
+						"type": "boolean"
+					},
+					"ai_overwrite_existing": {
+						"description": "Apply suggestions even if the document already has a value for that field. Tags are always added to, never replaced.",
+						"title": "Overwrite existing values",
+						"type": "boolean"
+					},
+					"ai_suggestion_fields": {
+						"description": "Which of the AI-suggested fields to apply to the document.",
+						"nullable": true
+					},
 					"assign_change_groups": {
 						"items": {
 							"title": "Grant change permissions to these groups",
@@ -7997,6 +8215,20 @@
 			},
 			"WorkflowActionRequest": {
 				"properties": {
+					"ai_create_missing": {
+						"description": "Create suggested tags, correspondents, document types and storage paths that do not already exist instead of skipping them.",
+						"title": "Create missing objects",
+						"type": "boolean"
+					},
+					"ai_overwrite_existing": {
+						"description": "Apply suggestions even if the document already has a value for that field. Tags are always added to, never replaced.",
+						"title": "Overwrite existing values",
+						"type": "boolean"
+					},
+					"ai_suggestion_fields": {
+						"description": "Which of the AI-suggested fields to apply to the document.",
+						"nullable": true
+					},
 					"assign_change_groups": {
 						"items": {
 							"title": "Grant change permissions to these groups",
@@ -8210,14 +8442,16 @@
 				"type": "object"
 			},
 			"WorkflowActionTypeEnum": {
-				"description": "* `1` - Assignment\n* `2` - Removal\n* `3` - Email\n* `4` - Webhook\n* `5` - Password removal\n* `6` - Move to trash",
+				"description": "* `1` - Assignment\n* `2` - Removal\n* `3` - Email\n* `4` - Webhook\n* `5` - Password removal\n* `6` - Move to trash\n* `7` - Remote OCR\n* `8` - Apply AI suggestions",
 				"enum": [
 					1,
 					2,
 					3,
 					4,
 					5,
-					6
+					6,
+					7,
+					8
 				],
 				"type": "integer"
 			},
@@ -9426,94 +9660,10 @@
 		"/api/custom_fields/": {
 			"get": {
 				"description": "Mixin to add document count to queryset, permissions-aware if needed",
-				"operationId": "custom_fields_list",
-				"parameters": [
-					{
-						"in": "query",
-						"name": "id",
-						"schema": {
-							"type": "integer"
-						}
-					},
-					{
-						"description": "Multiple values may be separated by commas.",
-						"explode": false,
-						"in": "query",
-						"name": "id__in",
-						"schema": {
-							"items": {
-								"type": "integer"
-							},
-							"type": "array"
-						},
-						"style": "form"
-					},
-					{
-						"in": "query",
-						"name": "name__icontains",
-						"schema": {
-							"type": "string"
-						}
-					},
-					{
-						"in": "query",
-						"name": "name__iendswith",
-						"schema": {
-							"type": "string"
-						}
-					},
-					{
-						"in": "query",
-						"name": "name__iexact",
-						"schema": {
-							"type": "string"
-						}
-					},
-					{
-						"in": "query",
-						"name": "name__istartswith",
-						"schema": {
-							"type": "string"
-						}
-					},
-					{
-						"description": "Which field to use when ordering the results.",
-						"in": "query",
-						"name": "ordering",
-						"required": false,
-						"schema": {
-							"type": "string"
-						}
-					},
-					{
-						"description": "A page number within the paginated result set.",
-						"in": "query",
-						"name": "page",
-						"required": false,
-						"schema": {
-							"type": "integer"
-						}
-					},
-					{
-						"description": "Number of results to return per page.",
-						"in": "query",
-						"name": "page_size",
-						"required": false,
-						"schema": {
-							"type": "integer"
-						}
-					}
-				],
+				"operationId": "custom_fields_retrieve",
 				"responses": {
 					"200": {
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/PaginatedCustomFieldList"
-								}
-							}
-						},
-						"description": ""
+						"description": "No response body"
 					}
 				},
 				"security": [
@@ -9619,7 +9769,7 @@
 			},
 			"get": {
 				"description": "Mixin to add document count to queryset, permissions-aware if needed",
-				"operationId": "custom_fields_retrieve",
+				"operationId": "custom_fields_retrieve_2",
 				"parameters": [
 					{
 						"description": "A unique integer value identifying this custom field.",
@@ -10616,6 +10766,13 @@
 					},
 					{
 						"in": "query",
+						"name": "has_duplicates",
+						"schema": {
+							"type": "boolean"
+						}
+					},
+					{
+						"in": "query",
 						"name": "id",
 						"schema": {
 							"type": "integer"
@@ -11384,6 +11541,48 @@
 				]
 			}
 		},
+		"/api/documents/merge_as_versions/": {
+			"post": {
+				"description": "Merge selected documents as versions of a chosen root document",
+				"operationId": "documents_merge_as_versions",
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/MergeDocumentsAsVersionsRequest"
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/MergeDocumentsAsVersionsResult"
+								}
+							}
+						},
+						"description": ""
+					}
+				},
+				"security": [
+					{
+						"PaperelessBasicAuthentication": []
+					},
+					{
+						"tokenAuth": []
+					},
+					{
+						"cookieAuth": []
+					}
+				],
+				"tags": [
+					"documents"
+				]
+			}
+		},
 		"/api/documents/next_asn/": {
 			"get": {
 				"description": "Get the next available Archive Serial Number (ASN) for a new document",
@@ -11636,7 +11835,7 @@
 		},
 		"/api/documents/{id}/": {
 			"delete": {
-				"description": "Pass a user object to serializer",
+				"description": "Prefetch Django-Guardian permissions for a list before serialization, to avoid N+1 queries.",
 				"operationId": "documents_destroy",
 				"parameters": [
 					{
@@ -11731,7 +11930,7 @@
 				]
 			},
 			"patch": {
-				"description": "Pass a user object to serializer",
+				"description": "Prefetch Django-Guardian permissions for a list before serialization, to avoid N+1 queries.",
 				"operationId": "documents_partial_update",
 				"parameters": [
 					{
@@ -11791,7 +11990,7 @@
 				]
 			},
 			"put": {
-				"description": "Pass a user object to serializer",
+				"description": "Prefetch Django-Guardian permissions for a list before serialization, to avoid N+1 queries.",
 				"operationId": "documents_update",
 				"parameters": [
 					{
@@ -12412,7 +12611,7 @@
 		},
 		"/api/documents/{id}/root/": {
 			"get": {
-				"description": "Pass a user object to serializer",
+				"description": "Prefetch Django-Guardian permissions for a list before serialization, to avoid N+1 queries.",
 				"operationId": "documents_root",
 				"parameters": [
 					{
@@ -12621,7 +12820,7 @@
 		},
 		"/api/documents/{id}/update_version/": {
 			"post": {
-				"description": "Pass a user object to serializer",
+				"description": "Prefetch Django-Guardian permissions for a list before serialization, to avoid N+1 queries.",
 				"operationId": "documents_update_version",
 				"parameters": [
 					{
@@ -12674,7 +12873,7 @@
 		},
 		"/api/documents/{id}/versions/{version_id}/": {
 			"delete": {
-				"description": "Pass a user object to serializer",
+				"description": "Prefetch Django-Guardian permissions for a list before serialization, to avoid N+1 queries.",
 				"operationId": "documents_delete_version",
 				"parameters": [
 					{
@@ -12716,7 +12915,7 @@
 				]
 			},
 			"patch": {
-				"description": "Pass a user object to serializer",
+				"description": "Prefetch Django-Guardian permissions for a list before serialization, to avoid N+1 queries.",
 				"operationId": "documents_update_version_label",
 				"parameters": [
 					{
@@ -15303,127 +15502,6 @@
 				"tags": [
 					"share_link_bundles"
 				]
-			},
-			"patch": {
-				"description": "Pass a user object to serializer",
-				"operationId": "share_link_bundles_partial_update",
-				"parameters": [
-					{
-						"description": "A unique integer value identifying this share link bundle.",
-						"in": "path",
-						"name": "id",
-						"required": true,
-						"schema": {
-							"type": "integer"
-						}
-					}
-				],
-				"requestBody": {
-					"content": {
-						"application/json": {
-							"schema": {
-								"$ref": "#/components/schemas/PatchedShareLinkBundleRequest"
-							}
-						},
-						"application/x-www-form-urlencoded": {
-							"schema": {
-								"$ref": "#/components/schemas/PatchedShareLinkBundleRequest"
-							}
-						},
-						"multipart/form-data": {
-							"schema": {
-								"$ref": "#/components/schemas/PatchedShareLinkBundleRequest"
-							}
-						}
-					}
-				},
-				"responses": {
-					"200": {
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/ShareLinkBundle"
-								}
-							}
-						},
-						"description": ""
-					}
-				},
-				"security": [
-					{
-						"PaperelessBasicAuthentication": []
-					},
-					{
-						"tokenAuth": []
-					},
-					{
-						"cookieAuth": []
-					}
-				],
-				"tags": [
-					"share_link_bundles"
-				]
-			},
-			"put": {
-				"description": "Pass a user object to serializer",
-				"operationId": "share_link_bundles_update",
-				"parameters": [
-					{
-						"description": "A unique integer value identifying this share link bundle.",
-						"in": "path",
-						"name": "id",
-						"required": true,
-						"schema": {
-							"type": "integer"
-						}
-					}
-				],
-				"requestBody": {
-					"content": {
-						"application/json": {
-							"schema": {
-								"$ref": "#/components/schemas/ShareLinkBundleRequest"
-							}
-						},
-						"application/x-www-form-urlencoded": {
-							"schema": {
-								"$ref": "#/components/schemas/ShareLinkBundleRequest"
-							}
-						},
-						"multipart/form-data": {
-							"schema": {
-								"$ref": "#/components/schemas/ShareLinkBundleRequest"
-							}
-						}
-					},
-					"required": true
-				},
-				"responses": {
-					"200": {
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/ShareLinkBundle"
-								}
-							}
-						},
-						"description": ""
-					}
-				},
-				"security": [
-					{
-						"PaperelessBasicAuthentication": []
-					},
-					{
-						"tokenAuth": []
-					},
-					{
-						"cookieAuth": []
-					}
-				],
-				"tags": [
-					"share_link_bundles"
-				]
 			}
 		},
 		"/api/share_link_bundles/{id}/rebuild/": {
@@ -16868,13 +16946,14 @@
 						}
 					},
 					{
-						"description": "Task Type\n\n* `consume_file` - Consume File\n* `train_classifier` - Train Classifier\n* `sanity_check` - Sanity Check\n* `index_optimize` - Index Optimize\n* `mail_fetch` - Mail Fetch\n* `llm_index` - LLM Index\n* `empty_trash` - Empty Trash\n* `check_workflows` - Check Workflows\n* `bulk_update` - Bulk Update\n* `reprocess_document` - Reprocess Document\n* `build_share_link` - Build Share Link\n* `bulk_delete` - Bulk Delete",
+						"description": "Task Type\n\n* `consume_file` - Consume File\n* `train_classifier` - Train Classifier\n* `sanity_check` - Sanity Check\n* `index_optimize` - Index Optimize\n* `mail_fetch` - Mail Fetch\n* `llm_index` - LLM Index\n* `empty_trash` - Empty Trash\n* `check_workflows` - Check Workflows\n* `bulk_update` - Bulk Update\n* `reprocess_document` - Reprocess Document\n* `build_share_link` - Build Share Link\n* `bulk_delete` - Bulk Delete\n* `apply_ai_suggestions` - Apply AI Suggestions",
 						"explode": true,
 						"in": "query",
 						"name": "task_type",
 						"schema": {
 							"items": {
 								"enum": [
+									"apply_ai_suggestions",
 									"build_share_link",
 									"bulk_delete",
 									"bulk_update",
@@ -17088,13 +17167,14 @@
 						"style": "form"
 					},
 					{
-						"description": "Task Type\n\n* `consume_file` - Consume File\n* `train_classifier` - Train Classifier\n* `sanity_check` - Sanity Check\n* `index_optimize` - Index Optimize\n* `mail_fetch` - Mail Fetch\n* `llm_index` - LLM Index\n* `empty_trash` - Empty Trash\n* `check_workflows` - Check Workflows\n* `bulk_update` - Bulk Update\n* `reprocess_document` - Reprocess Document\n* `build_share_link` - Build Share Link\n* `bulk_delete` - Bulk Delete",
+						"description": "Task Type\n\n* `consume_file` - Consume File\n* `train_classifier` - Train Classifier\n* `sanity_check` - Sanity Check\n* `index_optimize` - Index Optimize\n* `mail_fetch` - Mail Fetch\n* `llm_index` - LLM Index\n* `empty_trash` - Empty Trash\n* `check_workflows` - Check Workflows\n* `bulk_update` - Bulk Update\n* `reprocess_document` - Reprocess Document\n* `build_share_link` - Build Share Link\n* `bulk_delete` - Bulk Delete\n* `apply_ai_suggestions` - Apply AI Suggestions",
 						"explode": true,
 						"in": "query",
 						"name": "task_type",
 						"schema": {
 							"items": {
 								"enum": [
+									"apply_ai_suggestions",
 									"build_share_link",
 									"bulk_delete",
 									"bulk_update",
@@ -17365,13 +17445,14 @@
 						"style": "form"
 					},
 					{
-						"description": "Task Type\n\n* `consume_file` - Consume File\n* `train_classifier` - Train Classifier\n* `sanity_check` - Sanity Check\n* `index_optimize` - Index Optimize\n* `mail_fetch` - Mail Fetch\n* `llm_index` - LLM Index\n* `empty_trash` - Empty Trash\n* `check_workflows` - Check Workflows\n* `bulk_update` - Bulk Update\n* `reprocess_document` - Reprocess Document\n* `build_share_link` - Build Share Link\n* `bulk_delete` - Bulk Delete",
+						"description": "Task Type\n\n* `consume_file` - Consume File\n* `train_classifier` - Train Classifier\n* `sanity_check` - Sanity Check\n* `index_optimize` - Index Optimize\n* `mail_fetch` - Mail Fetch\n* `llm_index` - LLM Index\n* `empty_trash` - Empty Trash\n* `check_workflows` - Check Workflows\n* `bulk_update` - Bulk Update\n* `reprocess_document` - Reprocess Document\n* `build_share_link` - Build Share Link\n* `bulk_delete` - Bulk Delete\n* `apply_ai_suggestions` - Apply AI Suggestions",
 						"explode": true,
 						"in": "query",
 						"name": "task_type",
 						"schema": {
 							"items": {
 								"enum": [
+									"apply_ai_suggestions",
 									"build_share_link",
 									"bulk_delete",
 									"bulk_update",

@@ -170,7 +170,6 @@ export const zDocumentRequest = z.object({
 	created: z.iso.date().optional(),
 	created_date: z.iso.date().optional(),
 	custom_fields: z.array(zCustomFieldInstanceRequest).optional(),
-	deleted_at: z.iso.datetime().nullish(),
 	document_type: z.int().nullable(),
 	owner: z.int().nullish(),
 	storage_path: z.int().nullable(),
@@ -214,7 +213,7 @@ export const zMailAccount = z.object({
 	}).optional(),
 	expiration: z.iso.datetime().nullish(),
 	id: z.int().readonly(),
-	imap_port: z.coerce.bigint().gte(BigInt(0)).lte(BigInt(9223372036854776000)).nullish(),
+	imap_port: z.int(),
 	imap_security: zImapSecurityEnum.optional(),
 	imap_server: z.string().max(256),
 	is_token: z.boolean().optional(),
@@ -235,7 +234,7 @@ export const zMailAccountRequest = z.object({
 		description: "The character set to use when communicating with the mail server, such as 'UTF-8' or 'US-ASCII'.",
 	}).optional(),
 	expiration: z.iso.datetime().nullish(),
-	imap_port: z.coerce.bigint().gte(BigInt(0)).lte(BigInt(9223372036854776000)).nullish(),
+	imap_port: z.int(),
 	imap_security: zImapSecurityEnum.optional(),
 	imap_server: z.string().min(1).max(256),
 	is_token: z.boolean().optional(),
@@ -413,7 +412,7 @@ export const zDocument = z.object({
 	created: z.iso.date().optional(),
 	created_date: z.iso.date().optional(),
 	custom_fields: z.array(zCustomFieldInstance).optional(),
-	deleted_at: z.iso.datetime().nullish(),
+	deleted_at: z.iso.datetime().readonly().nullable(),
 	document_type: z.int().nullable(),
 	duplicate_documents: z.array(zDuplicateDocumentSummary).readonly(),
 	id: z.int().readonly(),
@@ -475,13 +474,6 @@ export const zPaginatedCorrespondentList = z.object({
 	results: z.array(zCorrespondent),
 });
 
-export const zPaginatedCustomFieldList = z.object({
-	count: z.int(),
-	next: z.url().nullish(),
-	previous: z.url().nullish(),
-	results: z.array(zCustomField),
-});
-
 export const zPaginatedDocumentList = z.object({
 	count: z.int(),
 	next: z.url().nullish(),
@@ -531,7 +523,6 @@ export const zPatchedDocumentRequest = z.object({
 	created: z.iso.date().optional(),
 	created_date: z.iso.date().optional(),
 	custom_fields: z.array(zCustomFieldInstanceRequest).optional(),
-	deleted_at: z.iso.datetime().nullish(),
 	document_type: z.int().nullish(),
 	owner: z.int().nullish(),
 	storage_path: z.int().nullish(),
@@ -815,6 +806,7 @@ export const zTaskSerializerV10StatusEnum = z.enum([
  * * `reprocess_document` - Reprocess Document
  * * `build_share_link` - Build Share Link
  * * `bulk_delete` - Bulk Delete
+ * * `apply_ai_suggestions` - Apply AI Suggestions
  */
 export const zTaskTypeEnum = z.enum([
 	'consume_file',
@@ -829,9 +821,10 @@ export const zTaskTypeEnum = z.enum([
 	'reprocess_document',
 	'build_share_link',
 	'bulk_delete',
+	'apply_ai_suggestions',
 ]).register(z.globalRegistry, {
 	description:
-		'* `consume_file` - Consume File\n* `train_classifier` - Train Classifier\n* `sanity_check` - Sanity Check\n* `index_optimize` - Index Optimize\n* `mail_fetch` - Mail Fetch\n* `llm_index` - LLM Index\n* `empty_trash` - Empty Trash\n* `check_workflows` - Check Workflows\n* `bulk_update` - Bulk Update\n* `reprocess_document` - Reprocess Document\n* `build_share_link` - Build Share Link\n* `bulk_delete` - Bulk Delete',
+		'* `consume_file` - Consume File\n* `train_classifier` - Train Classifier\n* `sanity_check` - Sanity Check\n* `index_optimize` - Index Optimize\n* `mail_fetch` - Mail Fetch\n* `llm_index` - LLM Index\n* `empty_trash` - Empty Trash\n* `check_workflows` - Check Workflows\n* `bulk_update` - Bulk Update\n* `reprocess_document` - Reprocess Document\n* `build_share_link` - Build Share Link\n* `bulk_delete` - Bulk Delete\n* `apply_ai_suggestions` - Apply AI Suggestions',
 });
 
 /**
@@ -982,7 +975,6 @@ export const zDocumentWritable = z.object({
 	created: z.iso.date().optional(),
 	created_date: z.iso.date().optional(),
 	custom_fields: z.array(zCustomFieldInstance).optional(),
-	deleted_at: z.iso.datetime().nullish(),
 	document_type: z.int().nullable(),
 	owner: z.int().nullish(),
 	storage_path: z.int().nullable(),
@@ -1004,7 +996,6 @@ export const zDocumentRequestWritable = z.object({
 	created: z.iso.date().optional(),
 	created_date: z.iso.date().optional(),
 	custom_fields: z.array(zCustomFieldInstanceRequest).optional(),
-	deleted_at: z.iso.datetime().nullish(),
 	document_type: z.int().nullable(),
 	owner: z.int().nullish(),
 	remove_inbox_tags: z.boolean().nullish().default(false),
@@ -1057,7 +1048,7 @@ export const zMailAccountWritable = z.object({
 		description: "The character set to use when communicating with the mail server, such as 'UTF-8' or 'US-ASCII'.",
 	}).optional(),
 	expiration: z.iso.datetime().nullish(),
-	imap_port: z.coerce.bigint().gte(BigInt(0)).lte(BigInt(9223372036854776000)).nullish(),
+	imap_port: z.int(),
 	imap_security: zImapSecurityEnum.optional(),
 	imap_server: z.string().max(256),
 	is_token: z.boolean().optional(),
@@ -1073,7 +1064,7 @@ export const zMailAccountRequestWritable = z.object({
 		description: "The character set to use when communicating with the mail server, such as 'UTF-8' or 'US-ASCII'.",
 	}).optional(),
 	expiration: z.iso.datetime().nullish(),
-	imap_port: z.coerce.bigint().gte(BigInt(0)).lte(BigInt(9223372036854776000)).nullish(),
+	imap_port: z.int(),
 	imap_security: zImapSecurityEnum.optional(),
 	imap_server: z.string().min(1).max(256),
 	is_token: z.boolean().optional(),
@@ -1187,13 +1178,6 @@ export const zPaginatedCorrespondentListWritable = z.object({
 	results: z.array(zCorrespondentWritable),
 });
 
-export const zPaginatedCustomFieldListWritable = z.object({
-	count: z.int(),
-	next: z.url().nullish(),
-	previous: z.url().nullish(),
-	results: z.array(zCustomFieldWritable),
-});
-
 export const zPaginatedDocumentListWritable = z.object({
 	count: z.int(),
 	next: z.url().nullish(),
@@ -1259,7 +1243,6 @@ export const zPatchedDocumentRequestWritable = z.object({
 	created: z.iso.date().optional(),
 	created_date: z.iso.date().optional(),
 	custom_fields: z.array(zCustomFieldInstanceRequest).optional(),
-	deleted_at: z.iso.datetime().nullish(),
 	document_type: z.int().nullish(),
 	owner: z.int().nullish(),
 	remove_inbox_tags: z.boolean().nullish().default(false),
@@ -1539,28 +1522,6 @@ export const zCorrespondentsUpdatePath = z.object({
 
 export const zCorrespondentsUpdateResponse = zCorrespondent;
 
-export const zCustomFieldsListQuery = z.object({
-	id: z.int().optional(),
-	id__in: z.array(z.int()).register(z.globalRegistry, {
-		description: 'Multiple values may be separated by commas.',
-	}).optional(),
-	name__icontains: z.string().optional(),
-	name__iendswith: z.string().optional(),
-	name__iexact: z.string().optional(),
-	name__istartswith: z.string().optional(),
-	ordering: z.string().register(z.globalRegistry, {
-		description: 'Which field to use when ordering the results.',
-	}).optional(),
-	page: z.int().register(z.globalRegistry, {
-		description: 'A page number within the paginated result set.',
-	}).optional(),
-	page_size: z.int().register(z.globalRegistry, {
-		description: 'Number of results to return per page.',
-	}).optional(),
-});
-
-export const zCustomFieldsListResponse = zPaginatedCustomFieldList;
-
 export const zCustomFieldsCreateBody = zCustomFieldRequest;
 
 export const zCustomFieldsCreateResponse = zCustomField;
@@ -1578,13 +1539,13 @@ export const zCustomFieldsDestroyResponse = z.void().register(z.globalRegistry, 
 	description: 'No response body',
 });
 
-export const zCustomFieldsRetrievePath = z.object({
+export const zCustomFieldsRetrieve2Path = z.object({
 	id: z.int().register(z.globalRegistry, {
 		description: 'A unique integer value identifying this custom field.',
 	}),
 });
 
-export const zCustomFieldsRetrieveResponse = zCustomField;
+export const zCustomFieldsRetrieve2Response = zCustomField;
 
 export const zCustomFieldsPartialUpdateBody = zPatchedCustomFieldRequest;
 
@@ -1745,6 +1706,7 @@ export const zDocumentsListQuery = z.object({
 	has_custom_fields: z.boolean().register(z.globalRegistry, {
 		description: 'Has custom field',
 	}).optional(),
+	has_duplicates: z.boolean().optional(),
 	id: z.int().optional(),
 	id__in: z.array(z.int()).register(z.globalRegistry, {
 		description: 'Multiple values may be separated by commas.',
@@ -2212,6 +2174,7 @@ export const zTasksListQuery = z.object({
 		description: 'Filter tasks by Celery UUID',
 	}).optional(),
 	task_type: z.array(z.enum([
+		'apply_ai_suggestions',
 		'build_share_link',
 		'bulk_delete',
 		'bulk_update',
@@ -2226,7 +2189,7 @@ export const zTasksListQuery = z.object({
 		'train_classifier',
 	])).register(z.globalRegistry, {
 		description:
-			'Task Type\n\n* `consume_file` - Consume File\n* `train_classifier` - Train Classifier\n* `sanity_check` - Sanity Check\n* `index_optimize` - Index Optimize\n* `mail_fetch` - Mail Fetch\n* `llm_index` - LLM Index\n* `empty_trash` - Empty Trash\n* `check_workflows` - Check Workflows\n* `bulk_update` - Bulk Update\n* `reprocess_document` - Reprocess Document\n* `build_share_link` - Build Share Link\n* `bulk_delete` - Bulk Delete',
+			'Task Type\n\n* `consume_file` - Consume File\n* `train_classifier` - Train Classifier\n* `sanity_check` - Sanity Check\n* `index_optimize` - Index Optimize\n* `mail_fetch` - Mail Fetch\n* `llm_index` - LLM Index\n* `empty_trash` - Empty Trash\n* `check_workflows` - Check Workflows\n* `bulk_update` - Bulk Update\n* `reprocess_document` - Reprocess Document\n* `build_share_link` - Build Share Link\n* `bulk_delete` - Bulk Delete\n* `apply_ai_suggestions` - Apply AI Suggestions',
 	}).optional(),
 	trigger_source: z.array(z.enum([
 		'api_upload',

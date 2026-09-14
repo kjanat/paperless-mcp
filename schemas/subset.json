@@ -544,6 +544,7 @@
 					"deleted_at": {
 						"format": "date-time",
 						"nullable": true,
+						"readOnly": true,
 						"type": "string"
 					},
 					"document_type": {
@@ -669,6 +670,7 @@
 					"added",
 					"archived_file_name",
 					"correspondent",
+					"deleted_at",
 					"document_type",
 					"duplicate_documents",
 					"id",
@@ -719,11 +721,6 @@
 							"$ref": "#/components/schemas/CustomFieldInstanceRequest"
 						},
 						"type": "array"
-					},
-					"deleted_at": {
-						"format": "date-time",
-						"nullable": true,
-						"type": "string"
 					},
 					"document_type": {
 						"nullable": true,
@@ -1053,11 +1050,6 @@
 						"type": "integer"
 					},
 					"imap_port": {
-						"description": "This is usually 143 for unencrypted and STARTTLS connections, and 993 for SSL connections.",
-						"format": "int64",
-						"maximum": 9223372036854775807,
-						"minimum": 0,
-						"nullable": true,
 						"type": "integer"
 					},
 					"imap_security": {
@@ -1099,6 +1091,7 @@
 				},
 				"required": [
 					"id",
+					"imap_port",
 					"imap_server",
 					"name",
 					"password",
@@ -1140,11 +1133,6 @@
 						"type": "string"
 					},
 					"imap_port": {
-						"description": "This is usually 143 for unencrypted and STARTTLS connections, and 993 for SSL connections.",
-						"format": "int64",
-						"maximum": 9223372036854775807,
-						"minimum": 0,
-						"nullable": true,
 						"type": "integer"
 					},
 					"imap_security": {
@@ -1225,6 +1213,7 @@
 					}
 				},
 				"required": [
+					"imap_port",
 					"imap_server",
 					"name",
 					"password",
@@ -1734,37 +1723,6 @@
 				],
 				"type": "object"
 			},
-			"PaginatedCustomFieldList": {
-				"properties": {
-					"count": {
-						"example": 123,
-						"type": "integer"
-					},
-					"next": {
-						"example": "http://api.example.org/accounts/?page=4",
-						"format": "uri",
-						"nullable": true,
-						"type": "string"
-					},
-					"previous": {
-						"example": "http://api.example.org/accounts/?page=2",
-						"format": "uri",
-						"nullable": true,
-						"type": "string"
-					},
-					"results": {
-						"items": {
-							"$ref": "#/components/schemas/CustomField"
-						},
-						"type": "array"
-					}
-				},
-				"required": [
-					"count",
-					"results"
-				],
-				"type": "object"
-			},
 			"PaginatedDocumentList": {
 				"properties": {
 					"count": {
@@ -2101,11 +2059,6 @@
 							"$ref": "#/components/schemas/CustomFieldInstanceRequest"
 						},
 						"type": "array"
-					},
-					"deleted_at": {
-						"format": "date-time",
-						"nullable": true,
-						"type": "string"
 					},
 					"document_type": {
 						"nullable": true,
@@ -3054,7 +3007,7 @@
 								"$ref": "#/components/schemas/TaskTypeEnum"
 							}
 						],
-						"description": "The kind of work being performed\n\n* `consume_file` - Consume File\n* `train_classifier` - Train Classifier\n* `sanity_check` - Sanity Check\n* `index_optimize` - Index Optimize\n* `mail_fetch` - Mail Fetch\n* `llm_index` - LLM Index\n* `empty_trash` - Empty Trash\n* `check_workflows` - Check Workflows\n* `bulk_update` - Bulk Update\n* `reprocess_document` - Reprocess Document\n* `build_share_link` - Build Share Link\n* `bulk_delete` - Bulk Delete",
+						"description": "The kind of work being performed\n\n* `consume_file` - Consume File\n* `train_classifier` - Train Classifier\n* `sanity_check` - Sanity Check\n* `index_optimize` - Index Optimize\n* `mail_fetch` - Mail Fetch\n* `llm_index` - LLM Index\n* `empty_trash` - Empty Trash\n* `check_workflows` - Check Workflows\n* `bulk_update` - Bulk Update\n* `reprocess_document` - Reprocess Document\n* `build_share_link` - Build Share Link\n* `bulk_delete` - Bulk Delete\n* `apply_ai_suggestions` - Apply AI Suggestions",
 						"readOnly": true
 					},
 					"task_type_display": {
@@ -3117,7 +3070,7 @@
 				"type": "string"
 			},
 			"TaskTypeEnum": {
-				"description": "* `consume_file` - Consume File\n* `train_classifier` - Train Classifier\n* `sanity_check` - Sanity Check\n* `index_optimize` - Index Optimize\n* `mail_fetch` - Mail Fetch\n* `llm_index` - LLM Index\n* `empty_trash` - Empty Trash\n* `check_workflows` - Check Workflows\n* `bulk_update` - Bulk Update\n* `reprocess_document` - Reprocess Document\n* `build_share_link` - Build Share Link\n* `bulk_delete` - Bulk Delete",
+				"description": "* `consume_file` - Consume File\n* `train_classifier` - Train Classifier\n* `sanity_check` - Sanity Check\n* `index_optimize` - Index Optimize\n* `mail_fetch` - Mail Fetch\n* `llm_index` - LLM Index\n* `empty_trash` - Empty Trash\n* `check_workflows` - Check Workflows\n* `bulk_update` - Bulk Update\n* `reprocess_document` - Reprocess Document\n* `build_share_link` - Build Share Link\n* `bulk_delete` - Bulk Delete\n* `apply_ai_suggestions` - Apply AI Suggestions",
 				"enum": [
 					"consume_file",
 					"train_classifier",
@@ -3130,7 +3083,8 @@
 					"bulk_update",
 					"reprocess_document",
 					"build_share_link",
-					"bulk_delete"
+					"bulk_delete",
+					"apply_ai_suggestions"
 				],
 				"type": "string"
 			},
@@ -3607,94 +3561,10 @@
 		"/api/custom_fields/": {
 			"get": {
 				"description": "Mixin to add document count to queryset, permissions-aware if needed",
-				"operationId": "custom_fields_list",
-				"parameters": [
-					{
-						"in": "query",
-						"name": "id",
-						"schema": {
-							"type": "integer"
-						}
-					},
-					{
-						"description": "Multiple values may be separated by commas.",
-						"explode": false,
-						"in": "query",
-						"name": "id__in",
-						"schema": {
-							"items": {
-								"type": "integer"
-							},
-							"type": "array"
-						},
-						"style": "form"
-					},
-					{
-						"in": "query",
-						"name": "name__icontains",
-						"schema": {
-							"type": "string"
-						}
-					},
-					{
-						"in": "query",
-						"name": "name__iendswith",
-						"schema": {
-							"type": "string"
-						}
-					},
-					{
-						"in": "query",
-						"name": "name__iexact",
-						"schema": {
-							"type": "string"
-						}
-					},
-					{
-						"in": "query",
-						"name": "name__istartswith",
-						"schema": {
-							"type": "string"
-						}
-					},
-					{
-						"description": "Which field to use when ordering the results.",
-						"in": "query",
-						"name": "ordering",
-						"required": false,
-						"schema": {
-							"type": "string"
-						}
-					},
-					{
-						"description": "A page number within the paginated result set.",
-						"in": "query",
-						"name": "page",
-						"required": false,
-						"schema": {
-							"type": "integer"
-						}
-					},
-					{
-						"description": "Number of results to return per page.",
-						"in": "query",
-						"name": "page_size",
-						"required": false,
-						"schema": {
-							"type": "integer"
-						}
-					}
-				],
+				"operationId": "custom_fields_retrieve",
 				"responses": {
 					"200": {
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/PaginatedCustomFieldList"
-								}
-							}
-						},
-						"description": ""
+						"description": "No response body"
 					}
 				},
 				"security": [
@@ -3800,7 +3670,7 @@
 			},
 			"get": {
 				"description": "Mixin to add document count to queryset, permissions-aware if needed",
-				"operationId": "custom_fields_retrieve",
+				"operationId": "custom_fields_retrieve_2",
 				"parameters": [
 					{
 						"description": "A unique integer value identifying this custom field.",
@@ -4797,6 +4667,13 @@
 					},
 					{
 						"in": "query",
+						"name": "has_duplicates",
+						"schema": {
+							"type": "boolean"
+						}
+					},
+					{
+						"in": "query",
 						"name": "id",
 						"schema": {
 							"type": "integer"
@@ -5328,7 +5205,7 @@
 		},
 		"/api/documents/{id}/": {
 			"delete": {
-				"description": "Pass a user object to serializer",
+				"description": "Prefetch Django-Guardian permissions for a list before serialization, to avoid N+1 queries.",
 				"operationId": "documents_destroy",
 				"parameters": [
 					{
@@ -5423,7 +5300,7 @@
 				]
 			},
 			"patch": {
-				"description": "Pass a user object to serializer",
+				"description": "Prefetch Django-Guardian permissions for a list before serialization, to avoid N+1 queries.",
 				"operationId": "documents_partial_update",
 				"parameters": [
 					{
@@ -5483,7 +5360,7 @@
 				]
 			},
 			"put": {
-				"description": "Pass a user object to serializer",
+				"description": "Prefetch Django-Guardian permissions for a list before serialization, to avoid N+1 queries.",
 				"operationId": "documents_update",
 				"parameters": [
 					{
@@ -7171,13 +7048,14 @@
 						}
 					},
 					{
-						"description": "Task Type\n\n* `consume_file` - Consume File\n* `train_classifier` - Train Classifier\n* `sanity_check` - Sanity Check\n* `index_optimize` - Index Optimize\n* `mail_fetch` - Mail Fetch\n* `llm_index` - LLM Index\n* `empty_trash` - Empty Trash\n* `check_workflows` - Check Workflows\n* `bulk_update` - Bulk Update\n* `reprocess_document` - Reprocess Document\n* `build_share_link` - Build Share Link\n* `bulk_delete` - Bulk Delete",
+						"description": "Task Type\n\n* `consume_file` - Consume File\n* `train_classifier` - Train Classifier\n* `sanity_check` - Sanity Check\n* `index_optimize` - Index Optimize\n* `mail_fetch` - Mail Fetch\n* `llm_index` - LLM Index\n* `empty_trash` - Empty Trash\n* `check_workflows` - Check Workflows\n* `bulk_update` - Bulk Update\n* `reprocess_document` - Reprocess Document\n* `build_share_link` - Build Share Link\n* `bulk_delete` - Bulk Delete\n* `apply_ai_suggestions` - Apply AI Suggestions",
 						"explode": true,
 						"in": "query",
 						"name": "task_type",
 						"schema": {
 							"items": {
 								"enum": [
+									"apply_ai_suggestions",
 									"build_share_link",
 									"bulk_delete",
 									"bulk_update",
